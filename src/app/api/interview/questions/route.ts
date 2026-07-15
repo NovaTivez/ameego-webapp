@@ -2,41 +2,32 @@ import { NextResponse } from "next/server";
 
 import { exceedsBodyLimit, isRateLimited } from "@/lib/api/guards";
 import { InterviewAIError } from "@/lib/interview/openai";
+import { PERSONALIZATION_UNAVAILABLE_MESSAGE } from "@/lib/interview/product-messages";
 import { generatePersonalizedQuestions } from "@/lib/interview/questions";
 import { parseConfirmedContext } from "@/lib/interview/validation";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
-const SAFE_ERRORS: Record<InterviewAIError["kind"], { status: number; message: string }> =
-  {
-    configuration: {
-      status: 503,
-      message: "Question generation is not configured.",
-    },
-    timeout: { status: 504, message: "Question generation timed out. Please retry." },
-    network: {
-      status: 503,
-      message: "Question generation could not reach the AI service. Please retry.",
-    },
-    provider: {
-      status: 502,
-      message: "The AI service could not generate questions. Please retry.",
-    },
-    invalid_output: {
-      status: 502,
-      message: "The generated questions were invalid and were not used. Please retry.",
-    },
-  };
+const ERROR_STATUS: Record<InterviewAIError["kind"], number> = {
+  configuration: 503,
+  timeout: 504,
+  network: 503,
+  provider: 502,
+  invalid_output: 502,
+};
 
 export async function POST(request: Request) {
   if (isRateLimited(request, "questions")) {
     return NextResponse.json(
-      { error: "Too many requests. Please wait a moment and retry." },
+      { error: PERSONALIZATION_UNAVAILABLE_MESSAGE },
       { status: 429 },
     );
   }
   if (exceedsBodyLimit(request, MAX_BODY_BYTES)) {
-    return NextResponse.json({ error: "Request body is too large." }, { status: 413 });
+    return NextResponse.json(
+      { error: "Interview details are too large. Shorten them and try again." },
+      { status: 413 },
+    );
   }
 
   let body: unknown;
@@ -44,7 +35,7 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { error: "Request body must be valid JSON." },
+      { error: "Interview details could not be read. Review your setup and try again." },
       { status: 400 },
     );
   }
@@ -61,7 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json(await generatePersonalizedQuestions(context));
   } catch (error) {
     const kind = error instanceof InterviewAIError ? error.kind : "provider";
-    const safe = SAFE_ERRORS[kind];
-    return NextResponse.json({ error: safe.message }, { status: safe.status });
+    return NextResponse.json(
+      { error: PERSONALIZATION_UNAVAILABLE_MESSAGE },
+      { status: ERROR_STATUS[kind] },
+    );
   }
 }

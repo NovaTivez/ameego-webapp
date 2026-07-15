@@ -1,463 +1,526 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
-import { EvaluationFeedback } from "@/components/EvaluationFeedback";
 import { PixelBadge } from "@/components/PixelBadge";
 import { PixelButton } from "@/components/PixelButton";
 import { PixelIcon } from "@/components/PixelIcon";
 import { PixelLoadingState } from "@/components/PixelLoadingState";
 import { PixelPanel } from "@/components/PixelPanel";
-import { PixelRoomBackground } from "@/components/PixelRoomBackground";
-import { PixelStatusBar } from "@/components/PixelStatusBar";
-import { useProgressDashboard } from "@/hooks/useProgressDashboard";
-import { COURSE_PROGRESS_STORAGE_KEY } from "@/lib/course-progress";
-import { EXERCISE_PROGRESS_STORAGE_KEY } from "@/lib/exercise-progress";
+import { readCourseProgress } from "@/lib/course-progress";
+import { readExerciseProgress } from "@/lib/exercise-progress";
+import { readInterviewAttempts } from "@/lib/interview/attempts";
 import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
-import { INTERVIEW_ATTEMPTS_STORAGE_KEY } from "@/lib/interview/attempts";
 import {
+  calculateProgress,
   compareAttempts,
-  describeAttemptScenario,
-  hasSavedEvaluation,
-} from "@/lib/progress/compare";
+  type ProgressSnapshot,
+} from "@/lib/progress";
+
+import styles from "./progress-dashboard.module.css";
+
+type DashboardState =
+  | { status: "loading" }
+  | { status: "error" }
+  | {
+      status: "ready";
+      attempts: CompletedInterviewAttempt[];
+      snapshot: ProgressSnapshot;
+      hasAnyActivity: boolean;
+    };
 
 function formatAttemptDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
 }
 
-function AttemptSummaryCard({
-  attempt,
-  selected,
-  onOpen,
-  onToggleCompare,
-  compareSelected,
-}: {
-  attempt: CompletedInterviewAttempt;
-  selected: boolean;
-  onOpen: () => void;
-  onToggleCompare: () => void;
-  compareSelected: boolean;
-}) {
-  const evaluated = hasSavedEvaluation(attempt);
-  return (
-    <article className={`attempt-history-card${selected ? " is-selected" : ""}`}>
-      <div className="attempt-history-card-copy">
-        <p className="eyebrow">{formatAttemptDate(attempt.completedAt)}</p>
-        <h3>{describeAttemptScenario(attempt)}</h3>
-        <p>
-          {attempt.questions.length} questions ·{" "}
-          {evaluated ? "STAR evaluation saved" : "Transcript only (not evaluated)"}
-        </p>
-      </div>
-      <div className="button-row">
-        <PixelButton onClick={onOpen} variant={selected ? "primary" : "secondary"}>
-          {selected ? "Viewing attempt" : "Open attempt"}
-        </PixelButton>
-        <PixelButton
-          onClick={onToggleCompare}
-          variant={compareSelected ? "primary" : "ghost"}
-          disabled={!evaluated}
-        >
-          {compareSelected ? "Selected for compare" : "Select to compare"}
-        </PixelButton>
-      </div>
-    </article>
-  );
-}
-
 export function ProgressDashboard() {
-  const { status, snapshot, error, reload } = useProgressDashboard();
-  const [openAttemptId, setOpenAttemptId] = useState<string | null>(null);
-  const [compareIds, setCompareIds] = useState<string[]>([]);
-  const [announcement, setAnnouncement] = useState("");
-  const openHeadingRef = useRef<HTMLHeadingElement | null>(null);
-  const historyHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const [state, setState] = useState<DashboardState>({ status: "loading" });
+  const [selectedAttemptId, setSelectedAttemptId] = useState("");
+  const [firstComparisonId, setFirstComparisonId] = useState("");
+  const [secondComparisonId, setSecondComparisonId] = useState("");
 
-  const openAttempt = useMemo(
-    () => snapshot?.attempts.find((attempt) => attempt.id === openAttemptId) ?? null,
-    [openAttemptId, snapshot],
-  );
-
-  // The opened attempt renders far below the activating button, so move
-  // keyboard focus to it; closing returns focus to the history section.
-  useEffect(() => {
-    if (openAttemptId) {
-      openHeadingRef.current?.focus();
-    }
-  }, [openAttemptId]);
-
-  const closeAttempt = () => {
-    setOpenAttemptId(null);
-    setAnnouncement("Attempt closed.");
-    historyHeadingRef.current?.focus();
-  };
-
-  const resetStoredProgress = () => {
+  const load = useCallback(() => {
+    setState({ status: "loading" });
     try {
-      window.localStorage.removeItem(COURSE_PROGRESS_STORAGE_KEY);
-      window.localStorage.removeItem(EXERCISE_PROGRESS_STORAGE_KEY);
-      window.localStorage.removeItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
+      const courseProgress = readCourseProgress(window.localStorage);
+      const exerciseProgress = readExerciseProgress(window.localStorage);
+      const attempts = readInterviewAttempts(window.localStorage).attempts.sort(
+        (a, b) => Date.parse(b.completedAt) - Date.parse(a.completedAt),
+      );
+      const snapshot = calculateProgress({ courseProgress, exerciseProgress, attempts });
+      setState({
+        status: "ready",
+        attempts,
+        snapshot,
+        hasAnyActivity:
+          snapshot.completedLessons.length > 0 ||
+          snapshot.completedExercises.length > 0 ||
+          attempts.length > 0,
+      });
     } catch {
-      // Storage unavailable; reload() will surface the same error state.
+      setState({ status: "error" });
     }
-    reload();
-  };
+  }, []);
 
-  const compareSelection = useMemo(() => {
-    if (!snapshot || compareIds.length !== 2) return null;
-    const first = snapshot.attempts.find((attempt) => attempt.id === compareIds[0]);
-    const second = snapshot.attempts.find((attempt) => attempt.id === compareIds[1]);
-    if (!first || !second) return null;
-    return compareAttempts(first, second);
-  }, [compareIds, snapshot]);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+      if (active) load();
+    });
+    return () => {
+      active = false;
+    };
+  }, [load]);
 
-  const toggleCompare = (attemptId: string) => {
-    const next = compareIds.includes(attemptId)
-      ? compareIds.filter((id) => id !== attemptId)
-      : compareIds.length >= 2
-        ? [compareIds[1], attemptId]
-        : [...compareIds, attemptId];
-    setCompareIds(next);
-    setAnnouncement(
-      next.length === 2
-        ? "Two attempts selected. Comparison is shown below the attempt list."
-        : `${next.length} of 2 attempts selected for comparison.`,
-    );
-  };
+  const selectedAttempt =
+    state.status === "ready"
+      ? state.attempts.find((attempt) => attempt.id === selectedAttemptId)
+      : undefined;
+  const comparison = useMemo(() => {
+    if (state.status !== "ready" || !firstComparisonId || !secondComparisonId) {
+      return null;
+    }
+    const first = state.attempts.find((attempt) => attempt.id === firstComparisonId);
+    const second = state.attempts.find((attempt) => attempt.id === secondComparisonId);
+    return first && second ? compareAttempts(first, second) : null;
+  }, [firstComparisonId, secondComparisonId, state]);
 
-  if (status === "loading") {
+  if (state.status === "loading") {
     return (
-      <div className="page-stack progress-library-page">
-        <header className="progress-library-header">
-          <p className="eyebrow">Progress Library</p>
-          <h1>Loading your saved progress.</h1>
-        </header>
-        <PixelLoadingState label="Loading progress records from this device..." />
-      </div>
+      <PixelLoadingState
+        label="Loading your progress library"
+        detail="Reading stored lessons, exercises, and attempts"
+      />
     );
   }
 
-  if (status === "error" || !snapshot) {
+  if (state.status === "error") {
     return (
-      <div className="page-stack progress-library-page">
-        <header className="progress-library-header">
-          <p className="eyebrow">Progress Library</p>
-          <h1>Progress records unavailable</h1>
-        </header>
-        <PixelPanel className="progress-library-card">
-          <p>{error ?? "Stored activity could not be read."}</p>
-          <div className="button-row">
-            <PixelButton onClick={reload}>Retry</PixelButton>
-            <PixelButton variant="secondary" onClick={resetStoredProgress}>
-              Reset stored progress
-            </PixelButton>
-          </div>
-          <p role="note">
-            Resetting removes saved lessons, exercises, and interview attempts from this
-            browser so the library can start clean.
-          </p>
-        </PixelPanel>
-      </div>
+      <PixelPanel tone="warning" className="progress-dashboard-error" role="alert">
+        <p className="eyebrow">Progress unavailable</p>
+        <h2>Your saved activity could not be read.</h2>
+        <p>
+          No completion or improvement is being inferred. Restore browser storage access
+          or remove invalid local records, then try again.
+        </p>
+        <PixelButton onClick={load}>Retry progress check</PixelButton>
+      </PixelPanel>
     );
   }
 
-  if (snapshot.isEmpty) {
+  if (!state.hasAnyActivity) {
     return (
-      <div className="page-stack progress-library-page">
-        <header className="progress-library-header">
-          <PixelBadge tone="mint">Library ready</PixelBadge>
-          <p className="eyebrow">Progress Library</p>
-          <h1>No saved activity yet.</h1>
-          <p className="hero-lede">
-            Lesson completions, exercises, and interview simulations appear here only
-            after you save them on this device. Nothing is invented ahead of time.
-          </p>
-        </header>
-        <PixelRoomBackground variant="library" label="Pixel-art progress library">
-          <div className="library-desk">
-            <PixelIcon name="progress" size="large" />
-            <span>Empty records desk</span>
-          </div>
-        </PixelRoomBackground>
-        <PixelPanel className="progress-library-card progress-empty-state">
-          <PixelIcon name="lesson" size="large" />
-          <h2>Start with the recommended next activity</h2>
-          <p>{snapshot.recommendedNext.reason}</p>
-          <div className="button-row">
-            <PixelButton href={snapshot.recommendedNext.href}>
-              {snapshot.recommendedNext.title}
-            </PixelButton>
-            <PixelButton href="/learn" variant="secondary">
-              Browse Interview Foundations
-            </PixelButton>
-          </div>
-        </PixelPanel>
-      </div>
+      <PixelPanel className={`${styles.emptyState} progress-empty-state`}>
+        <PixelBadge tone="amber">New learner checkpoint</PixelBadge>
+        <h2>Your progress library is ready for its first record.</h2>
+        <p>
+          Complete the STAR lesson, try the arrangement exercise, then save an interview
+          simulation. Only activity completed on this device will appear here.
+        </p>
+        <div className="button-row">
+          <PixelButton href={state.snapshot.recommendedNext.href}>
+            Start with the STAR lesson
+          </PixelButton>
+          <PixelButton href="/practice" variant="secondary">
+            Open Interview Center
+          </PixelButton>
+        </div>
+      </PixelPanel>
     );
   }
 
   return (
-    <div className="page-stack progress-library-page">
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
-      <header className="progress-library-header">
-        <PixelBadge tone="mint">Local records</PixelBadge>
-        <p className="eyebrow">Progress Library</p>
-        <h1>Evidence from this device only.</h1>
-        <p className="hero-lede">
-          Open a saved attempt, compare two evaluated runs from the same scenario, and
-          follow the next activity derived from real stored progress.
-        </p>
-      </header>
-
-      <PixelRoomBackground variant="library" label="Pixel-art progress library">
-        <div className="library-desk">
-          <PixelIcon name="progress" size="large" />
-          <span>Local records desk</span>
+    <div className={`${styles.dashboard} progress-dashboard`}>
+      <section aria-labelledby="progress-overview-heading">
+        <div className={styles.overviewHeading}>
+          <div>
+            <p>Stored Activity</p>
+            <h2 id="progress-overview-heading">Your Progress</h2>
+          </div>
+          <span>Only completed activity saved in this browser is counted.</span>
         </div>
-      </PixelRoomBackground>
+        <div className={styles.statGrid}>
+          <article className={styles.statCard}>
+            <span>Lessons Completed</span>
+            <strong>{state.snapshot.completedLessons.length}</strong>
+          </article>
+          <article className={styles.statCard}>
+            <span>Interviews Taken</span>
+            <strong>{state.snapshot.simulationsCompleted}</strong>
+            <small>{state.snapshot.evaluatedSimulations} with feedback</small>
+          </article>
+          <article className={styles.statCard}>
+            <span>Current Streak</span>
+            <strong>{state.snapshot.currentStreak}</strong>
+            <small>
+              {state.snapshot.currentStreak === 1 ? "Practice day" : "Practice days"}
+            </small>
+          </article>
+          <article className={styles.statCard}>
+            <span>Level</span>
+            <strong>{String(state.snapshot.level).padStart(2, "0")}</strong>
+            <small>{state.snapshot.xp} real activity XP</small>
+          </article>
+        </div>
+      </section>
 
-      <div className="progress-summary-grid">
-        <PixelPanel tone="dark" className="progress-library-console">
-          <p className="eyebrow">Activity ledger</p>
-          <h2>What is saved</h2>
-          <PixelStatusBar
-            label="Lessons completed"
-            value={String(snapshot.completedLessons.length)}
-            tone="success"
-          />
-          <PixelStatusBar
-            label="Exercises completed"
-            value={String(snapshot.completedExercises.length)}
-            tone="success"
-          />
-          <PixelStatusBar
-            label="Simulations completed"
-            value={String(snapshot.simulationsCompleted)}
-            tone="info"
-          />
-          <PixelStatusBar
-            label="Evaluated attempts"
-            value={String(snapshot.evaluatedAttempts)}
-            tone={snapshot.evaluatedAttempts > 0 ? "success" : "warning"}
-            icon="timer"
-          />
-        </PixelPanel>
-
-        <PixelPanel className="progress-library-card">
-          <PixelBadge tone="amber">Recommended next</PixelBadge>
-          <h2>{snapshot.recommendedNext.title}</h2>
-          <p>{snapshot.recommendedNext.reason}</p>
-          <PixelButton href={snapshot.recommendedNext.href}>
-            Continue recommended activity
-          </PixelButton>
-        </PixelPanel>
-      </div>
-
-      <div className="progress-library-grid">
-        <PixelPanel className="progress-library-card">
-          <h2>Completed lessons</h2>
-          {snapshot.completedLessons.length === 0 ? (
-            <p>No lesson completions are saved yet.</p>
+      <section
+        className={styles.progressGrid}
+        aria-label="Skill progress and recent activity"
+      >
+        <div className={styles.gamePanel}>
+          <div className={styles.panelHeading}>
+            <h2>Skill Progress</h2>
+            <span>Validated rubric averages</span>
+          </div>
+          {state.snapshot.skillProgress.length ? (
+            <div className={styles.skillList}>
+              {state.snapshot.skillProgress.map((skill) => (
+                <div className={styles.skillRow} key={skill.criterion}>
+                  <div>
+                    <span>{skill.label}</span>
+                    <strong>{skill.percent}%</strong>
+                  </div>
+                  <div
+                    className={styles.skillTrack}
+                    role="progressbar"
+                    aria-label={`${skill.label} validated rubric average`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={skill.percent}
+                  >
+                    <span style={{ width: `${skill.percent}%` }} />
+                  </div>
+                  <small>
+                    {skill.averageScore}/5 across {skill.evaluatedAttempts} validated{" "}
+                    {skill.evaluatedAttempts === 1 ? "attempt" : "attempts"}
+                  </small>
+                </div>
+              ))}
+            </div>
           ) : (
-            <ul className="progress-activity-list">
-              {snapshot.completedLessons.map((lesson) => (
+            <p className={styles.panelEmpty}>
+              Complete a simulation with validated feedback to unlock rubric-based skill
+              bars.
+            </p>
+          )}
+        </div>
+
+        <div className={styles.gamePanel}>
+          <div className={styles.panelHeading}>
+            <h2>Recent Activity</h2>
+            <span>{state.snapshot.recentActivity.length} stored records</span>
+          </div>
+          <ul className={styles.activityList}>
+            {state.snapshot.recentActivity.map((activity) => (
+              <li key={activity.id}>
+                <PixelIcon
+                  name={
+                    activity.kind === "lesson"
+                      ? "lesson"
+                      : activity.kind === "exercise"
+                        ? "star"
+                        : "speech"
+                  }
+                  size="small"
+                />
+                <div>
+                  <strong>{activity.title}</strong>
+                  <span>{activity.detail}</span>
+                </div>
+                <time dateTime={activity.occurredAt}>
+                  {activity.occurredAt
+                    ? formatAttemptDate(activity.occurredAt)
+                    : "Date not stored"}
+                </time>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section
+        className={styles.recommendation}
+        aria-labelledby="next-recommendation-heading"
+      >
+        <PixelIcon name="star" size="small" />
+        <div>
+          <span>Next Recommendation</span>
+          <h2 id="next-recommendation-heading">{state.snapshot.recommendedNext.title}</h2>
+          <p>{state.snapshot.recommendedNext.description}</p>
+        </div>
+        <PixelButton href={state.snapshot.recommendedNext.href}>Start</PixelButton>
+      </section>
+
+      <section
+        className={`${styles.completionGrid} progress-completion-grid`}
+        aria-label="Completed learning activities"
+      >
+        <PixelPanel className="progress-completion-card">
+          <p className="eyebrow">Completed lessons</p>
+          <h2>Lesson records</h2>
+          {state.snapshot.completedLessons.length ? (
+            <ul>
+              {state.snapshot.completedLessons.map((lesson) => (
                 <li key={lesson.id}>
-                  <a href={lesson.href}>{lesson.title}</a>
+                  <Link href={lesson.href}>{lesson.title}</Link>
                 </li>
               ))}
             </ul>
-          )}
-        </PixelPanel>
-        <PixelPanel className="progress-library-card">
-          <h2>Completed exercises</h2>
-          {snapshot.completedExercises.length === 0 ? (
-            <p>No exercise completions are saved yet.</p>
           ) : (
-            <ul className="progress-activity-list">
-              {snapshot.completedExercises.map((exercise) => (
+            <p>No completed lesson is stored yet.</p>
+          )}
+        </PixelPanel>
+        <PixelPanel className="progress-completion-card">
+          <p className="eyebrow">Completed exercises</p>
+          <h2>Practice records</h2>
+          {state.snapshot.completedExercises.length ? (
+            <ul>
+              {state.snapshot.completedExercises.map((exercise) => (
                 <li key={exercise.id}>
-                  <a href={exercise.href}>{exercise.title}</a>
-                  {exercise.detail ? <span> — {exercise.detail}</span> : null}
+                  <Link href={exercise.href}>{exercise.title}</Link>
+                  <span>
+                    {exercise.attemptCount}{" "}
+                    {exercise.attemptCount === 1 ? "attempt" : "attempts"};{" "}
+                    {exercise.correct ? "correct order recorded" : "completion recorded"}
+                  </span>
                 </li>
               ))}
             </ul>
+          ) : (
+            <p>No completed exercise is stored yet.</p>
           )}
         </PixelPanel>
-      </div>
+      </section>
 
-      <PixelPanel className="progress-library-card attempt-history-panel">
-        <div className="attempt-history-heading">
+      <section id="attempt-history" aria-labelledby="attempt-history-heading">
+        <div className="progress-section-heading">
           <div>
             <p className="eyebrow">Attempt history</p>
-            <h2 tabIndex={-1} ref={historyHeadingRef}>
-              Saved interview simulations
-            </h2>
+            <h2 id="attempt-history-heading">Saved interview simulations</h2>
           </div>
           <p>
-            Select two evaluated attempts from the same scenario to compare rubric-level
-            changes. Broad improvement is never claimed from a single isolated score.
+            {state.attempts.length} stored{" "}
+            {state.attempts.length === 1 ? "attempt" : "attempts"}
           </p>
         </div>
-
-        {snapshot.attempts.length === 0 ? (
-          <p>No interview simulations are saved yet.</p>
+        {state.attempts.length === 0 ? (
+          <PixelPanel className="attempt-history-empty">
+            <h3>No interview attempts yet.</h3>
+            <p>
+              Your lesson and exercise activity is saved. Complete a simulation when you
+              are ready to apply the skill.
+            </p>
+            <PixelButton href="/practice">Start a simulation</PixelButton>
+          </PixelPanel>
         ) : (
           <div className="attempt-history-list">
-            {snapshot.attempts.map((attempt) => (
-              <AttemptSummaryCard
-                key={attempt.id}
-                attempt={attempt}
-                selected={openAttemptId === attempt.id}
-                compareSelected={compareIds.includes(attempt.id)}
-                onOpen={() => {
-                  setOpenAttemptId(attempt.id);
-                  setAnnouncement("Attempt opened below the comparison section.");
-                }}
-                onToggleCompare={() => toggleCompare(attempt.id)}
-              />
+            {state.attempts.map((attempt, index) => (
+              <article className="attempt-history-card" key={attempt.id}>
+                <div>
+                  <span className="attempt-number">
+                    Attempt {state.attempts.length - index}
+                  </span>
+                  <h3>{attempt.context.setup.role}</h3>
+                  <p>
+                    {attempt.context.setup.organization} ·{" "}
+                    {formatAttemptDate(attempt.completedAt)}
+                  </p>
+                </div>
+                <div className="attempt-history-meta">
+                  <PixelBadge tone={attempt.evaluation ? "mint" : "plum"}>
+                    {attempt.evaluation ? "Feedback saved" : "Transcript saved"}
+                  </PixelBadge>
+                  <span>
+                    {attempt.responses.length} confirmed{" "}
+                    {attempt.responses.length === 1 ? "response" : "responses"}
+                  </span>
+                </div>
+                <PixelButton
+                  onClick={() => setSelectedAttemptId(attempt.id)}
+                  variant="secondary"
+                >
+                  Open attempt
+                </PixelButton>
+              </article>
             ))}
           </div>
         )}
+      </section>
 
-        {compareIds.length === 2 ? (
-          <section className="attempt-comparison" aria-labelledby="comparison-heading">
-            <h3 id="comparison-heading">Attempt comparison</h3>
-            {compareSelection?.comparable ? (
-              <>
-                <p className="comparison-narrative">{compareSelection.narrative}</p>
-                <p className="comparison-disclaimer" role="note">
-                  Comparison uses saved rubric scores only. It does not invent an overall
-                  grade or claim broad improvement from one isolated change.
-                </p>
-                <div className="comparison-meta">
-                  <p>
-                    Earlier: {formatAttemptDate(compareSelection.earlier.completedAt)}
-                  </p>
-                  <p>Later: {formatAttemptDate(compareSelection.later.completedAt)}</p>
+      {selectedAttempt ? (
+        <section className="attempt-detail" aria-labelledby="attempt-detail-heading">
+          <div className="attempt-detail-heading">
+            <div>
+              <p className="eyebrow">Previous attempt</p>
+              <h2 id="attempt-detail-heading">
+                {selectedAttempt.context.setup.role} at{" "}
+                {selectedAttempt.context.setup.organization}
+              </h2>
+              <p>{formatAttemptDate(selectedAttempt.completedAt)}</p>
+            </div>
+            <PixelButton onClick={() => setSelectedAttemptId("")} variant="ghost">
+              Close attempt
+            </PixelButton>
+          </div>
+          {selectedAttempt.retryGoal ? (
+            <p className="attempt-retry-goal">
+              <strong>Focused goal:</strong> {selectedAttempt.retryGoal}
+            </p>
+          ) : null}
+          {selectedAttempt.evaluation ? (
+            <div className="attempt-evaluation-summary">
+              <h3>Validated feedback summary</h3>
+              <p>{selectedAttempt.evaluation.summary}</p>
+              <ul aria-label="Saved rubric scores">
+                {selectedAttempt.evaluation.rubricScores.map((item) => (
+                  <li key={item.criterion}>
+                    <strong>{item.criterion}</strong>
+                    <span>{item.score}/5</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="attempt-no-evaluation">
+              This attempt has a confirmed transcript but no saved validated feedback. No
+              score is inferred.
+            </p>
+          )}
+          <ol className="attempt-transcript-list">
+            {selectedAttempt.questions.map((question) => {
+              const response = selectedAttempt.responses.find(
+                (item) => item.questionId === question.id,
+              );
+              return (
+                <li key={question.id}>
+                  <h3>{question.text}</h3>
+                  <blockquote>{response?.transcript}</blockquote>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      ) : null}
+
+      <section
+        className="attempt-comparison"
+        aria-labelledby="attempt-comparison-heading"
+      >
+        <div className="progress-section-heading">
+          <div>
+            <p className="eyebrow">Attempt comparison</p>
+            <h2 id="attempt-comparison-heading">Compare two related practice attempts</h2>
+          </div>
+          <p>Only the same skill or scenario can be compared.</p>
+        </div>
+        {state.attempts.length < 2 ? (
+          <PixelPanel className="comparison-empty-state">
+            <h3>Two attempts are needed for comparison.</h3>
+            <p>
+              Your saved attempt remains available above. Complete another related
+              simulation to compare rubric evidence.
+            </p>
+            <PixelButton href="/practice">Practice again</PixelButton>
+          </PixelPanel>
+        ) : (
+          <>
+            <div className="comparison-selectors">
+              <label htmlFor="comparison-first">First attempt</label>
+              <select
+                id="comparison-first"
+                value={firstComparisonId}
+                onChange={(event) => setFirstComparisonId(event.target.value)}
+              >
+                <option value="">Choose an attempt</option>
+                {state.attempts.map((attempt) => (
+                  <option key={attempt.id} value={attempt.id}>
+                    {attempt.context.setup.role} ·{" "}
+                    {formatAttemptDate(attempt.completedAt)}
+                  </option>
+                ))}
+              </select>
+              <label htmlFor="comparison-second">Second attempt</label>
+              <select
+                id="comparison-second"
+                value={secondComparisonId}
+                onChange={(event) => setSecondComparisonId(event.target.value)}
+              >
+                <option value="">Choose an attempt</option>
+                {state.attempts.map((attempt) => (
+                  <option key={attempt.id} value={attempt.id}>
+                    {attempt.context.setup.role} ·{" "}
+                    {formatAttemptDate(attempt.completedAt)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {comparison && !comparison.compatible ? (
+              <div className="comparison-incompatible" role="alert">
+                <strong>These attempts cannot be compared.</strong>
+                <span>{comparison.reason}</span>
+              </div>
+            ) : null}
+            {comparison?.compatible ? (
+              <div className="comparison-report" aria-live="polite">
+                <div className="comparison-caution" role="note">
+                  {comparison.caution}
                 </div>
-                <div
-                  className="comparison-table-scroll"
-                  tabIndex={0}
-                  role="region"
-                  aria-label="Rubric comparison table"
-                >
-                  <table className="comparison-table">
+                <p className="comparison-basis">
+                  Comparable by shared {comparison.basis}.
+                </p>
+                <div className="comparison-table-wrap">
+                  <table>
+                    <caption>
+                      Rubric-level changes from the earlier to later attempt
+                    </caption>
                     <thead>
                       <tr>
-                        <th scope="col">Rubric</th>
+                        <th scope="col">Criterion</th>
                         <th scope="col">Earlier</th>
                         <th scope="col">Later</th>
                         <th scope="col">Change</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {compareSelection.rubricChanges.map((change) => (
+                      {comparison.rubricChanges.map((change) => (
                         <tr key={change.criterion}>
                           <th scope="row">{change.label}</th>
                           <td>{change.earlierScore}/5</td>
                           <td>{change.laterScore}/5</td>
-                          <td>
-                            {change.status === "improved"
-                              ? `+${change.delta} improved`
-                              : change.status === "declined"
-                                ? `${change.delta} declined`
-                                : "unchanged"}
-                          </td>
+                          <td>{change.delta > 0 ? `+${change.delta}` : change.delta}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <div className="comparison-lists">
+                <div className="comparison-guidance-grid">
                   <section>
-                    <h4>Specific improvements</h4>
-                    {compareSelection.specificImprovements.length === 0 ? (
-                      <p>No rubric area improved between these attempts.</p>
-                    ) : (
-                      <ul>
-                        {compareSelection.specificImprovements.map((item) => (
-                          <li key={item.criterion}>
-                            {item.label}: {item.earlierScore}/5 → {item.laterScore}/5
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <h3>Specific improvements in this pair</h3>
+                    <ul>
+                      {comparison.specificImprovements.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
                   </section>
                   <section>
-                    <h4>Remaining practice areas</h4>
-                    {compareSelection.remainingPracticeAreas.length === 0 ? (
-                      <p>No weak or declined rubric areas remain in the later attempt.</p>
-                    ) : (
-                      <ul>
-                        {compareSelection.remainingPracticeAreas.map((item) => (
-                          <li key={item.criterion}>
-                            {item.label}: {item.laterScore}/5
-                            {item.status === "declined" ? " (declined)" : ""}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <h3>Remaining practice areas</h3>
+                    <ul>
+                      {comparison.remainingPracticeAreas.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
                   </section>
                 </div>
-              </>
-            ) : (
-              <div className="interview-inline-error" role="alert">
-                <strong>These attempts cannot be compared.</strong>
-                <span>
-                  {compareSelection && !compareSelection.comparable
-                    ? compareSelection.reason
-                    : "Choose two compatible evaluated attempts from the same scenario."}
-                </span>
               </div>
-            )}
-          </section>
-        ) : compareIds.length === 1 ? (
-          <p className="comparison-hint">Select one more evaluated attempt to compare.</p>
-        ) : null}
-      </PixelPanel>
-
-      {openAttempt ? (
-        <PixelPanel className="progress-library-card attempt-detail-panel">
-          <div className="attempt-history-heading">
-            <div>
-              <p className="eyebrow">Opened attempt</p>
-              <h2 id="opened-attempt-heading" tabIndex={-1} ref={openHeadingRef}>
-                {describeAttemptScenario(openAttempt)}
-              </h2>
-            </div>
-            <PixelButton variant="ghost" onClick={closeAttempt}>
-              Close attempt
-            </PixelButton>
-          </div>
-          <p>Completed {formatAttemptDate(openAttempt.completedAt)}</p>
-          <ol className="attempt-transcript-list">
-            {openAttempt.questions.map((question) => {
-              const response = openAttempt.responses.find(
-                (item) => item.questionId === question.id,
-              );
-              return (
-                <li key={question.id}>
-                  <h3>{question.text}</h3>
-                  <blockquote>{response?.transcript ?? "Missing response"}</blockquote>
-                </li>
-              );
-            })}
-          </ol>
-          {openAttempt.evaluation ? (
-            <EvaluationFeedback evaluation={openAttempt.evaluation} />
-          ) : (
-            <p>
-              This attempt has no saved STAR evaluation yet. Generate feedback from a new
-              Interview Center completion to unlock rubric comparison.
-            </p>
-          )}
-        </PixelPanel>
-      ) : null}
+            ) : null}
+          </>
+        )}
+      </section>
     </div>
   );
 }

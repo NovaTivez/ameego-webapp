@@ -1,0 +1,370 @@
+.report {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  color: #edf4ff;
+}
+
+.report > :global(.evaluation-heading-row),
+.report > :global(.evaluation-disclaimer),
+.report > :global(.evaluation-report-block),
+.report > :global(.evaluation-example),
+.report > :global(.evaluation-report-action) {
+  grid-column: 1 / -1;
+}
+
+.report :global(.pixel-button:focus-visible),
+.report :global(a:focus-visible) {
+  outline: 3px solid #f2c44f;
+  outline-offset: 3px;
+}
+
+.report > :global(.evaluation-heading-row) {
+  min-height: 40px;
+  align-items: center;
+  padding: 7px 10px;
+  border: 3px solid #03070e;
+  background: #101d31;
+  box-shadow:
+    inset 0 0 0 1px #405675,
+    4px 4px 0 #03070e;
+}
+
+.report > :global(.evaluation-heading-row) p,
+.report > :global(.evaluation-heading-row) h2 {
+  margin: 0;
+}
+
+.completionRibbon {
+  display: inline-block;
+  margin-bottom: 5px;
+  padding: 3px 6px;
+  border: 2px solid #03070e;
+  color: #071009;
+  background: #f2c44f;
+  box-shadow:
+    inset 0 2px 0 #ffe68b,
+    3px 3px 0 #03070e;
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .completionRibbon {
+    animation: completionRibbonIn 420ms steps(6, end) both;
+  }
+
+  .report :global(.evaluation-criterion),
+  .report :global(.evaluation-evidence-card),
+  .report :global(.evaluation-action-list li) {
+    animation: resultPanelIn 300ms steps(5, end) both;
+  }
+}
+
+@keyframes completionRibbonIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes resultPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.report > :global(.evaluation-heading-row) h2 {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.report > :global(.evaluation-disclaimer) {
+  padding: 7px 10px;
+  border: 2px solid #624d22;
+  color: #d6deea;
+  background: #211d18;
+  box-shadow: inset 0 0 0 1px #8b7233;
+  font-size: 0.74rem;
+}
+
+.summaryPanel,
+.guidanceGrid :global(.evaluation-report-section),
+.report > :global(.evaluation-next-step),
+.report > :global(.evaluation-example),
+.report > :global(.evaluation-report-action) {
+  padding: 9px;
+  border: 3px solid #03070e;
+  color: #edf4ff;
+  background: #101f35;
+  box-shadow:
+    inset 0 0 0 1px #3c5271,
+    4px 4px 0 #03070e;
+}
+
+.summaryPanel {
+  grid-column: 1;
+  grid-row: 3;
+  min-height: 178px;
+}
+
+.summaryPanel :global(.evaluation-summary) {
+  font-size: 0.84rem;
+  line-height: 1.48;
+}
+
+.summaryPanel :global(.evaluation-session-meta) {
+  color: #9faec3;
+  font-size: 0.72rem;
+}
+
+.summaryPanel :global(.evaluation-session-context) {
+  margin: 0 0 5px;
+  color: #f2c44f;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.guidanceGrid {
+  grid-column: 2;
+  grid-row: 3 / span 2;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.guidanceGrid :global(.evaluation-report-section) {
+  min-height: 0;
+}
+
+.guidanceGrid :global(.evaluation-opportunity) {
+  border-color: #171008;
+  background: #2b241a;
+  box-shadow:
+    inset 0 0 0 1px #74582a,
+    4px 4px 0 #03070e;
+}
+
+.report :global(.evaluation-report-section h3),
+.report :global(.evaluation-next-step h3),
+.report :global(.evaluation-example h3),
+.report :global(.evaluation-report-action h3) {
+  margin: 2px 0 5px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.report :global(.evaluation-report-section p),
+.report :global(.evaluation-report-section li),
+.report :global(.evaluation-next-step p),
+.report :global(.evaluation-example p),
+.report :global(.evaluation-report-action p) {
+  font-size: 0.78rem;
+}
+
+.report :global(.evaluation-report-section ul) {
+  display: grid;
+  gap: 4px;
+  padding-left: 17px;
+  margin: 5px 0 0;
+}
+
+.report :global(.evaluation-report-section li)::marker {
+  color: #64bd5e;
+}
+
+.report :global(.evaluation-section-number) {
+  color: #f2c44f;
+  font-size: 0.58rem;
+}
+
+.rubricPanel {
+  grid-column: 1;
+  grid-row: 4;
+  padding: 8px;
+  border: 3px solid #03070e;
+  background: #0b172a;
+  box-shadow:
+    inset 0 0 0 1px #3c5271,
+    4px 4px 0 #03070e;
+}
+
+.report :global(.evaluation-section-heading) {
+  min-height: 30px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  border: 2px solid #03070e;
+  background: #14243d;
+  box-shadow: inset 0 1px 0 #465d7d;
+}
+
+.report :global(.evaluation-section-heading p),
+.report :global(.evaluation-section-heading h3) {
+  margin: 0;
+}
+
+.report :global(.evaluation-section-heading h3) {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.report :global(.evaluation-rubric) {
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+.report :global(.evaluation-criterion) {
+  padding: 7px;
+  border: 2px solid #03070e;
+  background: #101f35;
+  box-shadow: inset 0 1px 0 #354b69;
+}
+
+.report :global(.evaluation-criterion-heading) {
+  gap: 7px;
+}
+
+.report :global(.evaluation-criterion-heading h4) {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.report :global(.evaluation-criterion-heading p) {
+  display: none;
+}
+
+.report :global(.evaluation-criterion-heading span) {
+  padding: 2px 5px;
+  border: 2px solid #03070e;
+  color: #f2c44f;
+  background: #091426;
+  font-size: 0.58rem;
+}
+
+.report :global(.evaluation-criterion > p) {
+  margin: 4px 0 0;
+  color: #cbd7e6;
+  font-size: 0.7rem;
+  line-height: 1.38;
+}
+
+.report > :global(.evaluation-report-block:not(:first-of-type)) {
+  padding: 8px;
+  border: 3px solid #03070e;
+  background: #0b172a;
+  box-shadow:
+    inset 0 0 0 1px #3c5271,
+    4px 4px 0 #03070e;
+}
+
+.report :global(.evaluation-evidence-list),
+.report :global(.evaluation-action-list) {
+  gap: 5px;
+}
+
+.report :global(.evaluation-evidence-card) {
+  grid-template-columns: minmax(110px, 0.25fr) minmax(0, 1fr);
+  gap: 7px;
+  padding: 7px;
+  border: 2px solid #03070e;
+  background: #101f35;
+  box-shadow: inset 0 1px 0 #354b69;
+}
+
+.report :global(.evaluation-evidence-card figcaption) {
+  color: #f2c44f;
+  font-size: 0.58rem;
+}
+
+.report :global(.evaluation-evidence-card blockquote) {
+  padding-left: 8px;
+  border-left: 3px solid #4fae58;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.report :global(.evaluation-action-list li) {
+  grid-template-columns: minmax(100px, 0.22fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 6px 8px;
+  border: 2px solid #03070e;
+  border-left: 4px solid #f2c44f;
+  background: #101f35;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.report > :global(.evaluation-next-step) {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+}
+
+.report > :global(.evaluation-recommended-lesson) {
+  border-color: #171008;
+  background: #2b241a;
+  box-shadow:
+    inset 0 0 0 1px #74582a,
+    4px 4px 0 #03070e;
+}
+
+.report > :global(.evaluation-example blockquote) {
+  padding: 8px;
+  border: 2px solid #03070e;
+  border-left: 4px solid #4fae58;
+  color: #d8e3f1;
+  background: #091426;
+  font-size: 0.78rem;
+}
+
+.report > :global(.evaluation-report-action) {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .report {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryPanel,
+  .guidanceGrid,
+  .rubricPanel,
+  .report > :global(.evaluation-next-step) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .report > :global(.evaluation-heading-row) {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .report :global(.evaluation-evidence-card),
+  .report :global(.evaluation-action-list li),
+  .report > :global(.evaluation-report-action) {
+    grid-template-columns: 1fr;
+  }
+}

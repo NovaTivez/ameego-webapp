@@ -118,8 +118,14 @@ function parseAttempt(value: unknown): CompletedInterviewAttempt | null {
     responses,
   } as const;
 
+  const retryGoal =
+    typeof value.retryGoal === "string" && value.retryGoal.trim()
+      ? value.retryGoal.trim()
+      : undefined;
+  if (value.retryGoal !== undefined && !retryGoal) return null;
+
   if (value.evaluation === undefined && value.evaluatedAt === undefined) {
-    return { ...base };
+    return { ...base, ...(retryGoal ? { retryGoal } : {}) };
   }
 
   const storedEvaluation = parseStoredEvaluation(
@@ -133,6 +139,7 @@ function parseAttempt(value: unknown): CompletedInterviewAttempt | null {
     ...base,
     evaluation: storedEvaluation.evaluation,
     evaluatedAt: storedEvaluation.evaluatedAt,
+    ...(retryGoal ? { retryGoal } : {}),
   };
 }
 
@@ -225,6 +232,7 @@ export function createCompletedAttempt(input: {
   completedAt?: string;
   evaluation?: InterviewEvaluation;
   evaluatedAt?: string;
+  retryGoal?: string;
 }): CompletedInterviewAttempt {
   const attempt: CompletedInterviewAttempt = {
     id:
@@ -237,6 +245,7 @@ export function createCompletedAttempt(input: {
     questionSource: input.questionSet.source,
     questions: input.questionSet.questions,
     responses: input.responses,
+    ...(input.retryGoal?.trim() ? { retryGoal: input.retryGoal.trim() } : {}),
   };
 
   if (input.evaluation && input.evaluatedAt) {

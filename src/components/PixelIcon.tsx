@@ -1,5 +1,6 @@
 export type PixelIconName =
   | "academy"
+  | "back"
   | "building"
   | "camera"
   | "check"
@@ -8,7 +9,9 @@ export type PixelIconName =
   | "microphone"
   | "progress"
   | "resume"
+  | "settings"
   | "speech"
+  | "star"
   | "timer";
 
 type PixelIconProps = {
@@ -24,6 +27,7 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
       <path d="M5 6h14v2H5zM8 3h8v3H8z" />
     </>
   ),
+  back: <path d="M9 3h5v4h7v4h-7v3h7v4h-7v3H9v-4H6v-3H3V9h3V6h3z" />,
   building: <path d="M3 8h18v14H3zM6 3h12v5H6zm1 9h3v3H7zm7 0h3v3h-3zM10 17h4v5h-4z" />,
   camera: <path d="M2 7h14v12H2zM16 10l6-3v12l-6-3zM6 4h6v3H6zm1 7h4v4H7z" />,
   check: <path d="M2 12h5v5h4v4h5v-5h3v-5h3V6h-5v5h-3v4h-2v-3H7V9H2z" />,
@@ -40,7 +44,11 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
   resume: (
     <path d="M4 1h11l5 5v17H4zM14 2v6h5M7 11h10v2H7zm0 4h10v2H7zm0 4h7v2H7zM7 5h4v4H7z" />
   ),
+  settings: (
+    <path d="M9 1h6v3h4v4h3v8h-3v4h-4v3H9v-3H5v-4H2V8h3V4h4zm3 7h-2v2H8v4h2v2h4v-2h2v-4h-2V8z" />
+  ),
   speech: <path d="M2 3h20v14H9l-5 5v-5H2zM6 7h3v3H6zm5 0h3v3h-3zm5 0h3v3h-3z" />,
+  star: <path d="M9 1h6v5h5v5h3v5h-6v7H7v-7H1v-5h3V6h5zM10 8h4v4h-4z" />,
   timer: (
     <path d="M9 1h6v3H9zM7 4h10v2h3v3h2v10h-2v3h-3v2H7v-2H4v-3H2V9h2V6h3zm4 4h3v6h4v3h-7z" />
   ),

@@ -5,6 +5,7 @@ import { MainNav } from "@/components/MainNav";
 import { GameWorldBackdrop } from "@/components/GameWorldBackdrop";
 
 import "./globals.css";
+import "./pixel-system.css";
 
 export const metadata: Metadata = {
   title: {

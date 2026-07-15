@@ -3,6 +3,32 @@ import { type EvaluationCriterionId } from "@/lib/evaluation/contracts";
 export const STAR_LESSON_ID = "interview-foundations.star-method";
 export const KNOWN_LESSON_IDS = [STAR_LESSON_ID] as const;
 
+export type LessonRecommendation = {
+  id: (typeof KNOWN_LESSON_IDS)[number];
+  title: string;
+  href: string;
+  objective: string;
+};
+
+export const LESSON_RECOMMENDATIONS: Record<
+  (typeof KNOWN_LESSON_IDS)[number],
+  LessonRecommendation
+> = {
+  [STAR_LESSON_ID]: {
+    id: STAR_LESSON_ID,
+    title: "The STAR Method: Build Answers That Land",
+    href: "/learn/star-method",
+    objective:
+      "Structure a behavioral answer with clear Situation, Task, Action, and Result evidence.",
+  },
+};
+
+export function getLessonRecommendation(lessonId: string): LessonRecommendation | null {
+  return Object.prototype.hasOwnProperty.call(LESSON_RECOMMENDATIONS, lessonId)
+    ? LESSON_RECOMMENDATIONS[lessonId as keyof typeof LESSON_RECOMMENDATIONS]
+    : null;
+}
+
 export const STAR_RUBRIC: Record<
   EvaluationCriterionId,
   { label: string; description: string }

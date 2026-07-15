@@ -4,31 +4,47 @@ import { exceedsBodyLimit, isRateLimited } from "@/lib/api/guards";
 import { EvaluationError } from "@/lib/evaluation/errors";
 import { evaluateInterview } from "@/lib/evaluation/evaluate";
 import { parseEvaluationRequest } from "@/lib/evaluation/schema";
+import {
+  FEEDBACK_INVALID_MESSAGE,
+  FEEDBACK_REFUSED_MESSAGE,
+  FEEDBACK_UNAVAILABLE_MESSAGE,
+} from "@/lib/interview/product-messages";
 
-const SAFE_ERRORS: Record<EvaluationError["kind"], { status: number; message: string }> =
-  {
-    configuration: {
-      status: 503,
-      message: "Interview evaluation is not configured.",
-    },
-    timeout: { status: 504, message: "Evaluation timed out. Please retry." },
-    network: {
-      status: 503,
-      message: "Evaluation could not reach the AI service. Please retry.",
-    },
-    provider: {
-      status: 502,
-      message: "The AI service could not complete the evaluation. Please retry.",
-    },
-    refusal: {
-      status: 422,
-      message: "This transcript could not be evaluated. Revise it and retry.",
-    },
-    invalid_output: {
-      status: 502,
-      message: "The evaluation response was invalid and was not used. Please retry.",
-    },
-  };
+const SAFE_ERRORS: Record<
+  EvaluationError["kind"],
+  { status: number; message: string; code: string }
+> = {
+  configuration: {
+    status: 503,
+    message: FEEDBACK_UNAVAILABLE_MESSAGE,
+    code: "service_unavailable",
+  },
+  timeout: {
+    status: 504,
+    message: FEEDBACK_UNAVAILABLE_MESSAGE,
+    code: "service_unavailable",
+  },
+  network: {
+    status: 503,
+    message: FEEDBACK_UNAVAILABLE_MESSAGE,
+    code: "service_unavailable",
+  },
+  provider: {
+    status: 502,
+    message: FEEDBACK_UNAVAILABLE_MESSAGE,
+    code: "service_unavailable",
+  },
+  refusal: {
+    status: 422,
+    message: FEEDBACK_REFUSED_MESSAGE,
+    code: "feedback_unavailable",
+  },
+  invalid_output: {
+    status: 502,
+    message: FEEDBACK_INVALID_MESSAGE,
+    code: "invalid_result",
+  },
+};
 
 const MAX_BODY_BYTES = 256 * 1024;
 
@@ -54,7 +70,11 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { error: "Request body must be valid JSON.", code: "invalid_request" },
+      {
+        error:
+          "The feedback request could not be read. Your saved attempt was not changed.",
+        code: "invalid_request",
+      },
       { status: 400 },
     );
   }
@@ -76,7 +96,7 @@ export async function POST(request: Request) {
     const kind = error instanceof EvaluationError ? error.kind : "provider";
     const safe = SAFE_ERRORS[kind];
     return NextResponse.json(
-      { error: safe.message, code: kind },
+      { error: safe.message, code: safe.code },
       { status: safe.status },
     );
   }

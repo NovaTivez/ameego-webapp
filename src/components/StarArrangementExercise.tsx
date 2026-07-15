@@ -4,12 +4,9 @@ import Link from "next/link";
 import { useMemo, useState, type DragEvent } from "react";
 
 import { ExerciseProgressState } from "@/components/ExerciseProgressState";
-import { LearningScene } from "@/components/LearningScene";
 import { PixelBadge } from "@/components/PixelBadge";
 import { PixelButton } from "@/components/PixelButton";
 import { PixelPanel } from "@/components/PixelPanel";
-import { PixelProgress } from "@/components/PixelProgress";
-import { PixelStatusBar } from "@/components/PixelStatusBar";
 import type {
   StarArrangementExerciseData,
   StarSegmentId,
@@ -22,6 +19,8 @@ import {
   validateStarOrder,
   type StarOrderValidation,
 } from "@/lib/star-exercise-validation";
+
+import styles from "./star-exercise.module.css";
 
 type StarArrangementExerciseProps = {
   exercise: StarArrangementExerciseData;
@@ -40,15 +39,17 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
   );
 
   const moveSegment = (fromIndex: number, toIndex: number) => {
-    const movedId = order[fromIndex];
-    const movedSegment = segmentMap.get(movedId);
-    const nextOrder = moveStarSegment(order, fromIndex, toIndex);
-    setOrder(nextOrder);
-    setAnnouncement(
-      movedSegment && nextOrder !== order
-        ? `${movedSegment.label} moved to position ${nextOrder.indexOf(movedId) + 1}.`
-        : "The answer order did not change.",
-    );
+    setOrder((currentOrder) => {
+      const movedId = currentOrder[fromIndex];
+      const movedSegment = segmentMap.get(movedId);
+      const nextOrder = moveStarSegment(currentOrder, fromIndex, toIndex);
+      setAnnouncement(
+        movedSegment && nextOrder !== currentOrder
+          ? `${movedSegment.label} moved to position ${nextOrder.indexOf(movedId) + 1}.`
+          : "The answer order did not change.",
+      );
+      return nextOrder;
+    });
     setValidation(null);
   };
 
@@ -58,14 +59,16 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
     const draggedId = draggedSegmentId ?? transferredId;
 
     if (segmentMap.has(draggedId) && segmentMap.has(targetId)) {
-      const nextOrder = moveStarSegmentToTarget(order, draggedId, targetId);
-      const movedSegment = segmentMap.get(draggedId);
-      setOrder(nextOrder);
-      setAnnouncement(
-        movedSegment
-          ? `${movedSegment.label} moved to position ${nextOrder.indexOf(draggedId) + 1}.`
-          : "Answer segment moved.",
-      );
+      setOrder((currentOrder) => {
+        const nextOrder = moveStarSegmentToTarget(currentOrder, draggedId, targetId);
+        const movedSegment = segmentMap.get(draggedId);
+        setAnnouncement(
+          movedSegment
+            ? `${movedSegment.label} moved to position ${nextOrder.indexOf(draggedId) + 1}.`
+            : "Answer segment moved.",
+        );
+        return nextOrder;
+      });
       setValidation(null);
     }
 
@@ -93,8 +96,8 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
   const correctOrder = getCorrectStarOrder(exercise);
 
   return (
-    <div className="star-exercise">
-      <nav className="lesson-breadcrumbs" aria-label="Course breadcrumb">
+    <div className={styles.exerciseScreen}>
+      <nav className={styles.breadcrumbs} aria-label="Course breadcrumb">
         <Link href="/learn">Interview Foundations</Link>
         <span aria-hidden="true">/</span>
         <Link href="/learn/star-method">STAR Method</Link>
@@ -102,137 +105,148 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
         <span aria-current="page">Arrangement exercise</span>
       </nav>
 
-      <header className="exercise-header">
-        <PixelBadge tone="amber">Interactive exercise</PixelBadge>
-        <p className="eyebrow">STAR sequence</p>
-        <h1>{exercise.title}</h1>
-        <p className="hero-lede">{exercise.instructions}</p>
-      </header>
-
-      <LearningScene variant="exercise" />
-
-      {progress.status === "loading" ? <ExerciseProgressState state="loading" /> : null}
-      {progress.status === "error" ? (
-        <ExerciseProgressState
-          state="error"
-          errorKind={progress.errorKind}
-          onRetry={progress.retrySave}
-        />
-      ) : null}
-      {progress.status === "ready" && progress.completed ? (
-        <div className="exercise-saved-status" role="status">
-          <PixelBadge tone="mint">Completion saved</PixelBadge>
-          <PixelStatusBar
-            label="Exercise checkpoint"
-            value={progress.correct ? "Correct order saved" : "Attempt saved"}
-            tone="success"
-          />
-          <span>
-            {progress.correct
-              ? "A correct arrangement has been recorded."
-              : "An attempt has been recorded; perfection is not required to continue."}
-          </span>
-        </div>
-      ) : null}
-
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
-
-      <section aria-labelledby="arrangement-heading">
-        <PixelProgress
-          label="STAR exercise progress"
-          current={validation ? 1 : 0}
-          total={1}
-        />
-        <div className="exercise-section-heading">
+      <section className={styles.exercisePanel} aria-labelledby="exercise-title">
+        <header className={styles.exerciseHeader}>
           <div>
-            <p className="eyebrow">Your arrangement</p>
-            <h2 id="arrangement-heading">Put the answer in a useful sequence.</h2>
+            <p>Interactive Exercise</p>
+            <h1 id="exercise-title">Arrange the STAR Method</h1>
           </div>
-          <span className="exercise-help" id="exercise-reorder-help">
-            Mouse or trackpad: drag cards. Keyboard or touch: use Move up / Move down.
+          <PixelBadge tone={validation?.correct ? "mint" : "amber"}>
+            {validation ? "Checked" : "1 Exercise"}
+          </PixelBadge>
+        </header>
+
+        <div className={styles.instructions}>
+          <strong>Put the four answer segments in the correct order.</strong>
+          <span id="exercise-reorder-help">
+            Drag with a mouse. On touch or keyboard, use each tile&apos;s arrow controls.
           </span>
         </div>
 
-        <ol className="exercise-segment-list" aria-describedby="exercise-reorder-help">
-          {order.map((segmentId, index) => {
-            const segment = segmentMap.get(segmentId);
-            if (!segment) {
-              return null;
-            }
+        {progress.status === "loading" ? (
+          <div className={styles.progressState}>
+            <ExerciseProgressState state="loading" />
+          </div>
+        ) : null}
+        {progress.status === "error" ? (
+          <div className={styles.progressState}>
+            <ExerciseProgressState
+              state="error"
+              errorKind={progress.errorKind}
+              onRetry={progress.retrySave}
+            />
+          </div>
+        ) : null}
+        {progress.status === "ready" && progress.completed ? (
+          <div className={styles.savedStatus} role="status">
+            <PixelBadge tone="mint">Completion saved</PixelBadge>
+            <span>
+              {progress.correct
+                ? "Correct order saved"
+                : "Attempt saved — perfection is not required to continue."}
+            </span>
+          </div>
+        ) : null}
 
-            return (
-              <li
-                key={segment.id}
-                className={`exercise-segment${dropTargetId === segment.id ? " is-drop-target" : ""}`}
-                draggable
-                data-testid={`segment-${segment.id}`}
-                onDragStart={(event) => {
-                  setDraggedSegmentId(segment.id);
-                  event.dataTransfer.effectAllowed = "move";
-                  event.dataTransfer.setData("text/plain", segment.id);
-                }}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  event.dataTransfer.dropEffect = "move";
-                  setDropTargetId(segment.id);
-                }}
-                onDragEnd={() => {
-                  setDraggedSegmentId(null);
-                  setDropTargetId(null);
-                }}
-                onDrop={(event) => handleDrop(event, segment.id)}
-              >
-                <span className="exercise-position" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <div className="exercise-segment-copy">
-                  <span className="exercise-drag-label">Answer segment</span>
-                  <p>{segment.text}</p>
-                </div>
-                <div
-                  className="exercise-move-controls"
-                  role="group"
-                  aria-label={`Move ${segment.label}`}
+        <p className="sr-only" aria-live="polite">
+          {announcement}
+        </p>
+
+        <section className={styles.arrangement} aria-labelledby="arrangement-heading">
+          <div className={styles.arrangementHeading}>
+            <h2 id="arrangement-heading">Answer Slots</h2>
+            <span>Move S → T → A → R</span>
+          </div>
+
+          <ol className={styles.answerSlots} aria-describedby="exercise-reorder-help">
+            {order.map((segmentId, index) => {
+              const segment = segmentMap.get(segmentId);
+              if (!segment) {
+                return null;
+              }
+
+              const isDragging = draggedSegmentId === segment.id;
+              const isDropTarget = dropTargetId === segment.id;
+
+              return (
+                <li
+                  key={segment.id}
+                  className={`${styles.answerSlot}${isDragging ? ` ${styles.isDragging}` : ""}${isDropTarget ? ` ${styles.isDropTarget}` : ""}`}
+                  draggable
+                  data-testid={`segment-${segment.id}`}
+                  onDragStart={(event) => {
+                    setDraggedSegmentId(segment.id);
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", segment.id);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setDropTargetId(segment.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedSegmentId(null);
+                    setDropTargetId(null);
+                  }}
+                  onDrop={(event) => handleDrop(event, segment.id)}
                 >
-                  <button
-                    type="button"
-                    onClick={() => moveSegment(index, index - 1)}
-                    disabled={index === 0}
-                    aria-label={`Move ${segment.label} up`}
-                  >
-                    <span aria-hidden="true">Up</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveSegment(index, index + 1)}
-                    disabled={index === order.length - 1}
-                    aria-label={`Move ${segment.label} down`}
-                  >
-                    <span aria-hidden="true">Down</span>
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+                  <span className={styles.slotLabel}>Slot {index + 1}</span>
+                  <div className={styles.answerTile}>
+                    <span className={styles.tileLetter} aria-hidden="true">
+                      {segment.label.charAt(0)}
+                    </span>
+                    <div className={styles.tileCopy}>
+                      <strong>{segment.label}</strong>
+                      <p>{segment.text}</p>
+                    </div>
+                    <div
+                      className={styles.moveControls}
+                      aria-label={`Move ${segment.label}`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => moveSegment(index, index - 1)}
+                        disabled={index === 0}
+                        aria-label={`Move ${segment.label} up`}
+                      >
+                        <span aria-hidden="true">↑</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveSegment(index, index + 1)}
+                        disabled={index === order.length - 1}
+                        aria-label={`Move ${segment.label} down`}
+                      >
+                        <span aria-hidden="true">↓</span>
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
 
-        <div className="exercise-action-row">
-          <PixelButton onClick={handleValidate} disabled={progress.status === "loading"}>
-            Check my order
-          </PixelButton>
-          <PixelButton onClick={handleRetry} variant="secondary">
-            Reset arrangement
-          </PixelButton>
-        </div>
+          <div className={styles.actionRow}>
+            <PixelButton onClick={handleRetry} variant="secondary">
+              <span className="sr-only">Reset arrangement</span>
+              <span aria-hidden="true">Reset</span>
+            </PixelButton>
+            <PixelButton
+              onClick={handleValidate}
+              disabled={progress.status === "loading"}
+            >
+              <span className="sr-only">Check my order</span>
+              <span aria-hidden="true">Check</span>
+            </PixelButton>
+          </div>
+        </section>
       </section>
 
       {validation ? (
-        <section className="exercise-feedback" aria-live="polite" aria-atomic="true">
+        <section className={styles.feedback} aria-live="polite" aria-atomic="true">
           <PixelPanel
             tone={validation.correct ? "dark" : "warning"}
-            className="exercise-feedback-summary"
+            className={styles.feedbackSummary}
           >
             <PixelBadge tone={validation.correct ? "mint" : "amber"}>
               {validation.correct ? "Correct order" : "Attempt complete"}
@@ -250,7 +264,7 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
           </PixelPanel>
 
           {!validation.correct ? (
-            <div className="exercise-placement-feedback">
+            <div className={styles.placementFeedback}>
               <h2>What should move?</h2>
               <ul>
                 {validation.placements
@@ -262,10 +276,10 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
             </div>
           ) : null}
 
-          <div className="exercise-correct-order">
-            <p className="eyebrow">Why the correct order works</p>
+          <div className={styles.correctOrder}>
+            <p>Why the correct order works</p>
             <h2>Context, responsibility, decisions, evidence.</h2>
-            <p>{exercise.correctOrderExplanation}</p>
+            <span>{exercise.correctOrderExplanation}</span>
             <ol>
               {correctOrder.map((segmentId) => {
                 const segment = segmentMap.get(segmentId);
@@ -274,7 +288,7 @@ export function StarArrangementExercise({ exercise }: StarArrangementExercisePro
             </ol>
           </div>
 
-          <div className="exercise-completion-actions">
+          <div className={styles.completionActions}>
             <PixelButton onClick={handleRetry} variant="secondary">
               Retry exercise
             </PixelButton>

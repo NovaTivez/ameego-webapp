@@ -1,11 +1,13 @@
 "use client";
 
+import { PixelIcon, type PixelIconName } from "@/components/PixelIcon";
 import {
   RESUME_FIELDS,
   type ResumeField,
   type ResumeProfile,
 } from "@/lib/interview/contracts";
-import { PixelFormField } from "@/components/PixelFormField";
+
+import styles from "./interview-preparation.module.css";
 
 const LABELS: Record<ResumeField, string> = {
   education: "Education",
@@ -16,6 +18,15 @@ const LABELS: Record<ResumeField, string> = {
   achievements: "Achievements",
 };
 
+const ICONS: Record<ResumeField, PixelIconName> = {
+  education: "lesson",
+  experience: "building",
+  projects: "progress",
+  skills: "star",
+  leadership: "speech",
+  achievements: "check",
+};
+
 type Props = {
   profile: ResumeProfile;
   onChange: (profile: ResumeProfile) => void;
@@ -23,12 +34,14 @@ type Props = {
 
 export function ResumeProfileEditor({ profile, onChange }: Props) {
   return (
-    <div className="resume-profile-grid">
+    <div className={styles.resumeSummaryGrid}>
       {RESUME_FIELDS.map((field) => (
-        <PixelFormField htmlFor={`resume-${field}`} label={LABELS[field]} key={field}>
+        <div className={styles.resumeSummaryField} key={field}>
+          <PixelIcon name={ICONS[field]} size="small" />
+          <label htmlFor={`resume-${field}`}>{LABELS[field]}</label>
           <textarea
             id={`resume-${field}`}
-            rows={4}
+            rows={2}
             value={profile[field].join("\n")}
             onChange={(event) =>
               onChange({
@@ -41,7 +54,7 @@ export function ResumeProfileEditor({ profile, onChange }: Props) {
             }
             placeholder={`One ${LABELS[field].toLowerCase()} item per line`}
           />
-        </PixelFormField>
+        </div>
       ))}
     </div>
   );

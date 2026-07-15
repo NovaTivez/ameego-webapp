@@ -1,0 +1,448 @@
+.page {
+  display: grid;
+  gap: 8px;
+  width: min(calc(100% - 18px), 1080px);
+  margin: 0 auto;
+  padding: 12px 0 18px;
+}
+
+.pageTitle {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 11px;
+  border: 3px solid #03070e;
+  background: #101d31;
+  box-shadow:
+    inset 0 0 0 1px #405575,
+    4px 4px 0 #03070e;
+}
+
+.pageTitle h1,
+.pageTitle p {
+  margin: 0;
+}
+
+.pageTitle h1 {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pageTitle p {
+  color: #aebcd0;
+  font-size: 0.78rem;
+}
+
+.dashboard {
+  display: grid;
+  gap: 9px;
+}
+
+.overviewHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  padding: 0 3px;
+}
+
+.overviewHeading p,
+.overviewHeading h2,
+.overviewHeading span {
+  margin: 0;
+}
+
+.overviewHeading p,
+.overviewHeading span,
+.panelHeading span,
+.recommendation > div > span {
+  color: #f2c44f;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.overviewHeading h2 {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.overviewHeading > span {
+  max-width: 48ch;
+  color: #9eafc5;
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  text-align: right;
+  text-transform: none;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.statCard {
+  display: grid;
+  min-height: 76px;
+  align-content: center;
+  justify-items: center;
+  gap: 3px;
+  padding: 7px;
+  border: 3px solid #03070e;
+  background: #101d31;
+  box-shadow:
+    inset 0 0 0 1px #384e6c,
+    4px 4px 0 #03070e;
+  text-align: center;
+}
+
+.statCard span,
+.statCard small {
+  color: #aab8ca;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.statCard strong {
+  color: #f2c44f;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.progressGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 8px;
+}
+
+.gamePanel {
+  min-width: 0;
+  padding: 8px;
+  border: 3px solid #03070e;
+  background: #0b172a;
+  box-shadow:
+    inset 0 0 0 1px #3c5272,
+    4px 4px 0 #03070e;
+}
+
+.panelHeading {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -5px -5px 7px;
+  padding: 6px 8px;
+  border: 2px solid #03070e;
+  background: #14243d;
+  box-shadow: inset 0 1px 0 #455c7b;
+}
+
+.panelHeading h2,
+.panelHeading span {
+  margin: 0;
+}
+
+.panelHeading h2 {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.panelHeading span {
+  color: #95a7be;
+  font-size: 0.52rem;
+}
+
+.skillList {
+  display: grid;
+  gap: 7px;
+}
+
+.skillRow {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.34fr) minmax(120px, 1fr) minmax(128px, auto);
+  gap: 8px;
+  align-items: center;
+}
+
+.skillRow > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: #dce6f3;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+}
+
+.skillRow strong {
+  color: #f2c44f;
+}
+
+.skillTrack {
+  height: 13px;
+  padding: 2px;
+  border: 2px solid #03070e;
+  background: #07111f;
+  box-shadow: inset 0 1px 0 #3a506e;
+}
+
+.skillTrack > span {
+  display: block;
+  height: 100%;
+  background: #4ba951;
+  box-shadow:
+    inset 0 3px 0 #75d36e,
+    inset 0 -2px 0 #245f31;
+}
+
+.skillRow small {
+  color: #91a2b9;
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.panelEmpty {
+  margin: 0;
+  padding: 10px;
+  border: 2px dashed #4a5f7c;
+  color: #aebbd0;
+  font-size: 0.78rem;
+}
+
+.activityList {
+  display: grid;
+  gap: 5px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.activityList li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  min-height: 42px;
+  padding: 5px 6px;
+  border: 2px solid #07101c;
+  background: #101f35;
+  box-shadow: inset 0 1px 0 #354c6a;
+}
+
+.activityList svg {
+  fill: #f2c44f;
+}
+
+.activityList li > div {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.activityList strong {
+  font-family: var(--font-display);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.activityList span,
+.activityList time {
+  color: #9eafc5;
+  font-size: 0.65rem;
+}
+
+.activityList time {
+  max-width: 110px;
+  text-align: right;
+}
+
+.recommendation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 3px solid #03070e;
+  background: #101d31;
+  box-shadow:
+    inset 0 0 0 1px #4d6380,
+    4px 4px 0 #03070e;
+}
+
+.recommendation > svg {
+  fill: #f2c44f;
+}
+
+.recommendation h2,
+.recommendation p {
+  margin: 0;
+}
+
+.recommendation h2 {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.recommendation p {
+  color: #aebbd0;
+  font-size: 0.74rem;
+}
+
+.completionGrid {
+  gap: 8px;
+}
+
+.completionGrid :global(.progress-completion-card) {
+  padding: 12px;
+  border: 3px solid #03070e;
+  color: #edf4ff;
+  background: #111f38;
+  box-shadow:
+    inset 0 0 0 1px #405675,
+    4px 4px 0 #03070e;
+}
+
+.completionGrid :global(.progress-completion-card li span) {
+  color: #9eafc5;
+}
+
+.emptyState {
+  border: 3px solid #03070e;
+  color: #edf4ff;
+  background: #111f38;
+  box-shadow:
+    inset 0 0 0 1px #405675,
+    5px 5px 0 #03070e;
+}
+
+.dashboard :global(.pixel-button:focus-visible),
+.dashboard :global(a:focus-visible),
+.dashboard :global(select:focus-visible) {
+  outline: 3px solid #f2c44f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .statGrid,
+  .progressGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progressGrid > * {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .pageTitle,
+  .overviewHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .overviewHeading > span {
+    text-align: left;
+  }
+
+  .statGrid,
+  .completionGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .skillRow {
+    grid-template-columns: 1fr;
+  }
+
+  .activityList li,
+  .recommendation {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .activityList time,
+  .recommendation :global(.pixel-button) {
+    grid-column: 2;
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 430px) {
+  .statGrid,
+  .completionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .statCard {
+    animation: dashboardStatIn 300ms steps(5, end) both;
+  }
+
+  .statCard:nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .statCard:nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .statCard:nth-child(4) {
+    animation-delay: 150ms;
+  }
+
+  .skillTrack > span {
+    animation: skillProgressReveal 560ms steps(8, end) both;
+    transform-origin: left;
+  }
+
+  .recommendation > svg {
+    animation: recommendationBob 2s steps(2, end) infinite;
+  }
+}
+
+@keyframes dashboardStatIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes skillProgressReveal {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes recommendationBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}

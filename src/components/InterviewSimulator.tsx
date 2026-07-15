@@ -4,16 +4,12 @@ import { useEffect, useRef, useState } from "react";
 
 import { EvaluationFeedback } from "@/components/EvaluationFeedback";
 import { FeedbackRoomScene } from "@/components/FeedbackRoomScene";
-import { CharacterPortrait } from "@/components/CharacterPortrait";
 import { InterviewSetupForm } from "@/components/InterviewSetupForm";
+import { InterviewSessionView } from "@/components/InterviewSessionView";
 import { PixelBadge } from "@/components/PixelBadge";
 import { PixelButton } from "@/components/PixelButton";
-import { PixelDialog } from "@/components/PixelDialog";
 import { PixelIcon } from "@/components/PixelIcon";
 import { PixelPanel } from "@/components/PixelPanel";
-import { PixelProgress } from "@/components/PixelProgress";
-import { PixelRoomBackground } from "@/components/PixelRoomBackground";
-import { PixelStatusBar } from "@/components/PixelStatusBar";
 import { ResumeProfileEditor } from "@/components/ResumeProfileEditor";
 import { PracticeLobbyScene } from "@/components/PracticeLobbyScene";
 import {
@@ -32,12 +28,17 @@ import {
   parseInterviewEvaluation,
 } from "@/lib/evaluation/schema";
 import {
-  buildEvaluationRequest,
   createCompletedAttempt,
   saveAttemptEvaluation,
   saveCompletedAttempt,
 } from "@/lib/interview/attempts";
 import { createGeneralQuestionFallback } from "@/lib/interview/questions";
+import {
+  FEEDBACK_INVALID_MESSAGE,
+  FEEDBACK_UNAVAILABLE_MESSAGE,
+  PERSONALIZATION_UNAVAILABLE_MESSAGE,
+  RESUME_PERSONALIZATION_UNAVAILABLE_MESSAGE,
+} from "@/lib/interview/product-messages";
 import { RESUME_ACCEPT, RESUME_MAX_BYTES } from "@/lib/interview/resume";
 import {
   parseQuestionSet,
@@ -46,7 +47,12 @@ import {
   validateTranscript,
 } from "@/lib/interview/validation";
 
+import preparationStyles from "./interview-preparation.module.css";
+import sessionStyles from "./interview-session.module.css";
+
 type Step = "setup" | "resume" | "review" | "mode" | "interview" | "confirm" | "complete";
+type EvaluationFailure =
+  "invalid_result" | "missing_data" | "service_failure" | "storage_failure" | null;
 
 type RecognitionResultEvent = {
   results: ArrayLike<ArrayLike<{ transcript: string }>>;
@@ -69,6 +75,7 @@ const STEP_LABELS = [
   "Setup",
   "Resume",
   "Review",
+  "Questions",
   "Mode",
   "Interview",
   "Confirm",
@@ -79,10 +86,10 @@ const STEP_PROGRESS: Record<Step, number> = {
   setup: 0,
   resume: 1,
   review: 2,
-  mode: 3,
-  interview: 4,
-  confirm: 5,
-  complete: 6,
+  mode: 4,
+  interview: 5,
+  confirm: 6,
+  complete: 7,
 };
 
 function fileAsDataUrl(file: File): Promise<string> {
@@ -97,18 +104,28 @@ function fileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-function errorMessage(value: unknown, fallback: string): string {
-  if (value && typeof value === "object" && "error" in value) {
-    const error = (value as { error?: unknown }).error;
-    if (typeof error === "string") return error;
+async function readServicePayload(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
   }
-  return fallback;
+}
+
+function serviceFailureCode(value: unknown): string | null {
+  if (!value || typeof value !== "object" || !("code" in value)) return null;
+  const code = (value as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
 }
 
 function formatSessionTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainder = seconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+}
+
+function countFillerWords(transcript: string): number {
+  return transcript.match(/\b(?:um+|uh+|erm+|ah+)\b|\byou know\b/gi)?.length ?? 0;
 }
 
 export function InterviewSimulator() {
@@ -142,11 +159,13 @@ export function InterviewSimulator() {
     "idle",
   );
   const [evaluationError, setEvaluationError] = useState("");
+  const [evaluationFailure, setEvaluationFailure] = useState<EvaluationFailure>(null);
+  const [focusedRetryGoal, setFocusedRetryGoal] = useState("");
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [speakingSeconds, setSpeakingSeconds] = useState(0);
   const [announcement, setAnnouncement] = useState("");
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
-  const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
-  const hasMountedRef = useRef(false);
+  const resumeInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(
     () => () => {
@@ -154,16 +173,6 @@ export function InterviewSimulator() {
     },
     [],
   );
-
-  // Keyboard users lose their place when a step panel unmounts the control
-  // they activated, so focus moves to the new step's heading.
-  useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
-    }
-    stepHeadingRef.current?.focus();
-  }, [step]);
 
   useEffect(() => {
     if (step !== "interview" && step !== "confirm") return;
@@ -173,6 +182,15 @@ export function InterviewSimulator() {
     );
     return () => window.clearInterval(timer);
   }, [step]);
+
+  useEffect(() => {
+    if (!isListening) return;
+    const timer = window.setInterval(
+      () => setSpeakingSeconds((current) => current + 1),
+      1_000,
+    );
+    return () => window.clearInterval(timer);
+  }, [isListening]);
 
   const confirmedContext: ConfirmedInterviewContext = { setup, resumeProfile };
 
@@ -211,25 +229,22 @@ export function InterviewSimulator() {
           fileData: await fileAsDataUrl(resumeFile),
         }),
       });
-      const result: unknown = await response.json();
-      if (!response.ok)
-        throw new Error(errorMessage(result, "Resume extraction failed."));
+      const result = await readServicePayload(response);
+      if (!response.ok) throw new Error("resume_personalization_unavailable");
       const profile =
         result && typeof result === "object" && "profile" in result
           ? parseResumeProfile((result as { profile: unknown }).profile)
           : null;
-      if (!profile) throw new Error("Resume extraction returned invalid information.");
+      if (!profile) throw new Error("resume_personalization_unavailable");
 
       setResumeProfile(profile);
       setResumeFile(null);
       setResumeStatus("idle");
       setStep("review");
       setAnnouncement("Resume information extracted. Review every detail before use.");
-    } catch (error) {
+    } catch {
       setResumeStatus("error");
-      setResumeError(
-        error instanceof Error ? error.message : "Resume extraction failed.",
-      );
+      setResumeError(RESUME_PERSONALIZATION_UNAVAILABLE_MESSAGE);
     }
   };
 
@@ -249,6 +264,27 @@ export function InterviewSimulator() {
     setAnnouncement("Manual resume information added. Review it before use.");
   };
 
+  const clearResumeFile = () => {
+    setResumeFile(null);
+    setResumeError("");
+    if (resumeInputRef.current) {
+      resumeInputRef.current.value = "";
+    }
+    setAnnouncement("Selected resume file removed.");
+  };
+
+  const previewResumeFile = () => {
+    if (!resumeFile) return;
+    if (typeof URL.createObjectURL !== "function") {
+      setResumeError("File preview is unavailable in this browser.");
+      return;
+    }
+    const previewUrl = URL.createObjectURL(resumeFile);
+    window.open(previewUrl, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60_000);
+    setAnnouncement(`Preview opened for ${resumeFile.name}.`);
+  };
+
   const generateQuestions = async () => {
     setQuestionStatus("loading");
     setQuestionError("");
@@ -258,21 +294,17 @@ export function InterviewSimulator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(confirmedContext),
       });
-      const result: unknown = await response.json();
-      if (!response.ok) {
-        throw new Error(errorMessage(result, "Question generation failed."));
-      }
+      const result = await readServicePayload(response);
+      if (!response.ok) throw new Error("personalization_unavailable");
       const parsed = parseQuestionSet(result, confirmedContext);
-      if (!parsed) throw new Error("Generated questions were invalid.");
+      if (!parsed) throw new Error("personalization_unavailable");
       setQuestionSet(parsed);
       setQuestionStatus("idle");
       setStep("mode");
       setAnnouncement("Personalized questions are ready. Choose an input mode.");
-    } catch (error) {
+    } catch {
       setQuestionStatus("error");
-      setQuestionError(
-        error instanceof Error ? error.message : "Question generation failed.",
-      );
+      setQuestionError(PERSONALIZATION_UNAVAILABLE_MESSAGE);
     }
   };
 
@@ -280,13 +312,14 @@ export function InterviewSimulator() {
     setQuestionSet(createGeneralQuestionFallback(confirmedContext));
     setQuestionStatus("idle");
     setStep("mode");
-    setAnnouncement("General fallback questions selected. They are not AI-personalized.");
+    setAnnouncement("Standard interview questions selected. Your practice can continue.");
   };
 
   const beginTextMode = () => {
     setInputMode("text");
     setModeError("");
     setElapsedSeconds(0);
+    setSpeakingSeconds(0);
     setStep("interview");
   };
 
@@ -301,6 +334,7 @@ export function InterviewSimulator() {
       stream.getTracks().forEach((track) => track.stop());
       setInputMode("microphone");
       setElapsedSeconds(0);
+      setSpeakingSeconds(0);
       setStep("interview");
     } catch {
       setModeError(
@@ -355,6 +389,18 @@ export function InterviewSimulator() {
     setAnnouncement("Microphone stopped. Review and edit the transcript.");
   };
 
+  const endInterview = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      setIsListening(false);
+    }
+    setStep("mode");
+    setAnnouncement(
+      "Interview ended without saving a completed attempt. Your scenario and confirmed responses are preserved.",
+    );
+  };
+
   const reviewTranscript = () => {
     if (isListening) stopListening();
     const error = validateTranscript(draft);
@@ -389,6 +435,7 @@ export function InterviewSimulator() {
           context: confirmedContext,
           questionSet,
           responses: nextResponses,
+          retryGoal: focusedRetryGoal,
         });
         saveCompletedAttempt(window.localStorage, attempt);
         setCompletedAttempt(attempt);
@@ -414,15 +461,29 @@ export function InterviewSimulator() {
 
   const evaluateCompletedAttempt = async () => {
     if (!completedAttempt) return;
-    const request: EvaluationRequest = buildEvaluationRequest(completedAttempt);
+    const request: EvaluationRequest = {
+      attemptId: completedAttempt.id,
+      role: completedAttempt.context.setup.role,
+      organization: completedAttempt.context.setup.organization,
+      exchanges: completedAttempt.questions.map((question) => ({
+        questionId: question.id,
+        question: question.text,
+        transcript:
+          completedAttempt.responses.find(
+            (response) => response.questionId === question.id,
+          )?.transcript ?? "",
+      })),
+    };
     const validatedRequest = parseEvaluationRequest(request);
     if (!validatedRequest) {
       setEvaluationStatus("error");
+      setEvaluationFailure("missing_data");
       setEvaluationError("The saved transcript is incomplete and cannot be evaluated.");
       return;
     }
 
     setEvaluationStatus("loading");
+    setEvaluationFailure(null);
     setEvaluationError("");
     setElapsedSeconds(0);
     try {
@@ -431,52 +492,56 @@ export function InterviewSimulator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validatedRequest),
       });
-      const result: unknown = await response.json();
+      const result = await readServicePayload(response);
       if (!response.ok) {
-        throw new Error(errorMessage(result, "Interview evaluation failed."));
+        const code = serviceFailureCode(result);
+        setEvaluationStatus("error");
+        setEvaluationFailure(
+          code === "invalid_result" ? "invalid_result" : "service_failure",
+        );
+        setEvaluationError(
+          code === "invalid_result"
+            ? FEEDBACK_INVALID_MESSAGE
+            : FEEDBACK_UNAVAILABLE_MESSAGE,
+        );
+        return;
       }
       const parsed = parseInterviewEvaluation(result, validatedRequest);
-      if (!parsed)
-        throw new Error("The evaluation response was invalid and was not used.");
-      setEvaluation(parsed);
+      if (!parsed) {
+        setEvaluationStatus("error");
+        setEvaluationFailure("invalid_result");
+        setEvaluationError(FEEDBACK_INVALID_MESSAGE);
+        return;
+      }
+      let updatedAttempt: CompletedInterviewAttempt;
       try {
-        const saved = saveAttemptEvaluation(
+        updatedAttempt = saveAttemptEvaluation(
           window.localStorage,
           completedAttempt.id,
           parsed,
         );
-        setCompletedAttempt(saved);
-        setAnnouncement(
-          "Evidence-based interview feedback is ready and saved with this attempt.",
-        );
       } catch {
-        setAnnouncement(
-          "Evidence-based interview feedback is ready, but it could not be saved with the attempt.",
+        setEvaluationStatus("error");
+        setEvaluationFailure("storage_failure");
+        setEvaluationError(
+          "Your feedback is ready but could not be saved on this device. Check browser storage and try again.",
         );
+        return;
       }
+      setCompletedAttempt(updatedAttempt);
+      setEvaluation(parsed);
       setEvaluationStatus("idle");
-    } catch (error) {
+      setAnnouncement("Evidence-based interview feedback is ready.");
+    } catch {
       setEvaluationStatus("error");
-      setEvaluationError(
-        error instanceof Error ? error.message : "Interview evaluation failed.",
-      );
+      setEvaluationFailure("service_failure");
+      setEvaluationError(FEEDBACK_UNAVAILABLE_MESSAGE);
     }
   };
 
-  const restart = () => {
-    setStep("setup");
-    setSetup(DEFAULT_INTERVIEW_SETUP);
-    setSetupErrors({});
-    setResumeFile(null);
-    setResumeProfile(null);
-    setManualResumeText("");
-    setResumeStatus("idle");
-    setResumeError("");
-    setQuestionSet(null);
-    setQuestionStatus("idle");
-    setQuestionError("");
-    setInputMode("text");
-    setModeError("");
+  const retrySameScenario = () => {
+    if (!evaluation || !questionSet) return;
+    setFocusedRetryGoal(evaluation.nextPracticeAction);
     setQuestionIndex(0);
     setDraft("");
     setDraftError("");
@@ -485,21 +550,59 @@ export function InterviewSimulator() {
     setCompletedAttempt(null);
     setEvaluation(null);
     setEvaluationStatus("idle");
+    setEvaluationFailure(null);
     setEvaluationError("");
     setElapsedSeconds(0);
+    setSpeakingSeconds(0);
+    setStep("mode");
+    setAnnouncement(
+      "Retry ready. The same scenario, questions, and focused learning goal were preserved.",
+    );
+  };
+
+  const restart = () => {
+    setStep("setup");
+    setSetup(DEFAULT_INTERVIEW_SETUP);
+    setResumeFile(null);
+    setResumeProfile(null);
+    setManualResumeText("");
+    setQuestionSet(null);
+    setQuestionIndex(0);
+    setDraft("");
+    setResponses([]);
+    setSaveError("");
+    setCompletedAttempt(null);
+    setEvaluation(null);
+    setEvaluationStatus("idle");
+    setEvaluationFailure(null);
+    setEvaluationError("");
+    setFocusedRetryGoal("");
+    setSpeakingSeconds(0);
   };
 
   const currentQuestion = questionSet?.questions[questionIndex];
+  const isPreparationStep = step === "setup" || step === "resume" || step === "review";
+  const isActiveSession = step === "interview" || step === "confirm";
+  const fillerWordCount = countFillerWords(draft);
+  const interviewTypeLabel =
+    setup.interviewType === "custom"
+      ? setup.customInterviewType
+      : setup.interviewType.replaceAll("_", " ");
+  const resumeHighlightCount = resumeProfile
+    ? Object.values(resumeProfile).flat().length
+    : 0;
 
   return (
-    <div className="page-stack interview-simulator">
+    <div
+      className={`page-stack interview-simulator${isPreparationStep ? ` ${preparationStyles.preparationScreen}` : ""}${isActiveSession ? ` ${sessionStyles.simulatorScreen}` : ""}`}
+    >
       <p className="sr-only" aria-live="polite">
         {announcement}
       </p>
 
       <header className="interview-simulator-header">
         <PixelBadge tone="mint">Interview Center</PixelBadge>
-        <p className="eyebrow">Practice interview</p>
+        <p className="eyebrow">Adaptive Practice</p>
         <h1>Build a grounded practice interview.</h1>
         <p className="hero-lede">
           Confirm your context, answer personalized questions, and request an
@@ -509,30 +612,37 @@ export function InterviewSimulator() {
 
       <ol className="interview-stepper" aria-label="Interview progress">
         {STEP_LABELS.map((label, index) => (
-          <li
-            key={label}
-            className={index <= STEP_PROGRESS[step] ? "is-reached" : ""}
-            aria-current={index === STEP_PROGRESS[step] ? "step" : undefined}
-          >
+          <li key={label} className={index <= STEP_PROGRESS[step] ? "is-reached" : ""}>
             <span aria-hidden="true">{index + 1}</span>
             {label}
-            {index < STEP_PROGRESS[step] ? (
-              <span className="sr-only"> (completed)</span>
-            ) : null}
           </li>
         ))}
       </ol>
 
-      {step === "setup" || step === "resume" || step === "review" || step === "mode" ? (
-        <PracticeLobbyScene stage={step} />
+      {isPreparationStep || step === "mode" ? <PracticeLobbyScene stage={step} /> : null}
+
+      {focusedRetryGoal && step !== "complete" ? (
+        <section className="focused-retry-banner" aria-labelledby="focused-retry-heading">
+          <PixelBadge tone="amber">Focused retry</PixelBadge>
+          <div>
+            <h2 id="focused-retry-heading">Your goal for this attempt</h2>
+            <p>{focusedRetryGoal}</p>
+            <p className="focused-retry-context">
+              Scenario preserved: {setup.role} at {setup.organization}
+            </p>
+          </div>
+        </section>
       ) : null}
 
       {step === "setup" ? (
-        <PixelPanel tone="dark" className="interview-stage">
-          <p className="eyebrow">Interview setup</p>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            What are you preparing for?
-          </h2>
+        <PixelPanel
+          tone="dark"
+          className={`${preparationStyles.preparationPanel} ${preparationStyles.setupPanel}`}
+        >
+          <header className={preparationStyles.preparationTitle}>
+            <p>Practice Configuration</p>
+            <h1>Interview Setup</h1>
+          </header>
           <InterviewSetupForm
             value={setup}
             errors={setupErrors}
@@ -543,46 +653,101 @@ export function InterviewSimulator() {
       ) : null}
 
       {step === "resume" ? (
-        <PixelPanel tone="dark" className="interview-stage">
-          <p className="eyebrow">Optional resume</p>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            Add confirmed experience—or continue without it.
-          </h2>
-          <p>
-            Accepted: PDF, DOC, DOCX, RTF, TXT, or Markdown up to 5 MB. Raw files are used
-            for extraction only and are not saved in browser progress.
-          </p>
-          <div className="interview-field">
-            <label htmlFor="resume-file">Resume file</label>
-            <input
-              id="resume-file"
-              type="file"
-              accept={RESUME_ACCEPT}
-              onChange={(event) => setResumeFile(event.target.files?.[0] ?? null)}
-            />
-          </div>
-          <div className="button-row">
-            <PixelButton onClick={extractResume} disabled={resumeStatus === "extracting"}>
-              {resumeStatus === "extracting" ? "Extracting..." : "Extract resume"}
-            </PixelButton>
-            <PixelButton
-              variant="secondary"
-              onClick={() => {
-                setResumeFile(null);
-                setResumeProfile(null);
-                setStep("review");
-              }}
-            >
-              Continue without resume
-            </PixelButton>
+        <PixelPanel
+          tone="dark"
+          className={`${preparationStyles.preparationPanel} ${preparationStyles.resumePanel}`}
+        >
+          <header className={preparationStyles.preparationTitle}>
+            <p>Optional Context</p>
+            <h1>Resume Upload</h1>
+          </header>
+          <div className={preparationStyles.resumeWorkspace}>
+            <div className={preparationStyles.uploadColumn}>
+              <label className={preparationStyles.uploadZone} htmlFor="resume-file">
+                <PixelIcon name="resume" size="large" />
+                <strong>Choose a resume file</strong>
+                <span>PDF, DOC, DOCX, RTF, TXT, or Markdown — maximum 5 MB</span>
+                <small>Click or press Enter to browse</small>
+                <input
+                  ref={resumeInputRef}
+                  id="resume-file"
+                  aria-label="Resume file"
+                  type="file"
+                  accept={RESUME_ACCEPT}
+                  onChange={(event) => {
+                    setResumeFile(event.target.files?.[0] ?? null);
+                    setResumeError("");
+                  }}
+                />
+              </label>
+
+              {resumeFile ? (
+                <section
+                  className={preparationStyles.uploadedFile}
+                  aria-label="Uploaded resume file"
+                >
+                  <PixelIcon name="resume" size="small" />
+                  <div>
+                    <strong>{resumeFile.name}</strong>
+                    <span>{Math.max(1, Math.round(resumeFile.size / 1024))} KB</span>
+                  </div>
+                  <div className={preparationStyles.fileActions}>
+                    <PixelButton variant="ghost" onClick={previewResumeFile}>
+                      <span className="sr-only">Preview selected resume file</span>
+                      <span aria-hidden="true">Preview</span>
+                    </PixelButton>
+                    <PixelButton variant="secondary" onClick={clearResumeFile}>
+                      <span className="sr-only">Remove selected resume file</span>
+                      <span aria-hidden="true">Remove</span>
+                    </PixelButton>
+                  </div>
+                </section>
+              ) : (
+                <p className={preparationStyles.filePrivacy}>
+                  Raw files are used for extraction only and are not saved in browser
+                  progress.
+                </p>
+              )}
+            </div>
+
+            <div className={preparationStyles.extractColumn}>
+              <div className={preparationStyles.sectionTitle}>Uploaded Resume</div>
+              <p>
+                Select a file, preview it if needed, then continue to extract only
+                confirmed interview-relevant details.
+              </p>
+              <PixelButton
+                onClick={extractResume}
+                disabled={resumeStatus === "extracting"}
+              >
+                {resumeStatus === "extracting" ? (
+                  "Extracting resume..."
+                ) : (
+                  <>
+                    <span className="sr-only">Extract resume and continue</span>
+                    <span aria-hidden="true">Continue</span>
+                  </>
+                )}
+              </PixelButton>
+              <PixelButton
+                variant="secondary"
+                onClick={() => {
+                  clearResumeFile();
+                  setResumeProfile(null);
+                  setStep("review");
+                }}
+              >
+                Continue without resume
+              </PixelButton>
+            </div>
           </div>
           {resumeStatus === "error" ? (
-            <div className="interview-inline-error" role="alert">
-              <strong>Resume extraction was not completed.</strong>
+            <div className={preparationStyles.inlineError} role="alert">
+              <strong>Resume details were not added.</strong>
               <span>{resumeError}</span>
             </div>
           ) : null}
-          <div className="interview-field manual-resume-fallback">
+          <div className={preparationStyles.manualResume}>
             <label htmlFor="manual-resume">Manual resume highlights</label>
             <textarea
               id="manual-resume"
@@ -599,63 +764,109 @@ export function InterviewSimulator() {
       ) : null}
 
       {step === "review" ? (
-        <PixelPanel tone="dark" className="interview-stage">
-          <p className="eyebrow">Review context</p>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            Confirm what the interviewer may use.
-          </h2>
-          <dl className="context-review">
-            <div>
-              <dt>Role</dt>
-              <dd>{setup.role}</dd>
-            </div>
-            <div>
-              <dt>Organization</dt>
-              <dd>{setup.organization}</dd>
-            </div>
-            <div>
-              <dt>Difficulty</dt>
-              <dd>{setup.difficulty}</dd>
-            </div>
-            <div>
-              <dt>Length</dt>
-              <dd>{setup.questionCount} questions</dd>
-            </div>
-          </dl>
-          {resumeProfile ? (
-            <>
-              <p>Edit or remove any extracted detail that is inaccurate.</p>
-              <ResumeProfileEditor profile={resumeProfile} onChange={setResumeProfile} />
-              <PixelButton variant="secondary" onClick={() => setResumeProfile(null)}>
-                Remove resume information
-              </PixelButton>
-            </>
-          ) : (
-            <div className="interview-no-resume" role="status">
-              No resume information will be used. Questions will use setup context only.
-            </div>
-          )}
-          <div className="button-row">
+        <PixelPanel
+          tone="dark"
+          className={`${preparationStyles.preparationPanel} ${preparationStyles.reviewPanel}`}
+        >
+          <header className={preparationStyles.preparationTitle}>
+            <p>Final Check</p>
+            <h1>Review Your Profile</h1>
+          </header>
+
+          <div className={preparationStyles.reviewColumns}>
+            <section className={preparationStyles.detailsPanel}>
+              <h2>Interview Details</h2>
+              <div
+                className={preparationStyles.reviewBadges}
+                aria-label="Session summary"
+              >
+                <PixelBadge tone="mint">{setup.difficulty}</PixelBadge>
+                <PixelBadge tone="amber">{setup.questionCount} questions</PixelBadge>
+              </div>
+              <dl>
+                <div>
+                  <dt>Type</dt>
+                  <dd>{interviewTypeLabel}</dd>
+                </div>
+                <div>
+                  <dt>Position</dt>
+                  <dd>{setup.role}</dd>
+                </div>
+                <div>
+                  <dt>Company</dt>
+                  <dd>{setup.organization}</dd>
+                </div>
+                <div>
+                  <dt>Difficulty</dt>
+                  <dd>{setup.difficulty}</dd>
+                </div>
+                <div>
+                  <dt>Length</dt>
+                  <dd>{setup.questionCount} questions</dd>
+                </div>
+                <div>
+                  <dt>Goals</dt>
+                  <dd>{setup.goals || "General interview practice"}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section className={preparationStyles.resumeSummaryPanel}>
+              <h2>Resume Summary</h2>
+              {resumeProfile ? (
+                <>
+                  <p className={preparationStyles.resumeHighlightCount}>
+                    {resumeHighlightCount} confirmed resume{" "}
+                    {resumeHighlightCount === 1 ? "highlight" : "highlights"}
+                  </p>
+                  <p>Edit or remove any extracted detail that is inaccurate.</p>
+                  <ResumeProfileEditor
+                    profile={resumeProfile}
+                    onChange={setResumeProfile}
+                  />
+                  <PixelButton variant="secondary" onClick={() => setResumeProfile(null)}>
+                    Remove resume information
+                  </PixelButton>
+                </>
+              ) : (
+                <div className={preparationStyles.noResume} role="status">
+                  <PixelIcon name="resume" size="medium" />
+                  <span>
+                    No resume information will be used. Questions will use setup context
+                    only.
+                  </span>
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className={preparationStyles.reviewActions}>
+            <PixelButton variant="secondary" onClick={() => setStep("setup")}>
+              Edit setup
+            </PixelButton>
             <PixelButton
               onClick={generateQuestions}
               disabled={questionStatus === "loading"}
             >
-              {questionStatus === "loading"
-                ? "Generating questions..."
-                : "Confirm and generate questions"}
-            </PixelButton>
-            <PixelButton variant="secondary" onClick={() => setStep("setup")}>
-              Edit setup
+              {questionStatus === "loading" ? (
+                "Generating questions..."
+              ) : (
+                <>
+                  <span className="sr-only">Confirm and generate questions</span>
+                  <span aria-hidden="true">Start Interview</span>
+                </>
+              )}
             </PixelButton>
           </div>
+
           {questionStatus === "error" ? (
-            <div className="interview-inline-error" role="alert">
+            <div className={preparationStyles.inlineError} role="alert">
               <strong>Personalized questions could not be generated.</strong>
               <span>{questionError}</span>
-              <div className="button-row">
-                <PixelButton onClick={generateQuestions}>Retry GPT-5.6</PixelButton>
+              <div className={preparationStyles.errorActions}>
+                <PixelButton onClick={generateQuestions}>Retry Generation</PixelButton>
                 <PixelButton variant="ghost" onClick={useGeneralFallback}>
-                  Use general questions (not AI-personalized)
+                  Continue with Standard Interview
                 </PixelButton>
               </div>
             </div>
@@ -666,16 +877,14 @@ export function InterviewSimulator() {
       {step === "mode" && questionSet ? (
         <PixelPanel tone="dark" className="interview-stage">
           <p className="eyebrow">Microphone / text setup</p>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            How would you like to answer?
-          </h2>
+          <h2>How would you like to answer?</h2>
           {questionSet.source === "general_fallback" ? (
             <div className="fallback-notice" role="status">
-              General fallback questions selected. These are not AI-personalized.
+              Standard interview questions selected. Your learning flow is ready.
             </div>
           ) : (
             <div className="personalized-notice" role="status">
-              GPT-5.6 personalized questions are ready from your confirmed context.
+              Your personalized interview is ready from the details you confirmed.
             </div>
           )}
           <div className="mode-grid">
@@ -698,211 +907,95 @@ export function InterviewSimulator() {
         </PixelPanel>
       ) : null}
 
-      {step === "interview" && currentQuestion && questionSet ? (
-        <section className="interview-session-shell" aria-label="Interview simulation">
-          <div className="interview-session-main">
-            <div className="interview-hud">
-              <div className="interview-hud-counter">
-                <span>Question</span>
-                <strong>
-                  {questionIndex + 1}/{questionSet.questions.length}
-                </strong>
-                <span>Session time</span>
-                <strong>{formatSessionTime(elapsedSeconds)}</strong>
-              </div>
-              <PixelProgress
-                label="Interview progress"
-                current={questionIndex + 1}
-                total={questionSet.questions.length}
-              />
-            </div>
-
-            <PixelRoomBackground
-              variant="office"
-              label="Warm pixel-art interview office"
-              className="interview-room-stage"
-            >
-              <PixelDialog
-                speaker="Jordan · Interviewer"
-                className="interview-question-dialog"
-              >
-                <PixelBadge tone="amber">
-                  {currentQuestion.category.replace("_", " ")}
-                </PixelBadge>
-                <h2 tabIndex={-1} ref={stepHeadingRef}>
-                  {currentQuestion.text}
-                </h2>
-              </PixelDialog>
-              <CharacterPortrait variant="interviewer" name="Jordan, interviewer" />
-              <div className="interview-desk" aria-hidden="true">
-                <PixelIcon name="resume" size="large" />
-              </div>
-            </PixelRoomBackground>
-
-            <PixelPanel tone="dark" className="interview-response-console">
-              <div className="response-console-heading">
-                <span>Your response</span>
-                <PixelStatusBar
-                  label="Input"
-                  value={inputMode === "microphone" ? "Mic + editable text" : "Text"}
-                  tone={isListening ? "success" : "info"}
-                  icon={inputMode === "microphone" ? "microphone" : "speech"}
-                />
-              </div>
-              {inputMode === "microphone" ? (
-                <div className="button-row">
-                  {isListening ? (
-                    <PixelButton onClick={stopListening} variant="secondary">
-                      Stop microphone
-                    </PixelButton>
-                  ) : (
-                    <PixelButton onClick={startListening}>Start microphone</PixelButton>
-                  )}
-                </div>
-              ) : null}
-              {modeError ? (
-                <div className="interview-inline-error" role="alert">
-                  {modeError}
-                </div>
-              ) : null}
-              <div className="interview-field">
-                <label htmlFor="response-draft">
-                  {inputMode === "microphone" ? "Editable transcript" : "Your response"}
-                </label>
-                <textarea
-                  id="response-draft"
-                  rows={7}
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  aria-invalid={Boolean(draftError)}
-                  aria-describedby={draftError ? "response-draft-error" : undefined}
-                />
-                {draftError ? (
-                  <span className="field-error" id="response-draft-error">
-                    {draftError}
-                  </span>
-                ) : null}
-              </div>
-              <PixelButton onClick={reviewTranscript}>Review response</PixelButton>
-            </PixelPanel>
-          </div>
-
-          <aside className="interview-session-side" aria-label="Optional session tools">
-            <PixelPanel tone="dark" className="camera-placeholder">
-              <div className="camera-placeholder-heading">
-                <span className="status-light status-light-warning" aria-hidden="true" />
-                <strong>Optional camera</strong>
-              </div>
-              <div className="camera-placeholder-screen">
-                <PixelIcon name="camera" size="large" />
-                <span>Preview not enabled</span>
-              </div>
-              <p>
-                Camera analysis is not implemented. No face, posture, eye-contact, or
-                emotion data is captured.
-              </p>
-            </PixelPanel>
-            <PixelPanel tone="dark" className="neutral-session-indicators">
-              <p className="eyebrow">Session indicators</p>
-              <PixelStatusBar
-                label="Question"
-                value={`${questionIndex + 1} of ${questionSet.questions.length}`}
-                tone="info"
-                icon="speech"
-              />
-              <PixelStatusBar
-                label="Transcript"
-                value="Review required"
-                tone="warning"
-                icon="resume"
-              />
-              <PixelStatusBar
-                label="Scoring"
-                value="After completion"
-                tone="info"
-                icon="progress"
-              />
-            </PixelPanel>
-          </aside>
-        </section>
-      ) : null}
-
-      {step === "confirm" && currentQuestion && questionSet ? (
-        <PixelPanel tone="dark" className="interview-stage">
-          <p className="eyebrow">Transcript confirmation</p>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            Confirm question {questionIndex + 1}.
-          </h2>
-          <blockquote>{currentQuestion.text}</blockquote>
-          <div className="interview-field">
-            <label htmlFor="confirmed-transcript">Review and edit your transcript</label>
-            <textarea
-              id="confirmed-transcript"
-              rows={9}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              aria-invalid={Boolean(draftError)}
-              aria-describedby={draftError ? "confirmed-transcript-error" : undefined}
-            />
-            {draftError ? (
-              <span className="field-error" id="confirmed-transcript-error">
-                {draftError}
-              </span>
-            ) : null}
-          </div>
-          {saveError ? (
-            <div className="interview-inline-error" role="alert">
-              {saveError}
-            </div>
-          ) : null}
-          <div className="button-row">
-            <PixelButton onClick={confirmTranscript}>
-              {questionIndex === questionSet.questions.length - 1
-                ? "Confirm and save attempt"
-                : "Confirm and continue"}
-            </PixelButton>
-            <PixelButton variant="secondary" onClick={() => setStep("interview")}>
-              Back to response
-            </PixelButton>
-          </div>
-        </PixelPanel>
+      {isActiveSession && currentQuestion && questionSet ? (
+        <InterviewSessionView
+          step={step}
+          question={currentQuestion}
+          questionIndex={questionIndex}
+          questionTotal={questionSet.questions.length}
+          elapsedTime={formatSessionTime(elapsedSeconds)}
+          speakingTime={formatSessionTime(speakingSeconds)}
+          inputMode={inputMode}
+          isListening={isListening}
+          draft={draft}
+          draftError={draftError}
+          saveError={saveError}
+          modeError={modeError}
+          confirmedResponses={responses}
+          fillerWordCount={fillerWordCount}
+          onDraftChange={setDraft}
+          onMicrophoneToggle={isListening ? stopListening : startListening}
+          onEnd={endInterview}
+          onNext={reviewTranscript}
+          onBack={() => setStep("interview")}
+          onConfirm={confirmTranscript}
+        />
       ) : null}
 
       {step === "complete" && questionSet ? (
         <PixelPanel tone="dark" className="interview-stage interview-complete">
-          <FeedbackRoomScene />
-          <PixelBadge tone="mint">Attempt saved</PixelBadge>
-          <h2 tabIndex={-1} ref={stepHeadingRef}>
-            Interview practice complete.
-          </h2>
-          <p>{responses.length} confirmed responses were saved on this device.</p>
           {!evaluation ? (
-            <div className="evaluation-request">
+            <>
+              <FeedbackRoomScene />
+              <PixelBadge tone="mint">Attempt saved</PixelBadge>
+              <h2>Interview practice complete.</h2>
+              <p>{responses.length} confirmed responses were saved on this device.</p>
+            </>
+          ) : null}
+          {!evaluation ? (
+            <div
+              className={`evaluation-request ${evaluationStatus === "loading" ? "is-loading" : ""}`}
+              role={evaluationStatus === "loading" ? "status" : undefined}
+              aria-live="polite"
+              aria-busy={evaluationStatus === "loading"}
+            >
+              <p className="eyebrow">Feedback report</p>
+              <h3>
+                {evaluationStatus === "loading"
+                  ? "Building your evidence-based learning report"
+                  : "Your intelligent feedback is ready to prepare"}
+              </h3>
               <p>
-                GPT-5.6 can now evaluate only the confirmed transcript against the STAR
-                rubric. It will not assess emotion, honesty, intelligence, employability,
-                accent, confidence, nervousness, or eye contact.
+                Ameego Interview Coach reviews only your confirmed transcript against the
+                STAR rubric. It does not assess emotion, honesty, intelligence,
+                employability, accent, confidence, nervousness, or eye contact.
               </p>
               <PixelButton
                 onClick={evaluateCompletedAttempt}
                 disabled={evaluationStatus === "loading" || !completedAttempt}
               >
                 {evaluationStatus === "loading"
-                  ? "Evaluating transcript..."
-                  : "Generate STAR feedback"}
+                  ? "Preparing feedback..."
+                  : "Generate Intelligent Feedback"}
               </PixelButton>
             </div>
           ) : null}
           {evaluationStatus === "error" ? (
             <div className="interview-inline-error" role="alert">
-              <strong>Evaluation was not saved or displayed.</strong>
+              <strong>
+                {evaluationFailure === "invalid_result"
+                  ? "Feedback could not be prepared."
+                  : evaluationFailure === "missing_data"
+                    ? "This attempt needs a complete transcript."
+                    : evaluationFailure === "storage_failure"
+                      ? "Validated feedback could not be saved."
+                      : "Service Temporarily Unavailable"}
+              </strong>
               <span>{evaluationError}</span>
-              <PixelButton onClick={evaluateCompletedAttempt}>
-                Retry evaluation
-              </PixelButton>
+              <PixelButton onClick={evaluateCompletedAttempt}>Retry Feedback</PixelButton>
             </div>
           ) : null}
-          {evaluation ? <EvaluationFeedback evaluation={evaluation} /> : null}
+          {evaluation && completedAttempt ? (
+            <EvaluationFeedback
+              evaluation={evaluation}
+              session={{
+                role: completedAttempt.context.setup.role,
+                organization: completedAttempt.context.setup.organization,
+                responseCount: completedAttempt.responses.length,
+              }}
+              onRetry={retrySameScenario}
+            />
+          ) : null}
           <PixelButton onClick={restart} variant={evaluation ? "secondary" : "ghost"}>
             Start another interview
           </PixelButton>

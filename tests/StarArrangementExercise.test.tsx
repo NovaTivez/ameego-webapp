@@ -24,6 +24,25 @@ describe("StarArrangementExercise", () => {
     vi.restoreAllMocks();
   });
 
+  it("renders four answer slots with movable S, T, A, and R tiles", async () => {
+    render(<StarArrangementExercise exercise={starArrangementExercise} />);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /check my order/i })).toBeEnabled();
+    });
+
+    expect(
+      screen.getByRole("heading", { name: /arrange the star method/i }),
+    ).toBeVisible();
+    expect(screen.getAllByText(/slot [1-4]/i)).toHaveLength(4);
+    for (const label of ["Situation", "Task", "Action", "Result"]) {
+      const tile = screen.getByTestId(`segment-${label.toLowerCase()}`);
+      expect(within(tile).getByText(label)).toBeVisible();
+      expect(within(tile).getByText(label.charAt(0))).toBeVisible();
+    }
+    expect(screen.getByRole("button", { name: /reset arrangement/i })).toBeVisible();
+    expect(screen.getByRole("button", { name: /check my order/i })).toBeVisible();
+  });
+
   it("supports exact mouse drag-and-drop targeting without duplicate or lost cards", async () => {
     render(<StarArrangementExercise exercise={starArrangementExercise} />);
     await waitFor(() => {
@@ -39,7 +58,9 @@ describe("StarArrangementExercise", () => {
     };
 
     fireEvent.dragStart(action, { dataTransfer });
+    expect(action.className).toContain("isDragging");
     fireEvent.dragOver(task, { dataTransfer });
+    expect(task.className).toContain("isDropTarget");
     fireEvent.drop(task, { dataTransfer });
 
     expect(dataTransfer.setData).toHaveBeenCalledWith("text/plain", "action");

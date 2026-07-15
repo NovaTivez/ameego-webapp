@@ -1,0 +1,842 @@
+.preparationScreen {
+  width: min(calc(100% - 18px), 1080px);
+  min-width: 0;
+  gap: 10px !important;
+  padding: 12px 0 18px !important;
+}
+
+:global(body):has(.preparationScreen) :global(.site-header) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+:global(body):has(.preparationScreen) :global(.site-header nav),
+:global(body):has(.preparationScreen) :global(.site-footer),
+.preparationScreen :global(.interview-simulator-header),
+.preparationScreen :global(.interview-stepper) {
+  display: none;
+}
+
+.preparationPanel {
+  width: min(100%, 1040px) !important;
+  margin: 0 auto;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 4px solid var(--game-border) !important;
+  background: var(--game-panel-850) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--game-line-highlight),
+    6px 6px 0 var(--game-border) !important;
+}
+
+.preparationScreen :global(.practice-lobby-scene) {
+  width: min(100%, 1040px);
+  min-height: 184px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-width: 4px;
+  box-shadow:
+    inset 0 0 0 2px var(--game-line-highlight),
+    6px 6px 0 var(--game-border);
+}
+
+.preparationScreen :global(.practice-lobby-dialog) {
+  top: 14px;
+  left: 25%;
+  width: min(54%, 560px);
+}
+
+.preparationScreen :global(.practice-lobby-character) {
+  bottom: -34px;
+  left: 5%;
+  transform: scale(0.68);
+  transform-origin: bottom left;
+}
+
+.preparationScreen :global(.practice-notice-board) {
+  top: 12px;
+  right: 3%;
+  transform: scale(0.68);
+  transform-origin: top right;
+}
+
+.preparationScreen :global(.practice-filing-cabinet) {
+  right: 4%;
+  bottom: -35px;
+  transform: scale(0.7);
+  transform-origin: bottom right;
+}
+
+.preparationScreen :global(.practice-lobby-counter) {
+  right: 18%;
+  left: 20%;
+  height: 58px;
+  padding: 10px;
+  border-width: 5px;
+}
+
+.preparationTitle {
+  min-height: 56px;
+  padding: 8px 12px;
+  border-bottom: 4px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 -2px 0 var(--game-line);
+}
+
+.preparationTitle p,
+.preparationTitle h1 {
+  margin: 0;
+  font-family: var(--game-font-ui);
+  text-transform: uppercase;
+}
+
+.preparationTitle p {
+  color: var(--game-yellow);
+  font-size: 0.53rem;
+  letter-spacing: 0.08em;
+}
+
+.preparationTitle h1 {
+  max-width: none;
+  font-size: clamp(0.86rem, 2vw, 1.02rem);
+  letter-spacing: 0.05em;
+}
+
+.setupForm {
+  display: grid;
+  gap: 7px;
+  padding: 13px;
+}
+
+.setupJourney {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  padding: 0;
+  margin: 0 0 4px;
+  list-style: none;
+}
+
+.setupJourney li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 1px 6px;
+  min-width: 0;
+  padding: 6px;
+  border: 2px solid var(--game-border);
+  color: var(--game-text-muted);
+  background: #081221;
+  box-shadow: inset 0 0 0 1px var(--game-line);
+}
+
+.setupJourney li[aria-current="step"] {
+  color: var(--game-text);
+  background: #173126;
+  box-shadow:
+    inset 0 -3px 0 var(--game-green),
+    inset 0 0 0 1px var(--game-line-highlight);
+}
+
+.setupJourney li > span {
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 2px solid var(--game-border);
+  color: var(--game-yellow);
+  background: var(--game-panel-850);
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+}
+
+.setupJourney strong,
+.setupJourney small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setupJourney strong {
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+}
+
+.setupJourney small {
+  font-size: 0.61rem;
+}
+
+.formSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 2px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 1px 0 var(--game-line-highlight);
+}
+
+.formSectionTitle > span {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+}
+
+.formSectionTitle > div {
+  display: grid;
+}
+
+.formSectionTitle strong {
+  color: var(--game-text);
+  font-family: var(--game-font-ui);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.formSectionTitle small {
+  color: var(--game-text-muted);
+  font-size: 0.64rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.formRow label,
+.manualResume label,
+.resumeSummaryField label,
+.stepControl legend {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.59rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.formRow label span {
+  color: var(--game-text-muted);
+  font-family: var(--game-font-copy);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.formRow input,
+.formRow textarea,
+.formRow select,
+.manualResume textarea,
+.resumeSummaryField textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 3px solid var(--game-border);
+  color: var(--game-text);
+  font-family: var(--game-font-copy);
+  font-size: 0.77rem;
+  background: #081221;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.formRow textarea,
+.manualResume textarea,
+.resumeSummaryField textarea {
+  resize: vertical;
+}
+
+.formRow input:focus,
+.formRow textarea:focus,
+.formRow select:focus,
+.manualResume textarea:focus,
+.resumeSummaryField textarea:focus {
+  border-color: var(--game-yellow);
+  outline: 3px solid var(--game-yellow);
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 2px #70591e;
+}
+
+.formRow [aria-invalid="true"] {
+  border-color: var(--game-red);
+  box-shadow: inset 0 0 0 2px #65232d;
+}
+
+.selectWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.selectWrap select {
+  appearance: none;
+  padding-right: 36px;
+}
+
+.selectWrap > span {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.62rem;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.fieldError {
+  grid-column: 2;
+  color: #ff7b83;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.stepControlGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.stepControl {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.stepControl legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.stepControl button,
+.stepControl output {
+  display: grid;
+  min-height: 38px;
+  place-items: center;
+  border: 3px solid var(--game-border);
+  font-family: var(--game-font-ui);
+  background: #081221;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.stepControl button {
+  color: var(--game-yellow);
+  font-size: 1rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.stepControl button:hover:not(:disabled),
+.stepControl button:focus-visible {
+  color: #071009;
+  background: var(--game-green-highlight);
+}
+
+.stepControl button:focus-visible {
+  outline: 3px solid var(--game-yellow);
+  outline-offset: 2px;
+}
+
+.stepControl button:disabled {
+  color: #4d5c6e;
+  cursor: not-allowed;
+}
+
+.stepControl output {
+  color: var(--game-text);
+  font-size: 0.61rem;
+  text-transform: uppercase;
+}
+
+.formAction {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 5px;
+  border-top: 3px solid var(--game-border);
+}
+
+.formAction :global(.pixel-button) {
+  min-width: 150px;
+  justify-content: center;
+}
+
+.resumeWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  gap: 10px;
+  padding: 12px 12px 0;
+}
+
+.uploadColumn,
+.extractColumn,
+.detailsPanel,
+.resumeSummaryPanel {
+  min-width: 0;
+  padding: 10px;
+  border: 3px solid var(--game-border);
+  background: #0b1627;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.reviewBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.resumeHighlightCount {
+  padding: 6px 8px;
+  border: 2px solid var(--game-border);
+  color: var(--game-yellow) !important;
+  background: #14243d;
+  box-shadow: inset 0 0 0 1px var(--game-line-highlight);
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem !important;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .preparationScreen :global(.practice-lobby-character) {
+    animation: coachIdle 2.8s steps(2, end) infinite;
+  }
+
+  .preparationScreen :global(.pixel-dialog) {
+    animation: coachDialogIn 300ms steps(5, end) both;
+  }
+
+  .setupJourney li[aria-current="step"] > span {
+    animation: currentPrepStep 1.7s steps(2, end) infinite;
+  }
+}
+
+@keyframes coachIdle {
+  0%,
+  100% {
+    transform: scale(0.68) translateY(0);
+  }
+  50% {
+    transform: scale(0.68) translateY(-3px);
+  }
+}
+
+@keyframes coachDialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes currentPrepStep {
+  0%,
+  100% {
+    color: var(--game-yellow);
+  }
+  50% {
+    color: #fff3aa;
+  }
+}
+
+.uploadZone {
+  position: relative;
+  display: grid;
+  min-height: 210px;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  padding: 18px;
+  border: 3px dashed #778ba5;
+  color: var(--game-text-muted);
+  text-align: center;
+  background: #101e34;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 4px #0b1627;
+}
+
+.uploadZone:hover,
+.uploadZone:focus-within {
+  border-color: var(--game-yellow);
+  outline: 3px solid var(--game-yellow);
+  outline-offset: 2px;
+  background: #172943;
+}
+
+.uploadZone :global(.pixel-icon) {
+  color: var(--game-text-muted);
+}
+
+.uploadZone strong {
+  color: var(--game-text);
+  font-family: var(--game-font-ui);
+  font-size: 0.69rem;
+  text-transform: uppercase;
+}
+
+.uploadZone span,
+.uploadZone small {
+  max-width: 42ch;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.uploadZone small {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+
+.uploadZone input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uploadedFile {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 3px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 0 0 2px var(--game-line-highlight);
+}
+
+.uploadedFile > :global(.pixel-icon) {
+  color: var(--game-yellow);
+}
+
+.uploadedFile > div:not(.fileActions) {
+  display: grid;
+  min-width: 0;
+}
+
+.uploadedFile strong {
+  overflow: hidden;
+  color: var(--game-text);
+  font-family: var(--game-font-ui);
+  font-size: 0.61rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadedFile span,
+.filePrivacy,
+.extractColumn p,
+.resumeSummaryPanel > p {
+  margin: 0;
+  color: var(--game-text-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.fileActions {
+  display: flex;
+  gap: 5px;
+}
+
+.fileActions :global(.pixel-button) {
+  min-height: 30px;
+  padding: 5px 7px;
+  font-size: 0.55rem;
+}
+
+.filePrivacy {
+  padding: 7px 2px 0;
+}
+
+.extractColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.sectionTitle,
+.detailsPanel h2,
+.resumeSummaryPanel h2 {
+  margin: 0;
+  padding: 7px 8px;
+  border: 3px solid var(--game-border);
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.63rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--game-panel-900);
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.inlineError {
+  display: grid;
+  gap: 4px;
+  margin: 9px 12px 0;
+  padding: 9px;
+  border: 3px solid var(--game-red);
+  color: var(--game-text-muted);
+  font-size: 0.72rem;
+  background: #2d131b;
+  box-shadow: inset 0 0 0 2px #65232d;
+}
+
+.inlineError strong {
+  color: #ff9da3;
+  font-family: var(--game-font-ui);
+  font-size: 0.61rem;
+  text-transform: uppercase;
+}
+
+.errorActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 5px;
+}
+
+.manualResume {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  margin: 10px 12px 12px;
+  padding: 10px;
+  border: 3px solid var(--game-border);
+  background: #0b1627;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.manualResume label {
+  grid-column: 1 / -1;
+}
+
+.manualResume textarea {
+  min-height: 92px;
+}
+
+.manualResume :global(.pixel-button) {
+  align-self: end;
+}
+
+.reviewColumns {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 10px;
+  padding: 12px 12px 0;
+}
+
+.detailsPanel dl {
+  display: grid;
+  gap: 0;
+  margin: 9px 0 0;
+}
+
+.detailsPanel dl > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  min-height: 38px;
+  align-items: start;
+  gap: 8px;
+  padding: 7px 6px;
+  border-bottom: 2px solid var(--game-line);
+}
+
+.detailsPanel dt {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detailsPanel dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--game-text);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  text-transform: capitalize;
+}
+
+.resumeSummaryPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resumeSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.resumeSummaryField {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  min-width: 0;
+  gap: 4px;
+  padding: 7px;
+  border: 2px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 0 0 1px var(--game-line);
+}
+
+.resumeSummaryField > :global(.pixel-icon) {
+  color: var(--game-yellow);
+}
+
+.resumeSummaryField textarea {
+  grid-column: 1 / -1;
+  min-height: 58px;
+  font-size: 0.68rem;
+}
+
+.noResume {
+  display: grid;
+  min-height: 210px;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+  border: 3px dashed var(--game-line-highlight);
+  color: var(--game-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: center;
+  background: #081221;
+}
+
+.noResume :global(.pixel-icon) {
+  color: var(--game-yellow);
+}
+
+.reviewActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  margin: 10px 12px 12px;
+  padding-top: 10px;
+  border-top: 3px solid var(--game-border);
+}
+
+.reviewActions :global(.pixel-button-primary) {
+  min-width: 168px;
+  justify-content: center;
+}
+
+@media (max-width: 780px) {
+  .formRow {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+
+  .resumeWorkspace,
+  .reviewColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .uploadZone {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 600px) {
+  :global(body):has(.preparationScreen) {
+    padding: 4px;
+  }
+
+  .preparationScreen {
+    width: 100%;
+    padding-top: 7px !important;
+  }
+
+  .formRow,
+  .stepControlGrid,
+  .resumeSummaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .setupJourney {
+    grid-template-columns: 1fr;
+  }
+
+  .setupJourney li:not([aria-current="step"]) {
+    display: none;
+  }
+
+  .preparationScreen :global(.practice-lobby-scene) {
+    min-height: 150px;
+  }
+
+  .preparationScreen :global(.practice-lobby-dialog) {
+    left: 28%;
+    width: 68%;
+  }
+
+  .preparationScreen :global(.practice-notice-board),
+  .preparationScreen :global(.practice-filing-cabinet) {
+    display: none;
+  }
+
+  .fieldError {
+    grid-column: 1;
+  }
+
+  .manualResume {
+    grid-template-columns: 1fr;
+  }
+
+  .manualResume :global(.pixel-button) {
+    width: 100%;
+  }
+
+  .uploadedFile {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+
+  .fileActions {
+    grid-column: 1 / -1;
+  }
+
+  .fileActions :global(.pixel-button) {
+    flex: 1;
+  }
+
+  .reviewActions,
+  .errorActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reviewActions :global(.pixel-button),
+  .errorActions :global(.pixel-button) {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uploadZone,
+  .stepControl button,
+  .reviewActions :global(.pixel-button) {
+    transition: none;
+  }
+}

@@ -82,6 +82,7 @@ export type CompletedInterviewAttempt = {
   responses: ConfirmedResponse[];
   evaluation?: InterviewEvaluation;
   evaluatedAt?: string;
+  retryGoal?: string;
 };
 
 export type ValidationResult<T> =

@@ -28,6 +28,10 @@ describe("MainNav", () => {
       "href",
       "/progress",
     );
+    expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute(
+      "href",
+      "/settings",
+    );
   });
 
   it("marks the current route for assistive technology", () => {
@@ -36,6 +40,38 @@ describe("MainNav", () => {
     expect(screen.getByRole("link", { name: "Interview Center" })).toHaveAttribute(
       "aria-current",
       "page",
+    );
+  });
+
+  it("renders the consistent back, XP, and level HUD", () => {
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: /back to academy/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    const status = screen.getByLabelText(/academy player status/i);
+    expect(status).toHaveTextContent("XP0000");
+    expect(status).toHaveTextContent("LV01");
+  });
+
+  it("returns from the Courses page to the Academy Hub", () => {
+    navigation.pathname = "/learn";
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
+  });
+
+  it("returns from Settings to the Academy Hub", () => {
+    navigation.pathname = "/settings";
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
+      "href",
+      "/academy",
     );
   });
 });

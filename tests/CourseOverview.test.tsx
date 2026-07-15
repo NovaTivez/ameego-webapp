@@ -13,13 +13,24 @@ describe("CourseOverview", () => {
     vi.restoreAllMocks();
   });
 
-  it("links the Interview Foundations course to the featured STAR lesson", async () => {
+  it("renders the compact module menu and links the published STAR lesson", async () => {
     render(<CourseOverview course={interviewFoundationsCourse} />);
 
-    expect(await screen.findByText("Available")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Interview Skills Course" }),
+    ).toBeVisible();
+    expect(await screen.findByText("Preparing for Interviews")).toBeVisible();
+    expect(screen.getByText("Answering Clearly")).toBeVisible();
+    expect(screen.getByText("Interview Delivery")).toBeVisible();
+    expect(screen.getAllByText("Coming Soon")).toHaveLength(3);
+    expect(screen.getByText("0/1")).toBeVisible();
     expect(
       screen.getByRole("link", { name: /open star method lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");
+    expect(
+      screen.getByRole("progressbar", { name: /interview foundations progress/i }),
+    ).toHaveAttribute("aria-valuenow", "0");
+    expect(screen.getByRole("img", { name: /ari, academy learner/i })).toBeVisible();
   });
 
   it("shows an empty state when a course has no published lesson", async () => {

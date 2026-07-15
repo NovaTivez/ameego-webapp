@@ -1,0 +1,106 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { completeLesson, COURSE_PROGRESS_STORAGE_KEY } from "@/lib/course-progress";
+import {
+  EXERCISE_PROGRESS_STORAGE_KEY,
+  recordExerciseAttempt,
+} from "@/lib/exercise-progress";
+import {
+  INTERVIEW_ATTEMPTS_STORAGE_KEY,
+  saveCompletedAttempt,
+} from "@/lib/interview/attempts";
+import { LEARNER_PROFILE_STORAGE_KEY, readLearnerProfile } from "@/lib/settings";
+import { starMethodLesson } from "@/content/interview-foundations";
+import { starArrangementExercise } from "@/content/star-arrangement-exercise";
+import { makeProgressAttempt } from "./progressFixtures";
+
+function seedProgress() {
+  completeLesson(window.localStorage, starMethodLesson.id);
+  recordExerciseAttempt(window.localStorage, starArrangementExercise.id, true);
+  saveCompletedAttempt(
+    window.localStorage,
+    makeProgressAttempt({
+      id: "settings-attempt",
+      completedAt: "2026-07-16T01:00:00.000Z",
+      evaluated: false,
+    }),
+  );
+}
+
+describe("SettingsPanel", () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it("shows default profile fields and real zero activity XP", async () => {
+    render(<SettingsPanel />);
+
+    expect(await screen.findByRole("heading", { name: "Profile" })).toBeVisible();
+    expect(screen.getByLabelText("Name")).toHaveValue("Pixel Learner");
+    expect(screen.getByLabelText("Focus")).toHaveValue("Interview Skills");
+    expect(screen.getByText("LV. 01")).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: /XP progress/i })).toHaveAttribute(
+      "aria-valuenow",
+      "0",
+    );
+  });
+
+  it("saves the learner name and focus on this device", async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    await user.clear(screen.getByLabelText("Name"));
+    await user.type(screen.getByLabelText("Name"), "Hannah Learner");
+    await user.clear(screen.getByLabelText("Focus"));
+    await user.type(screen.getByLabelText("Focus"), "Behavioral Interviews");
+    await user.click(screen.getByRole("button", { name: /save profile/i }));
+
+    expect(readLearnerProfile(window.localStorage)).toMatchObject({
+      name: "Hannah Learner",
+      focus: "Behavioral Interviews",
+    });
+  });
+
+  it("clears learning records while preserving the saved profile", async () => {
+    const user = userEvent.setup();
+    seedProgress();
+    window.localStorage.setItem(
+      LEARNER_PROFILE_STORAGE_KEY,
+      JSON.stringify({ version: 1, name: "Saved Learner", focus: "STAR Practice" }),
+    );
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    await user.click(screen.getByRole("button", { name: "Clear Progress" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      /keeps the learner profile/i,
+    );
+    await user.click(screen.getByRole("button", { name: /confirm clear progress/i }));
+
+    expect(window.localStorage.getItem(COURSE_PROGRESS_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(EXERCISE_PROGRESS_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+    expect(readLearnerProfile(window.localStorage).name).toBe("Saved Learner");
+  });
+
+  it("resets progress and profile only after confirmation", async () => {
+    const user = userEvent.setup();
+    seedProgress();
+    window.localStorage.setItem(
+      LEARNER_PROFILE_STORAGE_KEY,
+      JSON.stringify({ version: 1, name: "Saved Learner", focus: "STAR Practice" }),
+    );
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    await user.click(screen.getByRole("button", { name: "Reset All Data" }));
+    await user.click(screen.getByRole("button", { name: /confirm reset all data/i }));
+
+    expect(window.localStorage.getItem(LEARNER_PROFILE_STORAGE_KEY)).toBeNull();
+    expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+    expect(await screen.findByLabelText("Name")).toHaveValue("Pixel Learner");
+    expect(screen.getByText("LV. 01")).toBeVisible();
+  });
+});

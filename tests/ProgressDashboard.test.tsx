@@ -3,248 +3,120 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ProgressDashboard } from "@/components/ProgressDashboard";
-import { starArrangementExercise } from "@/content/star-arrangement-exercise";
-import { COURSE_PROGRESS_STORAGE_KEY } from "@/lib/course-progress";
-import type { InterviewEvaluation } from "@/lib/evaluation/contracts";
-import { STAR_LESSON_ID } from "@/lib/evaluation/rubric";
-import { EXERCISE_PROGRESS_STORAGE_KEY } from "@/lib/exercise-progress";
-import { createCompletedAttempt, saveCompletedAttempt } from "@/lib/interview/attempts";
-import {
-  DEFAULT_INTERVIEW_SETUP,
-  type ConfirmedInterviewContext,
-  type QuestionSet,
-} from "@/lib/interview/contracts";
+import { saveAttemptEvaluation, saveCompletedAttempt } from "@/lib/interview/attempts";
+import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
+import { makeProgressAttempt } from "./progressFixtures";
 
-const context: ConfirmedInterviewContext = {
-  setup: {
-    ...DEFAULT_INTERVIEW_SETUP,
-    role: "Volunteer coordinator",
-    organization: "Community Hub",
-  },
-  resumeProfile: null,
-};
-
-const questionSet: QuestionSet = {
-  source: "general_fallback",
-  questions: [
-    {
-      id: "q1",
-      category: "introductory",
-      text: "Please introduce yourself for this opportunity.",
-    },
-    {
-      id: "q2",
-      category: "behavioral",
-      text: "Describe a challenge you handled with others.",
-    },
-    {
-      id: "q3",
-      category: "role_specific",
-      text: "How would you prioritize volunteer responsibilities?",
-    },
-  ],
-};
-
-const evidence = [
-  "Weekend coverage was at risk.",
-  "I owned the onboarding redesign.",
-  "I rebuilt the checklist with volunteer leads.",
-  "Coverage recovered within one week.",
-];
-
-function evaluation(scores: [number, number, number, number]): InterviewEvaluation {
-  const criteria = ["situation", "task", "action", "result"] as const;
-  return {
-    summary: "Practice feedback grounded in the confirmed transcript only.",
-    strengths: ["Ownership is clear in the response."],
-    improvements: ["Add a more measurable result."],
-    rubricScores: criteria.map((criterion, index) => ({
-      criterion,
-      score: scores[index],
-      explanation: `Detailed explanation for the ${criterion} criterion.`,
-      evidence: evidence[index],
-      improvementAction: `Strengthen ${criterion} with one concrete detail.`,
-    })),
-    recommendedLessonId: STAR_LESSON_ID,
-    nextPracticeAction: "Retry and strengthen the weakest STAR part.",
-    improvedExample:
-      "Weekend coverage was at risk. I owned the onboarding redesign. I rebuilt the checklist with volunteer leads. Coverage recovered within one week.",
-  };
-}
-
-function seedCourseAndExercise() {
-  window.localStorage.setItem(
-    COURSE_PROGRESS_STORAGE_KEY,
-    JSON.stringify({ version: 1, completedLessonIds: [STAR_LESSON_ID] }),
-  );
-  window.localStorage.setItem(
-    EXERCISE_PROGRESS_STORAGE_KEY,
-    JSON.stringify({
-      version: 1,
-      exercises: {
-        [starArrangementExercise.id]: {
-          attemptCount: 1,
-          completed: true,
-          correct: true,
-        },
-      },
-    }),
-  );
-}
-
-function seedAttempt(input: {
-  id: string;
-  completedAt: string;
-  evaluation?: InterviewEvaluation;
-  evaluatedAt?: string;
-  role?: string;
-}) {
-  const attempt = createCompletedAttempt({
-    id: input.id,
-    completedAt: input.completedAt,
-    context: {
-      ...context,
-      setup: {
-        ...context.setup,
-        role: input.role ?? context.setup.role,
-      },
-    },
-    questionSet,
-    responses: questionSet.questions.map((question, index) => ({
-      questionId: question.id,
-      transcript:
-        index === questionSet.questions.length - 1
-          ? `${evidence[index]} ${evidence[3]} Confirmed answer for ${question.id}.`
-          : `${evidence[index]} Confirmed answer for ${question.id}.`,
-      inputMode: "text" as const,
-    })),
-    evaluation: input.evaluation,
-    evaluatedAt: input.evaluatedAt,
-  });
-  saveCompletedAttempt(window.localStorage, attempt);
+function storeAttempt(attempt: CompletedInterviewAttempt) {
+  const evaluation = attempt.evaluation;
+  const unevaluated = { ...attempt, evaluation: undefined };
+  saveCompletedAttempt(window.localStorage, unevaluated);
+  if (evaluation) saveAttemptEvaluation(window.localStorage, attempt.id, evaluation);
 }
 
 describe("ProgressDashboard", () => {
-  beforeEach(() => {
-    window.localStorage.clear();
-  });
+  beforeEach(() => window.localStorage.clear());
 
-  it("renders a useful empty state when no attempts or progress exist", async () => {
+  it("shows a useful empty state when there are no attempts or learning records", async () => {
     render(<ProgressDashboard />);
 
     expect(
-      await screen.findByRole("heading", { name: /no saved activity yet/i }),
+      await screen.findByRole("heading", {
+        name: /progress library is ready for its first record/i,
+      }),
     ).toBeVisible();
     expect(
-      screen.getByRole("link", { name: /study the star method lesson/i }),
+      screen.getByRole("link", { name: /start with the STAR lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");
   });
 
-  it("opens a previous attempt and compares two compatible evaluated attempts", async () => {
+  it("opens one saved attempt and explains why comparison is unavailable", async () => {
     const user = userEvent.setup();
-    seedCourseAndExercise();
-    seedAttempt({
-      id: "first",
-      completedAt: "2026-07-15T09:00:00.000Z",
-      evaluation: evaluation([2, 3, 3, 2]),
-      evaluatedAt: "2026-07-15T09:05:00.000Z",
+    const attempt = makeProgressAttempt({
+      id: "attempt-1",
+      completedAt: "2026-07-15T01:00:00.000Z",
+      evaluated: false,
     });
-    seedAttempt({
-      id: "second",
-      completedAt: "2026-07-15T11:00:00.000Z",
-      evaluation: evaluation([4, 3, 3, 2]),
-      evaluatedAt: "2026-07-15T11:05:00.000Z",
-    });
-
+    storeAttempt(attempt);
     render(<ProgressDashboard />);
 
+    expect(await screen.findByText("1 stored attempt")).toBeVisible();
+    expect(screen.getByText("Interviews Taken").parentElement).toHaveTextContent("1");
+    expect(screen.getByText(/unlock rubric-based skill bars/i)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Recent Activity" })).toBeVisible();
     expect(
-      await screen.findByRole("heading", { name: /evidence from this device only/i }),
+      screen.getByRole("heading", { name: /Complete the STAR Method lesson/i }),
     ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /open attempt/i }));
     expect(
-      screen.getByText("Simulations completed").closest(".pixel-status"),
-    ).toHaveTextContent("2");
-
-    const cards = screen.getAllByRole("article");
-    expect(cards).toHaveLength(2);
-
-    await user.click(within(cards[0]).getByRole("button", { name: /open attempt/i }));
-    expect(await screen.findByRole("button", { name: /close attempt/i })).toBeVisible();
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: /volunteer coordinator at community hub/i,
-      }),
+      screen.getByRole("heading", { name: /Frontend intern at Northstar Labs/i }),
     ).toBeVisible();
-    expect(screen.getByText(/confirmed answer for q1/i)).toBeVisible();
+    expect(screen.getByText(/attempt-1 situation evidence/i)).toBeVisible();
+    expect(screen.getByText(/no saved validated feedback/i)).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: /your star communication review/i }),
-    ).toBeVisible();
-
-    await user.click(
-      within(cards[0]).getByRole("button", { name: /select to compare/i }),
-    );
-    await user.click(
-      within(cards[1]).getByRole("button", { name: /select to compare/i }),
-    );
-
-    expect(
-      await screen.findByRole("heading", { name: /attempt comparison/i }),
-    ).toBeVisible();
-    expect(screen.getByText(/not enough to claim overall progress/i)).toBeVisible();
-    expect(screen.getByText(/specific improvements/i)).toBeVisible();
-    expect(screen.getByText(/situation: 2\/5 → 4\/5/i)).toBeVisible();
-    expect(screen.getByText(/remaining practice areas/i)).toBeVisible();
-  });
-
-  it("recovers from corrupt stored records via the reset action", async () => {
-    const user = userEvent.setup();
-    window.localStorage.setItem(COURSE_PROGRESS_STORAGE_KEY, "{corrupt json");
-
-    render(<ProgressDashboard />);
-
-    expect(
-      await screen.findByRole("heading", { name: /progress records unavailable/i }),
-    ).toBeVisible();
-    expect(screen.getByText(/unsupported format/i)).toBeVisible();
-
-    await user.click(screen.getByRole("button", { name: /reset stored progress/i }));
-
-    expect(
-      await screen.findByRole("heading", { name: /no saved activity yet/i }),
+      screen.getByRole("heading", { name: /two attempts are needed/i }),
     ).toBeVisible();
   });
 
-  it("explains incompatible attempt comparisons", async () => {
+  it("renders rubric changes, specific improvements, and remaining areas for two comparable attempts", async () => {
     const user = userEvent.setup();
-    seedCourseAndExercise();
-    seedAttempt({
-      id: "alpha",
-      completedAt: "2026-07-15T09:00:00.000Z",
-      evaluation: evaluation([3, 3, 3, 3]),
-      evaluatedAt: "2026-07-15T09:05:00.000Z",
-      role: "Volunteer coordinator",
+    const earlier = makeProgressAttempt({
+      id: "attempt-1",
+      completedAt: "2026-07-15T01:00:00.000Z",
+      scores: [2, 3, 3, 2],
     });
-    seedAttempt({
-      id: "beta",
-      completedAt: "2026-07-15T11:00:00.000Z",
-      evaluation: evaluation([4, 4, 4, 4]),
-      evaluatedAt: "2026-07-15T11:05:00.000Z",
-      role: "Frontend intern",
+    const later = makeProgressAttempt({
+      id: "attempt-2",
+      completedAt: "2026-07-16T01:00:00.000Z",
+      scores: [3, 3, 4, 3],
     });
-
+    storeAttempt(earlier);
+    storeAttempt(later);
     render(<ProgressDashboard />);
-    await screen.findByRole("heading", { name: /evidence from this device only/i });
+    await screen.findByText("2 stored attempts");
 
-    const cards = screen.getAllByRole("article");
-    await user.click(
-      within(cards[0]).getByRole("button", { name: /select to compare/i }),
-    );
-    await user.click(
-      within(cards[1]).getByRole("button", { name: /select to compare/i }),
-    );
+    expect(
+      screen.getByRole("progressbar", { name: /Situation validated rubric average/i }),
+    ).toHaveAttribute("aria-valuenow", "50");
 
-    expect(await screen.findByText(/these attempts cannot be compared/i)).toBeVisible();
-    expect(screen.getByText(/different interview scenarios/i)).toBeVisible();
+    await user.selectOptions(screen.getByLabelText("First attempt"), earlier.id);
+    await user.selectOptions(screen.getByLabelText("Second attempt"), later.id);
+
+    const table = await screen.findByRole("table", { name: /rubric-level changes/i });
+    expect(
+      within(table).getByRole("row", { name: /Action 3\/5 4\/5 \+1/i }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /specific improvements in this pair/i }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /remaining practice areas/i }),
+    ).toBeVisible();
+    expect(screen.getByText(/not proof of broad or lasting improvement/i)).toBeVisible();
+  });
+
+  it("shows an incompatible state instead of comparing an unevaluated attempt", async () => {
+    const user = userEvent.setup();
+    const evaluated = makeProgressAttempt({
+      id: "attempt-1",
+      completedAt: "2026-07-15T01:00:00.000Z",
+    });
+    const unevaluated = makeProgressAttempt({
+      id: "attempt-2",
+      completedAt: "2026-07-16T01:00:00.000Z",
+      evaluated: false,
+    });
+    storeAttempt(evaluated);
+    storeAttempt(unevaluated);
+    render(<ProgressDashboard />);
+    await screen.findByText("2 stored attempts");
+
+    await user.selectOptions(screen.getByLabelText("First attempt"), evaluated.id);
+    await user.selectOptions(screen.getByLabelText("Second attempt"), unevaluated.id);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /both attempts need validated rubric feedback/i,
+    );
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 });

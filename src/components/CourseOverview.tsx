@@ -1,16 +1,25 @@
 "use client";
 
+import Link from "next/link";
+
+import { CharacterPortrait } from "@/components/CharacterPortrait";
 import { CourseState } from "@/components/CourseState";
-import { LearningScene } from "@/components/LearningScene";
-import { PixelCourseCard } from "@/components/PixelCourseCard";
-import { PixelBadge } from "@/components/PixelBadge";
-import { PixelButton } from "@/components/PixelButton";
+import { PixelIcon } from "@/components/PixelIcon";
 import type { Course } from "@/content/interview-foundations";
 import { useLessonCompletion } from "@/hooks/useLessonCompletion";
+
+import styles from "./course-pages.module.css";
 
 type CourseOverviewProps = {
   course: Course;
 };
+
+const moduleDefinitions = [
+  { id: "preparing", title: "Preparing for Interviews", status: "planned" },
+  { id: "answering", title: "Answering Clearly", status: "planned" },
+  { id: "star", title: "STAR Method", status: "published" },
+  { id: "delivery", title: "Interview Delivery", status: "planned" },
+] as const;
 
 export function CourseOverview({ course }: CourseOverviewProps) {
   const featuredLesson = course.lessons.find(
@@ -22,48 +31,117 @@ export function CourseOverview({ course }: CourseOverviewProps) {
     return <CourseState state="empty" />;
   }
 
+  const completedLessons = completion.status === "ready" && completion.completed ? 1 : 0;
+  const publishedLessons = course.lessons.length;
+  const progressPercentage = Math.round((completedLessons / publishedLessons) * 100);
+
   return (
-    <div className="course-overview">
-      <header className="course-header">
-        <PixelBadge tone="mint">Interview Center course</PixelBadge>
-        <p className="eyebrow">Course 01</p>
-        <h1>{course.title}</h1>
-        <p className="hero-lede">{course.description}</p>
+    <section className={styles.courseScreen} aria-labelledby="course-title">
+      <header className={styles.panelTitle}>
+        <PixelIcon name="lesson" size="small" />
+        <div>
+          <p>{course.title}</p>
+          <h1 id="course-title">Interview Skills Course</h1>
+        </div>
       </header>
 
-      <LearningScene variant="course" />
+      <div className={styles.courseLayout}>
+        <div className={styles.modulePanel}>
+          <div className={styles.sectionHeading}>
+            <span>Course Modules</span>
+            <small>{publishedLessons} published lesson</small>
+          </div>
 
-      {completion.status === "loading" ? <CourseState state="loading" /> : null}
-      {completion.status === "error" ? (
-        <CourseState state="error" onRetry={completion.reload} />
-      ) : null}
+          {completion.status === "loading" ? <CourseState state="loading" /> : null}
+          {completion.status === "error" ? (
+            <CourseState state="error" onRetry={completion.reload} />
+          ) : null}
 
-      {completion.status === "ready" ? (
-        <section aria-labelledby="featured-lesson-title">
-          <PixelCourseCard className="featured-lesson-card">
-            <div className="featured-lesson-copy">
-              <div className="lesson-status-row" aria-live="polite">
-                <PixelBadge tone="amber">Featured lesson</PixelBadge>
-                <PixelBadge tone={completion.completed ? "mint" : "plum"}>
-                  {completion.completed ? "Completed" : "Available"}
-                </PixelBadge>
+          {completion.status === "ready" ? (
+            <ol className={styles.moduleList}>
+              {moduleDefinitions.map((module, index) => {
+                const isPublished = module.status === "published";
+                const count = isPublished
+                  ? `${completion.completed ? 1 : 0}/${publishedLessons}`
+                  : "0/0";
+                const content = (
+                  <>
+                    <span className={styles.moduleNumber}>{index + 1}</span>
+                    <span className={styles.moduleName}>{module.title}</span>
+                    <span className={styles.moduleCount}>{count}</span>
+                    <span className={styles.moduleState}>
+                      {isPublished
+                        ? completion.completed
+                          ? "Review"
+                          : "Open"
+                        : "Coming Soon"}
+                    </span>
+                  </>
+                );
+
+                return (
+                  <li key={module.id}>
+                    {isPublished ? (
+                      <Link
+                        className={styles.moduleLink}
+                        href={`/learn/${featuredLesson.slug}`}
+                        aria-label={`${completion.completed ? "Review" : "Open"} STAR Method lesson`}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div className={styles.moduleLocked}>{content}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          ) : null}
+        </div>
+
+        <aside className={styles.courseStatus} aria-label="Course progress panel">
+          <div className={styles.sectionHeading}>Course Progress</div>
+          {completion.status === "ready" ? (
+            <>
+              <div className={styles.progressReadout} aria-live="polite">
+                <strong>{progressPercentage}%</strong>
+                <span>
+                  {completedLessons}/{publishedLessons} lessons complete
+                </span>
               </div>
-              <p className="lesson-duration">{featuredLesson.durationMinutes} minutes</p>
-              <h2 id="featured-lesson-title">{featuredLesson.title}</h2>
-              <p>{featuredLesson.summary}</p>
-              <div className="lesson-objective">
-                <strong>Learning objective</strong>
-                <span>{featuredLesson.objective}</span>
+              <div
+                className={styles.progressTrack}
+                role="progressbar"
+                aria-label="Interview Foundations progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressPercentage}
+              >
+                <span style={{ width: `${progressPercentage}%` }} />
               </div>
-              <PixelButton href={`/learn/${featuredLesson.slug}`}>
-                {completion.completed
-                  ? "Review STAR Method lesson"
-                  : "Open STAR Method lesson"}
-              </PixelButton>
-            </div>
-          </PixelCourseCard>
-        </section>
-      ) : null}
-    </div>
+            </>
+          ) : (
+            <p className={styles.progressPending} aria-live="polite">
+              {completion.status === "loading"
+                ? "Reading saved progress..."
+                : "Saved progress unavailable"}
+            </p>
+          )}
+
+          <div className={styles.portrait}>
+            <CharacterPortrait variant="student" name="Ari, academy learner" compact />
+          </div>
+
+          <div className={styles.guideMessage}>
+            <span aria-hidden="true">◆</span>
+            <p>
+              {completion.status === "ready" && completion.completed
+                ? "Lesson cleared. Review STAR or continue to the exercise."
+                : "Begin with STAR Method and build one clear behavioral story."}
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
   );
 }

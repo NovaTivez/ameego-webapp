@@ -18,7 +18,15 @@ describe("StarLesson", () => {
   it("contains the complete concise STAR lesson content", async () => {
     render(<StarLesson lesson={starMethodLesson} />);
 
-    expect(screen.getByRole("heading", { name: starMethodLesson.title })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "STAR Method", level: 1 })).toBeVisible();
+    expect(screen.getByText("Lesson 2.1")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Objectives" })).toBeVisible();
+    expect(screen.getByText(starMethodLesson.summary)).toBeVisible();
+    expect(screen.getByText("STAR answer framework")).toBeVisible();
+    expect(screen.getByRole("link", { name: /continue lesson/i })).toHaveAttribute(
+      "href",
+      "#lesson-content",
+    );
     expect(screen.getByText("8 minutes")).toBeVisible();
     for (const step of ["Situation", "Task", "Action", "Result"]) {
       expect(screen.getByRole("heading", { name: step })).toBeVisible();
@@ -51,7 +59,12 @@ describe("StarLesson", () => {
     lessonView.unmount();
     render(<CourseOverview course={interviewFoundationsCourse} />);
 
-    expect(await screen.findByText("Completed")).toBeVisible();
+    expect(
+      await screen.findByRole("progressbar", {
+        name: /interview foundations progress/i,
+      }),
+    ).toHaveAttribute("aria-valuenow", "100");
+    expect(screen.getByText("1/1")).toBeVisible();
     expect(
       screen.getByRole("link", { name: /review star method lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");

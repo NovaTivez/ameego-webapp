@@ -27,7 +27,7 @@ describe("interview questions route", () => {
     const response = await POST(makeRequest("{not json"));
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
-      error: expect.stringMatching(/valid JSON/i),
+      error: expect.stringMatching(/interview details could not be read/i),
     });
   });
 
