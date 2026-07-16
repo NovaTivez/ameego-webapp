@@ -170,7 +170,8 @@ npm.cmd run start
 
 - STAR evaluation and resume extraction need live OpenAI access; there is no offline evaluation fixture.
 - Progress is device- and browser-local; no accounts or sync.
-- Speech input is progressive enhancement (Web Speech API); text always works.
+- Speech input is progressive enhancement (Web Speech API with interim text and
+  auto-restart while listening); best in Chrome/Edge. Text always works.
 - No automated Playwright E2E suite.
 - Workspace may need `git init` / remote setup before submission if Git history is not already present.
 - `restart()` clears the interview setup form, so comparison retries require re-entering the same role and organization.

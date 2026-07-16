@@ -734,6 +734,7 @@
 }
 .microphoneButton[data-listening="true"] {
   background: var(--red);
+  animation: mic-listen-pulse 1.1s steps(2, end) infinite;
 }
 .microphoneButton:disabled {
   color: #66758b;
@@ -744,6 +745,43 @@
   width: 24px;
   height: 24px;
   fill: currentColor;
+}
+.listeningStatus {
+  margin: 0 0 8px;
+  padding: 7px 9px;
+  border: 2px solid #03060b;
+  background: #0f1b2d;
+  color: #c5d3e8;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.listeningStatus[data-listening="true"] {
+  border-color: var(--yellow);
+  color: #ffe7a3;
+}
+.interimTranscript {
+  color: #9eb0c9;
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+@keyframes mic-listen-pulse {
+  from {
+    box-shadow:
+      inset 0 2px 0 #8a4a4a,
+      4px 4px 0 #03060b;
+  }
+  to {
+    box-shadow:
+      inset 0 2px 0 #c56b6b,
+      4px 4px 0 #03060b,
+      0 0 0 2px rgba(227, 93, 106, 0.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .microphoneButton[data-listening="true"] {
+    animation: none;
+  }
 }
 .responseField,
 .confirmField {

@@ -14,6 +14,14 @@ import { ResumeProfileEditor } from "@/components/ResumeProfileEditor";
 import { PracticeLobbyScene } from "@/components/PracticeLobbyScene";
 import { useCameraPresence } from "@/hooks/useCameraPresence";
 import {
+  appendTranscriptSegment,
+  extractRecognitionUpdate,
+  getSpeechRecognitionConstructor,
+  RECOVERABLE_SPEECH_ERRORS,
+  speechErrorMessage,
+  type SpeechRecognitionLike,
+} from "@/lib/audio/speech-recognition";
+import {
   DEFAULT_INTERVIEW_SETUP,
   EMPTY_RESUME_PROFILE,
   type ConfirmedInterviewContext,
@@ -54,23 +62,6 @@ import sessionStyles from "./interview-session.module.css";
 type Step = "setup" | "resume" | "review" | "mode" | "interview" | "confirm" | "complete";
 type EvaluationFailure =
   "invalid_result" | "missing_data" | "service_failure" | "storage_failure" | null;
-
-type RecognitionResultEvent = {
-  results: ArrayLike<ArrayLike<{ transcript: string }>>;
-};
-
-type SpeechRecognitionLike = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: RecognitionResultEvent) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 const STEP_LABELS = [
   "Setup",
@@ -152,6 +143,8 @@ export function InterviewSimulator() {
   const [draftError, setDraftError] = useState("");
   const [responses, setResponses] = useState<ConfirmedResponse[]>([]);
   const [isListening, setIsListening] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState("");
+  const [speechError, setSpeechError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [completedAttempt, setCompletedAttempt] =
     useState<CompletedInterviewAttempt | null>(null);
@@ -167,6 +160,7 @@ export function InterviewSimulator() {
   const [announcement, setAnnouncement] = useState("");
   const [cameraIntent, setCameraIntent] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const wantListeningRef = useRef(false);
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const isActiveSession = step === "interview" || step === "confirm";
   const camera = useCameraPresence({
@@ -176,6 +170,8 @@ export function InterviewSimulator() {
 
   useEffect(
     () => () => {
+      wantListeningRef.current = false;
+      recognitionRef.current?.abort?.();
       recognitionRef.current?.stop();
     },
     [],
@@ -372,57 +368,96 @@ export function InterviewSimulator() {
   };
 
   const startListening = () => {
-    const speechWindow = window as typeof window & {
-      SpeechRecognition?: SpeechRecognitionConstructor;
-      webkitSpeechRecognition?: SpeechRecognitionConstructor;
-    };
-    const Recognition =
-      speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+    const Recognition = getSpeechRecognitionConstructor();
     if (!Recognition) {
-      setModeError(
-        "Speech recognition is not supported in this browser. You can type or edit the transcript.",
+      setSpeechError(
+        "Speech recognition is not supported in this browser. Type or edit your response.",
       );
       return;
     }
 
+    wantListeningRef.current = true;
+    setSpeechError("");
+    setInterimTranscript("");
+
     const recognition = new Recognition();
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = "en-US";
     recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0]?.transcript ?? "")
-        .join(" ")
-        .trim();
-      if (transcript) {
-        setDraft((current) => `${current} ${transcript}`.trim());
+      const { finalChunk, interimText } = extractRecognitionUpdate(event);
+      if (finalChunk) {
+        setDraft((current) => appendTranscriptSegment(current, finalChunk));
+      }
+      setInterimTranscript(interimText);
+    };
+    recognition.onerror = (event) => {
+      const code = event.error;
+      if (code && RECOVERABLE_SPEECH_ERRORS.has(code)) {
+        // Browser often ends the session after silence; auto-restart via onend.
+        return;
+      }
+      wantListeningRef.current = false;
+      setIsListening(false);
+      setInterimTranscript("");
+      setSpeechError(speechErrorMessage(code));
+    };
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      if (!wantListeningRef.current) {
+        setIsListening(false);
+        setInterimTranscript("");
+        return;
+      }
+      // Browsers frequently stop continuous recognition after a pause.
+      try {
+        const next = new Recognition();
+        next.continuous = true;
+        next.interimResults = true;
+        next.lang = "en-US";
+        next.onresult = recognition.onresult;
+        next.onerror = recognition.onerror;
+        next.onend = recognition.onend;
+        recognitionRef.current = next;
+        next.start();
+        setIsListening(true);
+      } catch {
+        wantListeningRef.current = false;
+        setIsListening(false);
+        setInterimTranscript("");
+        setSpeechError(
+          "Speech recognition could not restart. Edit or type your response.",
+        );
       }
     };
-    recognition.onerror = () => {
-      setIsListening(false);
-      setModeError(
-        "Speech recognition stopped unexpectedly. Edit or type your response.",
-      );
-    };
-    recognition.onend = () => setIsListening(false);
     recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
+    try {
+      recognition.start();
+      setIsListening(true);
+      setAnnouncement("Microphone listening. Speak your answer, then stop to review.");
+    } catch {
+      wantListeningRef.current = false;
+      setIsListening(false);
+      setSpeechError(
+        "Speech recognition could not start. Edit or type your response.",
+      );
+    }
   };
 
   const stopListening = () => {
+    wantListeningRef.current = false;
     recognitionRef.current?.stop();
     recognitionRef.current = null;
     setIsListening(false);
+    setInterimTranscript("");
     setAnnouncement("Microphone stopped. Review and edit the transcript.");
   };
 
   const endInterview = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      recognitionRef.current = null;
-      setIsListening(false);
+    if (isListening || wantListeningRef.current) {
+      stopListening();
     }
+    setSpeechError("");
     setStep("mode");
     setAnnouncement(
       "Interview ended without saving a completed attempt. Your scenario and confirmed responses are preserved.",
@@ -430,7 +465,8 @@ export function InterviewSimulator() {
   };
 
   const reviewTranscript = () => {
-    if (isListening) stopListening();
+    if (isListening || wantListeningRef.current) stopListening();
+    setSpeechError("");
     const error = validateTranscript(draft);
     if (error) {
       setDraftError(error);
@@ -483,6 +519,8 @@ export function InterviewSimulator() {
     setQuestionIndex((current) => current + 1);
     setDraft("");
     setDraftError("");
+    setInterimTranscript("");
+    setSpeechError("");
     setStep("interview");
     setAnnouncement(`Response confirmed. Question ${questionIndex + 2} is ready.`);
   };
@@ -924,7 +962,10 @@ export function InterviewSimulator() {
             <button type="button" onClick={beginMicrophoneMode}>
               <PixelIcon name="microphone" size="large" />
               <strong>Microphone response</strong>
-              <span>Record speech, then review and edit the transcript.</span>
+              <span>
+                Live speech-to-text (best in Chrome/Edge), then review and edit the
+                transcript.
+              </span>
             </button>
           </div>
           <div className="camera-intent">
@@ -959,10 +1000,11 @@ export function InterviewSimulator() {
           speakingTime={formatSessionTime(speakingSeconds)}
           inputMode={inputMode}
           isListening={isListening}
+          interimTranscript={interimTranscript}
           draft={draft}
           draftError={draftError}
           saveError={saveError}
-          modeError={modeError}
+          speechError={speechError}
           confirmedResponses={responses}
           fillerWordCount={fillerWordCount}
           cameraVideoRef={camera.videoRef}

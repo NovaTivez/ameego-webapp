@@ -17,10 +17,11 @@ type InterviewSessionViewProps = {
   speakingTime: string;
   inputMode: "text" | "microphone";
   isListening: boolean;
+  interimTranscript: string;
   draft: string;
   draftError: string;
   saveError: string;
-  modeError: string;
+  speechError: string;
   confirmedResponses: ConfirmedResponse[];
   fillerWordCount: number;
   cameraVideoRef: RefObject<HTMLVideoElement | null>;
@@ -48,10 +49,11 @@ export function InterviewSessionView({
   speakingTime,
   inputMode,
   isListening,
+  interimTranscript,
   draft,
   draftError,
   saveError,
-  modeError,
+  speechError,
   confirmedResponses,
   fillerWordCount,
   cameraVideoRef,
@@ -115,9 +117,22 @@ export function InterviewSessionView({
                 {inputMode === "microphone" ? "Mic + editable text" : "Text mode"}
               </span>
             </div>
-            {modeError ? (
+            {inputMode === "microphone" ? (
+              <p
+                className={styles.listeningStatus}
+                data-listening={isListening ? "true" : "false"}
+                aria-live="polite"
+              >
+                {isListening
+                  ? interimTranscript
+                    ? `Listening… ${interimTranscript}`
+                    : "Listening… speak your answer, then stop the mic to review."
+                  : "Mic ready. Start the microphone, or type in the transcript box."}
+              </p>
+            ) : null}
+            {speechError ? (
               <div className={styles.inlineError} role="alert">
-                {modeError}
+                {speechError}
               </div>
             ) : null}
             <div className={styles.responseControls}>
@@ -148,6 +163,11 @@ export function InterviewSessionView({
                   onChange={(event) => onDraftChange(event.target.value)}
                   aria-invalid={Boolean(draftError)}
                 />
+                {isListening && interimTranscript ? (
+                  <span className={styles.interimTranscript} aria-hidden="true">
+                    {interimTranscript}
+                  </span>
+                ) : null}
                 {draftError ? (
                   <span className={styles.fieldError}>{draftError}</span>
                 ) : null}

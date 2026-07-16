@@ -440,6 +440,92 @@ describe("InterviewSimulator", () => {
     expect(screen.getByRole("button", { name: /text response/i })).toBeVisible();
   });
 
+  it("shows live listening status and commits speech finals into the editable transcript", async () => {
+    const user = userEvent.setup();
+    type Handler = ((event: unknown) => void) | null;
+    const instances: Array<{
+      onresult: Handler;
+      onerror: Handler;
+      onend: Handler;
+      start: ReturnType<typeof vi.fn>;
+      stop: ReturnType<typeof vi.fn>;
+    }> = [];
+
+    class MockSpeechRecognition {
+      continuous = false;
+      interimResults = false;
+      lang = "";
+      onresult: Handler = null;
+      onerror: Handler = null;
+      onend: Handler = null;
+      start = vi.fn();
+      stop = vi.fn();
+
+      constructor() {
+        instances.push(this);
+      }
+    }
+
+    const previousMediaDevices = navigator.mediaDevices;
+    Object.defineProperty(window, "SpeechRecognition", {
+      configurable: true,
+      value: MockSpeechRecognition,
+    });
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getUserMedia: vi.fn(async () => ({
+          getTracks: () => [{ stop: vi.fn() }],
+        })),
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+
+    try {
+      render(<InterviewSimulator />);
+      await reachModeWithoutResume(user);
+      await user.click(screen.getByRole("button", { name: /microphone response/i }));
+
+      const simulator = await screen.findByLabelText(/interview simulation/i);
+      expect(within(simulator).getByText(/mic ready/i)).toBeVisible();
+      await user.click(
+        within(simulator).getByRole("button", { name: /start microphone/i }),
+      );
+
+      const recognition = instances[0];
+      expect(recognition).toBeDefined();
+      expect(recognition.start).toHaveBeenCalled();
+      expect(within(simulator).getByText(/listening/i)).toBeVisible();
+
+      recognition.onresult?.({
+        resultIndex: 0,
+        results: [
+          { isFinal: false, 0: { transcript: "working on" } },
+          { isFinal: true, 0: { transcript: "Working on the launch." } },
+        ],
+      });
+
+      expect(
+        await within(simulator).findByLabelText(/editable transcript/i),
+      ).toHaveValue("Working on the launch.");
+      expect(within(simulator).getByText(/listening… working on/i)).toBeVisible();
+    } finally {
+      Object.defineProperty(navigator, "mediaDevices", {
+        configurable: true,
+        value: previousMediaDevices,
+      });
+      Reflect.deleteProperty(window, "SpeechRecognition");
+    }
+  });
+
   it("preserves the scenario, questions, and focused goal when retrying a valid report", async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
