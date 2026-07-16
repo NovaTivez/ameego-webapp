@@ -34,7 +34,7 @@ describe("interview evaluation route", () => {
   });
 
   it("returns branded safe copy when intelligent feedback is unavailable", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
     const response = await POST(
       new Request("http://localhost/api/interview/evaluate", {
         method: "POST",

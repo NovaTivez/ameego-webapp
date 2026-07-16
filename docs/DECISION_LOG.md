@@ -722,3 +722,28 @@ feedback loop.
 Consequences: Learners can practice framing during interviews. First opt-in
 requires a CDN model fetch. Offline academy routes still work; camera ML does
 not.
+
+---
+
+## Decision 019 - Use Groq Llama 3.1 8B for Server AI
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: STAR evaluation, question generation, and resume extraction previously
+called the OpenAI Responses API. The team wanted a cheaper Llama-hosted path.
+
+Decision: Route all structured AI calls through Groq Chat Completions with
+default model `llama-3.1-8b-instant`, `response_format: json_object`, and the
+existing application-side schema/evidence/safety validators. Use `GROQ_API_KEY`
+and optional `GROQ_MODEL`. Keep learner-facing copy provider-neutral.
+
+Alternatives considered: xAI Grok, keeping OpenAI GPT-5.6, or Groq Llama 70B.
+
+Reason: Groq Llama 3.1 8B Instant is the cheapest Llama option that still
+supports fast JSON responses for the hackathon loop.
+
+Consequences: PDF resume extraction is weaker than OpenAI file inputs; text
+resumes and manual highlights remain supported. Feedback quality may be thinner
+than larger models, so validation rejects remain critical.

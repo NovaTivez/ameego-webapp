@@ -12,7 +12,7 @@ describe("Ameego service language", () => {
   });
 
   it("keeps provider and configuration details out of question-generation failures", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
     const response = await generateQuestions(
       new Request("http://localhost/api/interview/questions", {
         method: "POST",
@@ -38,7 +38,7 @@ describe("Ameego service language", () => {
   });
 
   it("keeps provider and configuration details out of resume-personalization failures", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
     const response = await personalizeResume(
       new Request("http://localhost/api/interview/resume", {
         method: "POST",

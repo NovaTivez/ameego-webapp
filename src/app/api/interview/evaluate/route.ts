@@ -94,6 +94,9 @@ export async function POST(request: Request) {
     return NextResponse.json(await evaluateInterview(evaluationRequest));
   } catch (error) {
     const kind = error instanceof EvaluationError ? error.kind : "provider";
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[evaluate]", kind, error instanceof Error ? error.message : error);
+    }
     const safe = SAFE_ERRORS[kind];
     return NextResponse.json(
       { error: safe.message, code: safe.code },

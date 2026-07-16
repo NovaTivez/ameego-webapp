@@ -10,7 +10,7 @@ function clientKey(request: Request, route: string): string {
 }
 
 /**
- * Generous in-memory rate limit for the OpenAI-backed routes. Single-instance
+ * Generous in-memory rate limit for the Groq-backed routes. Single-instance
  * only, which matches the local/demo deployment target.
  */
 export function isRateLimited(request: Request, route: string): boolean {

@@ -32,7 +32,7 @@ Use this before final submission. Do not check items that are not actually done.
 
 ## GPT-5.6 and Codex evidence
 
-- [ ] **GPT-5.6 usage demonstrated** — Live STAR evaluation in the video (or linked clip) with visible transcript-grounded feedback. Preflight: `OPENAI_API_KEY` works for `/api/interview/evaluate`.
+- [ ] **AI feedback demonstrated** — Live STAR evaluation in the video (or linked clip) with visible transcript-grounded feedback. Preflight: `GROQ_API_KEY` works for `/api/interview/evaluate`.
 - [ ] Personalized questions or resume extraction shown only if they succeed live; otherwise show the **labeled** general-question path honestly.
 - [ ] **Codex usage documented** — README “How Codex accelerated development” + [`docs/CODEX_WORKFLOW.md`](CODEX_WORKFLOW.md) accurately reflect real sessions (no invented contributions).
 

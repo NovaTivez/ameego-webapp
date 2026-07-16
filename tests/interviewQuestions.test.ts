@@ -40,16 +40,18 @@ const questions = [
 ];
 
 describe("personalized question generation", () => {
-  it("uses GPT-5.6 server-side settings and accepts validated structured output", async () => {
-    const fetcher = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+  it("uses Groq server-side settings and accepts validated structured output", async () => {
+    const fetcher = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      expect(String(url)).toContain("api.groq.com");
       const requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
-      expect(requestBody).toMatchObject({ model: "gpt-5.6", store: false });
+      expect(requestBody).toMatchObject({
+        model: "llama-3.1-8b-instant",
+        response_format: { type: "json_object" },
+      });
       expect(init?.headers).toMatchObject({ Authorization: "Bearer test-key" });
       return new Response(
         JSON.stringify({
-          output: [
-            { content: [{ type: "output_text", text: JSON.stringify({ questions }) }] },
-          ],
+          choices: [{ message: { content: JSON.stringify({ questions }) } }],
         }),
         { status: 200 },
       );
@@ -68,7 +70,11 @@ describe("personalized question generation", () => {
     const fetcher = vi.fn(
       async () =>
         new Response(
-          JSON.stringify({ output_text: JSON.stringify({ questions: [questions[0]] }) }),
+          JSON.stringify({
+            choices: [
+              { message: { content: JSON.stringify({ questions: [questions[0]] }) } },
+            ],
+          }),
           { status: 200 },
         ),
     );

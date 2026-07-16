@@ -5,6 +5,8 @@ import { EvaluationError } from "@/lib/evaluation/errors";
 import { evaluateInterview } from "@/lib/evaluation/evaluate";
 import {
   containsUnsupportedEvaluationContent,
+  groundEvidenceInTranscript,
+  normalizeEvaluationCandidate,
   parseEvaluationRequest,
   parseInterviewEvaluation,
 } from "@/lib/evaluation/schema";
@@ -74,19 +76,20 @@ function validEvaluation(
 function modelResponse(value: unknown): Response {
   return new Response(
     JSON.stringify({
-      output: [{ content: [{ type: "output_text", text: JSON.stringify(value) }] }],
+      choices: [{ message: { content: JSON.stringify(value) } }],
     }),
     { status: 200 },
   );
 }
 
 describe("interview evaluation pipeline", () => {
-  it("uses GPT-5.6 structured output and accepts a grounded valid evaluation", async () => {
-    const fetcher = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+  it("uses Groq Llama structured JSON and accepts a grounded valid evaluation", async () => {
+    const fetcher = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      expect(String(url)).toContain("api.groq.com");
       const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
-      expect(body).toMatchObject({ model: "gpt-5.6", store: false });
-      expect(body.text).toMatchObject({
-        format: { type: "json_schema", strict: true },
+      expect(body).toMatchObject({
+        model: "llama-3.1-8b-instant",
+        response_format: { type: "json_object" },
       });
       expect(init?.headers).toMatchObject({ Authorization: "Bearer test-key" });
       return modelResponse(validEvaluation());
@@ -100,7 +103,7 @@ describe("interview evaluation pipeline", () => {
     ).resolves.toEqual(validEvaluation());
   });
 
-  it("rejects malformed GPT output", async () => {
+  it("rejects malformed model output", async () => {
     const fetcher = vi.fn(async () =>
       modelResponse({ summary: "Missing required fields" }),
     );
@@ -112,6 +115,89 @@ describe("interview evaluation pipeline", () => {
     ).rejects.toMatchObject({
       kind: "invalid_output",
     } satisfies Partial<EvaluationError>);
+  });
+
+  it("grounds paraphrased evidence back to the transcript", () => {
+    const grounded = groundEvidenceInTranscript(
+      request.exchanges,
+      "our release had an accessibility blocker",
+    );
+    expect(grounded).toBeTruthy();
+    expect(request.exchanges[0].transcript.includes(grounded!)).toBe(true);
+  });
+
+  it("evaluates very short joke transcripts instead of returning 502", () => {
+    const shortRequest: EvaluationRequest = {
+      ...request,
+      exchanges: [{ ...request.exchanges[0], transcript: "yea lol" }],
+    };
+    const incomplete = {
+      summary: "x",
+      strengths: [],
+      improvements: ["ok"],
+      rubricScores: [
+        {
+          criterion: "situation",
+          score: 1,
+          explanation: "No situation context is present.",
+          evidence: "yea",
+          improvementAction: "None",
+        },
+        {
+          criterion: "task",
+          score: 1,
+          explanation: "No personal task is stated.",
+          evidence: "lol",
+          improvementAction: "None",
+        },
+        {
+          criterion: "action",
+          score: 1,
+          explanation: "No concrete action is described.",
+          evidence: "yea",
+          improvementAction: "None",
+        },
+        {
+          criterion: "result",
+          score: 1,
+          explanation: "No result is described.",
+          evidence: "",
+          improvementAction: "None",
+        },
+      ],
+    };
+    const normalized = normalizeEvaluationCandidate(incomplete, shortRequest);
+    expect(parseInterviewEvaluation(normalized, shortRequest)).toMatchObject({
+      recommendedLessonId: "interview-foundations.star-method",
+      rubricScores: expect.arrayContaining([
+        expect.objectContaining({
+          evidence: expect.stringMatching(/yea|lol/),
+        }),
+      ]),
+    });
+  });
+
+  it("fills safe defaults when Llama omits lesson/retry fields", () => {
+    const incomplete = {
+      summary: "The response follows a concise STAR sequence with room for more detail.",
+      strengths: ["The learner states a clear responsibility and action."],
+      improvements: ["Add a more specific, verifiable result."],
+      rubricScores: validEvaluation().rubricScores.map((score) => ({
+        ...score,
+        improvementAction: "None",
+      })),
+    };
+    const normalized = normalizeEvaluationCandidate(incomplete, request);
+    expect(parseInterviewEvaluation(normalized, request)).toMatchObject({
+      recommendedLessonId: "interview-foundations.star-method",
+      nextPracticeAction: expect.stringMatching(/.{10,}/),
+      improvedExample: expect.stringContaining("accessibility blocker"),
+      rubricScores: expect.arrayContaining([
+        expect.objectContaining({
+          improvementAction: expect.stringMatching(/.{10,}/),
+        }),
+      ]),
+    });
   });
 
   it("rejects missing or fabricated transcript evidence", () => {
@@ -173,7 +259,7 @@ describe("interview evaluation pipeline", () => {
       async () =>
         new Response(
           JSON.stringify({
-            output: [{ content: [{ type: "refusal", refusal: "Cannot evaluate." }] }],
+            choices: [{ message: { refusal: "Cannot evaluate.", content: null } }],
           }),
           { status: 200 },
         ),

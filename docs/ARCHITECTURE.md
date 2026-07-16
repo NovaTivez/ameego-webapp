@@ -74,7 +74,7 @@ Server:
 - Apply authorization.
 - Persist results.
 
-Never expose OpenAI API keys to client-side code.
+Never expose Groq API keys to client-side code.
 
 ## AI Prompt Management
 

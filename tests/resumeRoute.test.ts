@@ -42,10 +42,10 @@ describe("resume extraction route", () => {
   });
 
   it("returns a safe 503 when the AI provider is not configured", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
     const response = await POST(makeRequest(JSON.stringify(validInput)));
     expect(response.status).toBe(503);
     const body = (await response.json()) as { error: string };
-    expect(body.error).not.toMatch(/OPENAI_API_KEY/);
+    expect(body.error).not.toMatch(/GROQ_API_KEY/);
   });
 });
