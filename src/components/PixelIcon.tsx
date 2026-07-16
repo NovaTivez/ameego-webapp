@@ -7,6 +7,8 @@ export type PixelIconName =
   | "lesson"
   | "lock"
   | "microphone"
+  | "music"
+  | "muted"
   | "progress"
   | "resume"
   | "settings"
@@ -40,6 +42,10 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
   microphone: (
     <path d="M8 2h8v12H8zM5 9h3v6h2v2h4v-2h2V9h3v7h-2v3h-4v3h4v2H7v-2h4v-3H8v-2H5z" />
   ),
+  music: (
+    <path d="M15 2h7v14h-3V7h-6v11h-2v3H5v-2H3v-4h2v-2h5V5h5zm-9 13v4h4v-4zm9-10h4V4h-4z" />
+  ),
+  muted: <path d="M3 9h4l5-5v16l-5-5H3zm12-3h3v3h3v3h-3v3h3v3h-3v-3h-3v-3h3V9h-3z" />,
   progress: <path d="M3 19h4v4H3zm0-7h8v4H3zm0-7h13v4H3zm16-2h3v20h-3z" />,
   resume: (
     <path d="M4 1h11l5 5v17H4zM14 2v6h5M7 11h10v2H7zm0 4h10v2H7zm0 4h7v2H7zM7 5h4v4H7z" />

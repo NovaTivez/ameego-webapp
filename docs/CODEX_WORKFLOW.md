@@ -938,3 +938,95 @@ Known placeholders: Speech Hall and non-Profile Settings sections remain Coming
 Soon; the camera preview remains intentionally optional and disabled; and the
 shared HUD retains zeroed status until a single real persisted player-status
 source is introduced in a future scoped feature.
+
+## Contribution 018 - Academy Audio and Offline Experience
+
+Date: 2026-07-16
+
+Feature: Persistent ambient music, independent interface sound effects,
+interview focus behavior, live connection status, and an offline app shell.
+
+Problem: The pixel academy had no shared sound layer or connectivity feedback.
+Adding audio separately to individual pages would duplicate downloads, lose
+preferences between routes, and risk playing music during focused interview
+answers. Offline navigation also had no application-owned caching strategy.
+
+Codex inspected: The root layout and HUD, all interview state transitions,
+Settings persistence, local progress stores, public assets, Next configuration,
+test setup, accessibility rules, and the supplied MP3 files.
+
+Codex proposed: Use one root client controller with two reused audio elements;
+store music and effect preferences separately; use a narrow interview-state
+event for focus mode; keep connection controls outside route-specific HUDs; and
+cache only public GET routes/assets while leaving protected POST operations
+uncached.
+
+Codex implemented: A global audio provider, persistent top-right controls,
+autoplay recovery, smooth music fades, delegated pointer/keyboard/click sounds,
+dialog and success sounds, Settings switches, interview focus events,
+online/offline listeners, a friendly Offline Mode notice, a standalone manifest,
+generated pixel icons, immutable audio headers, and a versioned service worker.
+
+Tests added: Preference defaults/persistence/corrupt-data recovery; global music
+toggle; SFX independence from music; online/offline changes; Settings switches;
+autoplay denial recovery; active-interview pausing; manifest and cache coverage;
+and exact supplied-asset verification.
+
+Privacy and data decision: The service worker never caches protected POST
+requests or intelligent service responses. Existing local progress and profile
+stores work offline without a remote queue. When connectivity returns, learners
+retry service-backed personalization deliberately instead of automatically
+replaying resume or transcript data.
+
+Validation result: ESLint and strict TypeScript passed. All 168 tests passed
+across 42 files. The production build generated all eight public routes, three
+protected interview routes, and statically generated 192px and 512px icons.
+Every public route, manifest, worker, icon, and audio asset returned HTTP 200.
+Audio and icons returned immutable one-year cache headers; the worker returned
+the required no-cache header. Interactive browser QA was unavailable because
+the supported preview browser reported no backend. Every file changed for this
+milestone passes Prettier. The repository-wide formatting check still reports
+71 existing files from the merged baseline and was not bulk-rewritten as part
+of this scoped feature.
+
+## Contribution 019 - Supplied-Asset Academy Hub
+
+Date: 2026-07-16
+
+Feature: Responsive Academy campus composition using the exact uploaded map and
+five uploaded transparent building images.
+
+Codex inspected: `AGENTS.md`, the existing Academy page and CSS module, Academy
+tests, route structure, shared HUD/navigation primitives, design documentation,
+the dimensions and alpha channels of all six supplied PNGs, and their copied
+SHA-256 hashes.
+
+Codex implemented: A fixed-aspect full-campus stage, five percentage-positioned
+building links, preserved destination routes, a local Speech Hall Coming Soon
+locked state, pointer press states, hover/focus scale and brightness treatment, contact
+shadows, restrained window glow, coarse-pointer labels, reduced-motion support,
+and Academy-specific asset and route tests. The copied files are byte-identical
+to the supplied images and no image generation or transformation was used.
+The final correction uses a contained image element for the map and fresh asset
+URLs so the offline worker cannot serve an earlier mismatched building image.
+
+Accessibility work: Each building is a keyboard-focusable link with a concise
+accessible name and high-contrast focus outline. Visual labels do not duplicate
+the link name for assistive technology, and the persistent bottom navigation
+provides an additional route path on small screens.
+
+Validation executed: Changed-file Prettier formatting, focused Academy tests,
+ESLint, strict TypeScript checking, the full Vitest suite, the production build,
+and supported in-app browser review at desktop, tablet, and mobile widths when
+available.
+
+Validation result: Both Academy test files passed all 9 focused tests. ESLint
+and strict TypeScript checking passed. The full suite passed all 171 tests across
+42 files. The production build passed and generated all mapped public routes.
+The supported in-app browser returned no available backend after the documented
+retry, so fresh screenshots at desktop, tablet, and mobile widths could not be
+captured. A source-dimension composite of the exact map, files, percentages, and
+aspect ratios was inspected and shows every building fully contained with clear
+gaps. Responsive coverage also comes from automated non-overlap geometry and CSS
+contracts; a final live-device screenshot pass remains the only unperformed
+visual check.

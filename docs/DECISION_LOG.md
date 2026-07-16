@@ -616,3 +616,78 @@ Consequences: The application feels more game-like while retaining the same
 business logic, persistence schemas, scoring rules, accessibility contract, and
 routes. Coming Soon sections remain clearly marked rather than appearing to be
 working settings or locations.
+
+---
+
+## Decision 016 - Keep Audio Global, Preferences Local, and Private POST Data Out of Offline Caches
+
+Date: 2026-07-16
+
+Status: Accepted
+
+Context: Ambient music must persist across routes, sound effects must remain
+available when music is muted, and music must stop during active interview
+answers. Offline support must retain public academy content and local progress
+without storing or silently replaying privacy-sensitive resume, transcript, or
+feedback requests.
+
+Decision: Mount one audio controller at the root layout with one reusable music
+element and one reusable sound-effect element. Store separate music and effect
+booleans in a versioned local preference. Attempt music playback on entry, but
+treat browser autoplay denial as a recoverable state and retry after the first
+learner interaction. Fade music to silence only while Interview Simulator answer
+or transcript-confirmation states are active.
+
+Use a versioned service worker to pre-cache public routes, the manifest, pixel
+icons, and supplied audio. Use network-first caching for navigations and
+cache-first behavior for same-origin static GET assets. Never intercept or cache
+non-GET requests. Existing profile, progress, exercise, attempt, and preference
+records remain device-local and therefore require no server synchronization.
+Personalized questions, resume assistance, and feedback require reconnection and
+an explicit learner retry.
+
+Alternatives considered: Per-page audio elements, tying sound effects to the
+music toggle, continuing music during interviews, saving audio preferences in
+the learner profile, caching API responses, automatically replaying failed POST
+requests, or adding a remote synchronization backend outside the requested
+scope.
+
+Reason: A root controller prevents duplicate downloads and route restarts while
+keeping focus behavior consistent. Public-only caching improves offline access
+without persisting sensitive payloads or inventing a synchronization service.
+
+Consequences: Installed and previously visited academy screens remain useful
+offline, and local learning records continue to work. First-visit offline access
+is impossible until the service worker has installed online. Browser autoplay
+policy may delay music until the first interaction, and service-backed features
+remain intentionally retry-based after reconnection.
+
+---
+
+## Decision 017 - Compose the Academy Hub from the Supplied Campus Assets
+
+Date: 2026-07-16
+
+Status: Accepted
+
+Context: The Academy Hub must use one supplied 1672-by-941 campus background and
+five supplied transparent building PNGs while keeping the full scene visible,
+preserving current routes, and supporting pointer, touch, and keyboard use.
+
+Decision: Render the background at its fixed source aspect ratio and position
+each undistorted 3:2 building layer with percentage coordinates. Use transparent
+links as the interaction boundary, restrained CSS filters and contact shadows
+for scene integration, and a persistent styled label beside every building.
+Route complete destinations directly; keep Speech Hall as a disabled,
+non-animated Coming Soon control until a real public-speaking route exists. Use fresh
+public asset URLs when correcting supplied images because the offline worker's
+cache-first strategy may retain an older file at a reused URL.
+
+Reason: One proportional coordinate system preserves the artist's composition
+across viewport sizes and prevents the five building regions from overlapping.
+It also keeps destination behavior explicit without altering other pages or
+inventing unfinished functionality.
+
+Consequences: The entire campus remains visible rather than being cropped to
+fill unusual screens. Buildings and labels become smaller on narrow phones, but
+the underlying links, focus outlines, and bottom navigation remain available.

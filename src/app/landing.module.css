@@ -1,7 +1,12 @@
 .screen {
   min-height: 100vh;
+  min-height: 100svh;
   padding: 12px;
-  background: #02050d;
+  background-color: #02050d;
+  background-image: url("/images/academy-background.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 :global(body):has(.screen) {
@@ -30,12 +35,13 @@
   position: relative;
   display: grid;
   min-height: calc(100vh - 24px);
+  min-height: calc(100svh - 24px);
   place-items: center;
   overflow: hidden;
   border: 4px solid #01030a;
   outline: 2px solid #3e5575;
   outline-offset: -7px;
-  background: #081326;
+  background: transparent;
   box-shadow:
     inset 0 0 0 3px #111f38,
     6px 6px 0 #01030a;
@@ -501,24 +507,65 @@
 }
 
 .titleCard {
+  position: relative;
   z-index: 5;
   display: grid;
   justify-items: center;
   width: min(92%, 610px);
-  margin-bottom: 17vh;
-  padding: 20px 24px 24px;
+  margin-bottom: clamp(72px, 14vh, 132px);
+  padding: 24px 28px 28px;
+  row-gap: clamp(12px, 1.8vh, 18px);
+  background: transparent;
+  isolation: isolate;
   text-align: center;
-  text-shadow: 3px 3px 0 #02040a;
+  text-shadow: none;
+}
+
+.titleCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.titleCard::before,
+.titleCard::after {
+  position: absolute;
+  z-index: 0;
+  width: 4px;
+  height: 4px;
+  content: "";
+  pointer-events: none;
+}
+
+.titleCard::before {
+  top: 22%;
+  left: 7%;
+  background: rgba(243, 197, 75, 0.86);
+  box-shadow:
+    18px 52px 0 rgba(216, 229, 239, 0.72),
+    -6px 112px 0 rgba(116, 215, 104, 0.58);
+}
+
+.titleCard::after {
+  top: 31%;
+  right: 8%;
+  background: rgba(216, 229, 239, 0.78);
+  box-shadow:
+    -12px 62px 0 rgba(243, 197, 75, 0.74),
+    8px 124px 0 rgba(116, 215, 104, 0.52);
 }
 
 .kicker {
   order: 2;
-  margin: 0 0 22px;
+  margin: 0;
   color: #74d768;
   font-family: var(--game-font-ui);
   font-size: clamp(0.72rem, 1.7vw, 1rem);
   font-weight: 900;
   letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-shadow:
+    2px 0 0 #02040a,
+    0 2px 0 #02040a;
   text-transform: uppercase;
 }
 
@@ -526,6 +573,7 @@
   order: 1;
   max-width: none;
   margin: 0;
+  padding: 0 10px 4px;
   color: #f3c54b;
   font-family: var(--game-font-ui);
   font-size: clamp(3.25rem, 10vw, 7.8rem);
@@ -534,50 +582,127 @@
   line-height: 0.9;
   text-transform: uppercase;
   text-shadow:
-    0 5px 0 #b97822,
-    5px 5px 0 #02040a,
-    -2px -2px 0 #fff0a0;
+    -2px -2px 0 #fff0a0,
+    0 6px 0 #b97822,
+    6px 6px 0 #02040a,
+    9px 9px 0 rgba(0, 0, 0, 0.7),
+    -6px 0 0 rgba(243, 197, 75, 0.16),
+    6px 0 0 rgba(243, 197, 75, 0.16),
+    0 -6px 0 rgba(243, 197, 75, 0.14),
+    0 12px 0 rgba(243, 197, 75, 0.1);
 }
 
 .tagline {
   order: 3;
   display: grid;
-  gap: 2px;
-  margin: 0 0 20px;
+  gap: 4px;
+  margin: 0;
   color: #f1f5f8;
   font-family: var(--game-font-copy);
   font-size: clamp(0.78rem, 1.6vw, 1rem);
-  line-height: 1.45;
+  font-weight: 700;
+  line-height: 1.62;
+  letter-spacing: 0.01em;
+  text-shadow:
+    -2px 0 0 #02040a,
+    2px 0 0 #02040a,
+    0 -2px 0 #02040a,
+    0 2px 0 #02040a,
+    2px 2px 0 #02040a;
 }
 
 .enterAction {
   order: 4;
+  margin-top: 3px;
 }
 
-.enterAction :global(.pixel-button) {
+.enterButton {
+  display: inline-flex;
   min-height: 46px;
+  align-items: center;
+  justify-content: center;
   padding: 10px 20px;
-  border-width: 3px;
+  border: 3px solid var(--game-border);
+  color: #f4fff3;
+  background: var(--game-green);
+  font-family: var(--game-font-ui);
   font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: uppercase;
   box-shadow:
     inset 0 0 0 1px #75d96e,
     5px 5px 0 #02040a;
+  transform: translateY(0);
+  transition:
+    background-color var(--game-motion-fast) steps(2, end),
+    box-shadow var(--game-motion-fast) steps(2, end),
+    transform var(--game-motion-fast) steps(2, end);
 }
 
-.enterAction :global(.pixel-button > span:last-child) {
-  display: none;
+.enterButton span {
+  display: block;
+  width: 100%;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: none;
+  transform: none;
+}
+
+.enterButton:hover {
+  background: var(--game-green-highlight);
+  box-shadow:
+    inset 0 0 0 1px #9cf395,
+    7px 8px 0 #02040a;
+  transform: translateY(-3px);
+}
+
+.enterButton:active {
+  box-shadow:
+    inset 0 0 0 1px #75d96e,
+    3px 3px 0 #02040a;
+  transform: translateY(1px);
+}
+
+.enterButton:focus-visible {
+  outline: 3px solid var(--game-yellow);
+  outline-offset: 4px;
 }
 
 .systemLabel {
   position: absolute;
-  right: 16px;
-  bottom: 10px;
+  right: 18px;
+  bottom: 14px;
   margin: 0;
-  color: #526b8e;
+  padding: 4px 6px;
+  border-left: 2px solid #526b8e;
+  color: #b5c6d9;
+  background: rgba(2, 6, 15, 0.72);
   font-family: var(--game-font-ui);
   font-size: 0.52rem;
   letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-shadow: 2px 2px 0 #02040a;
   text-transform: uppercase;
+}
+
+:global(body):has(.screen) :global(.experience-controls) {
+  top: 22px;
+  right: 22px;
+  align-items: stretch;
+  gap: 8px;
+}
+
+:global(body):has(.screen) :global(.music-toggle),
+:global(body):has(.screen) :global(.connection-status) {
+  box-sizing: border-box;
+  min-height: 34px;
+  height: 34px;
+  padding: 5px 8px;
+  border-width: 2px;
 }
 
 @media (max-width: 760px) {
@@ -600,7 +725,8 @@
   }
 
   .titleCard {
-    margin-bottom: 22vh;
+    width: min(94%, 590px);
+    margin-bottom: clamp(56px, 12vh, 96px);
   }
 
   .tree:nth-child(2),
@@ -618,6 +744,7 @@
 
   .frame {
     min-height: 100vh;
+    min-height: 100svh;
     border-right: 0;
     border-left: 0;
     outline-offset: -5px;
@@ -625,8 +752,9 @@
 
   .titleCard {
     width: 100%;
-    margin-bottom: 28vh;
-    padding: 16px 12px;
+    margin-bottom: 10vh;
+    padding: 18px 14px 20px;
+    row-gap: 11px;
   }
 
   .logo {
@@ -634,12 +762,32 @@
   }
 
   .kicker {
-    margin-bottom: 14px;
+    margin: 0;
     font-size: 0.65rem;
   }
 
   .tagline {
-    font-size: 0.76rem;
+    gap: 2px;
+    max-width: calc(100vw - 40px);
+    font-size: 0.78rem;
+    line-height: 1.62;
+  }
+
+  .enterAction {
+    margin-top: 2px;
+  }
+
+  :global(body):has(.screen) :global(.experience-controls) {
+    top: 20px;
+    right: 20px;
+    gap: 6px;
+  }
+
+  :global(body):has(.screen) :global(.music-toggle),
+  :global(body):has(.screen) :global(.connection-status) {
+    min-height: 32px;
+    height: 32px;
+    padding: 4px 6px;
   }
 
   .leftBuilding,
@@ -689,7 +837,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .enterAction :global(.pixel-button) {
+  .enterButton {
     transition: none;
   }
 }
@@ -725,9 +873,6 @@
   }
   .titleCard {
     animation: titleCardArrival 520ms steps(7, end) both;
-  }
-  .enterAction {
-    animation: enterPrompt 1.8s steps(2, end) 600ms infinite;
   }
 }
 
@@ -791,15 +936,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes enterPrompt {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-2px);
   }
 }

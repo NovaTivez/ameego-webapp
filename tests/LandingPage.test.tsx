@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import HomePage from "@/app/page";
@@ -12,9 +12,11 @@ describe("landing title screen", () => {
     expect(screen.getByText("Level up your communication.")).toBeVisible();
     expect(screen.getByText("Ace every interview.")).toBeVisible();
     expect(screen.getByText("Unlock your future.")).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: /start learning.*enter academy/i }),
-    ).toHaveAttribute("href", "/academy");
+    const enterAcademy = screen.getByRole("link", {
+      name: /start learning.*enter academy/i,
+    });
+    expect(enterAcademy).toHaveAttribute("href", "/academy");
+    expect(within(enterAcademy).getAllByText("Enter Academy")).toHaveLength(1);
   });
 
   it("does not render the academy hub directory on the title screen", () => {

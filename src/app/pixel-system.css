@@ -102,7 +102,7 @@ body {
   align-items: center;
   gap: var(--game-space-2);
   width: 100%;
-  padding: 5px 8px;
+  padding: 5px 190px 5px 8px;
   border: 0;
   border-bottom: 2px solid var(--game-border);
   background: var(--game-panel-900);
@@ -110,6 +110,94 @@ body {
     inset 0 -1px 0 var(--game-line-highlight),
     0 2px 0 var(--game-border);
   backdrop-filter: none;
+}
+
+.experience-controls {
+  position: fixed;
+  z-index: 100;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--game-font-ui);
+}
+
+.music-toggle,
+.connection-status {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 2px solid var(--game-border);
+  color: var(--game-text);
+  background: var(--game-panel-900);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    3px 3px 0 var(--game-border);
+  font-family: var(--game-font-ui);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.music-toggle {
+  cursor: pointer;
+}
+
+.music-toggle:hover,
+.music-toggle:focus-visible {
+  color: var(--game-yellow);
+  background: var(--game-panel-800);
+}
+
+.music-toggle[aria-pressed="false"] {
+  color: var(--game-text-muted);
+}
+
+.connection-status > span {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--game-border);
+  background: #8b96a5;
+  box-shadow: 1px 1px 0 var(--game-border);
+}
+
+.connection-status.is-online > span {
+  background: var(--game-green-highlight);
+}
+
+.connection-status.is-offline {
+  color: var(--game-text-muted);
+}
+
+.offline-mode-notice {
+  position: fixed;
+  z-index: 99;
+  top: 58px;
+  right: 20px;
+  display: grid;
+  max-width: min(340px, calc(100vw - 28px));
+  gap: 2px;
+  padding: 7px 9px;
+  border: 3px solid var(--game-border);
+  color: var(--game-text);
+  background: #202a38;
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    4px 4px 0 var(--game-border);
+}
+
+.offline-mode-notice strong {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.offline-mode-notice span {
+  color: var(--game-text-muted);
+  font-size: 0.68rem;
 }
 
 .hud-identity,
@@ -758,6 +846,29 @@ select {
     border-right: 0;
     border-left: 0;
     box-shadow: none;
+  }
+
+  .site-header {
+    padding-right: 104px;
+  }
+
+  .experience-controls {
+    top: 16px;
+    right: 16px;
+  }
+
+  .music-toggle > span,
+  .connection-status strong {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+
+  .offline-mode-notice {
+    top: 54px;
+    right: 16px;
   }
 
   .brand > span:last-child {

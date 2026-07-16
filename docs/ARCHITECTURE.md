@@ -18,43 +18,43 @@ Maintain a clear separation between:
 
 src/
 
-  app/
-    api/
-    academy/
-    courses/
-    lessons/
-    simulation/
-    feedback/
-    progress/
+app/
+api/
+academy/
+courses/
+lessons/
+simulation/
+feedback/
+progress/
 
-  components/
-    ui/
-    pixel/
-    courses/
-    simulation/
-    feedback/
-    progress/
+components/
+ui/
+pixel/
+courses/
+simulation/
+feedback/
+progress/
 
-  features/
-    academy/
-    courses/
-    exercises/
-    interview/
-    feedback/
-    progress/
+features/
+academy/
+courses/
+exercises/
+interview/
+feedback/
+progress/
 
-  lib/
-    ai/
-    audio/
-    transcription/
-    database/
-    validation/
+lib/
+ai/
+audio/
+transcription/
+database/
+validation/
 
-  prompts/
+prompts/
 
-  types/
+types/
 
-  tests/
+tests/
 
 ## AI Boundary
 
@@ -117,6 +117,24 @@ Persist:
 Do not store raw webcam recordings by default.
 
 Audio storage should be optional and disclosed.
+
+## Client Audio and Offline Boundary
+
+- `AudioExperienceProvider` owns the two shared HTML audio elements, preference
+  hydration, volume fades, sound event delegation, interview focus mode, and
+  connectivity state.
+- `ameego:audio-preferences:v1` stores only two booleans: background music and
+  sound effects. The supplied audio files remain immutable public assets and are
+  never copied into browser storage records.
+- Interview Simulator publishes only an active/inactive focus event. It does not
+  expose transcript or evaluation content to the audio layer.
+- `public/sw.js` caches public navigation responses and same-origin GET assets.
+  It ignores POST requests, including question generation, resume assistance,
+  and feedback evaluation.
+- Existing course, exercise, attempt, profile, and audio data remain local-first
+  and continue to function offline. No remote synchronization claim is made
+  until the product has an authenticated persistence service and an explicit
+  consent-aware queue design.
 
 ## Error Handling
 

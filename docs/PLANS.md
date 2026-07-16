@@ -814,6 +814,55 @@ where no shared persisted player-status source exists.
 
 ---
 
+# Milestone Update - Academy Audio and Offline App Shell
+
+Status: Implemented on 2026-07-16.
+
+## Completed
+
+- Added the supplied Town Theme as one preloaded looping background track with
+  stepped-safe volume fade-in and fade-out behavior.
+- Added the supplied button sound as the shared hover, keyboard-focus, click,
+  dialog, completion, and success-notification effect.
+- Added separate versioned device-local preferences for background music and
+  sound effects. Music defaults to on, while browser-blocked autoplay resumes
+  after the learner's first pointer or keyboard interaction.
+- Added a persistent top-right pixel music toggle and live Online/Offline status
+  across every route, including screens that hide the shared HUD.
+- Added separate Background Music and Sound Effects switches to Settings with
+  accessible switch semantics and automatic persistence.
+- Added interview focus mode: music fades out during answer and transcript
+  confirmation states and resumes after the active interview ends. Essential
+  sound effects remain independent.
+- Added a web app manifest, generated 192px and 512px pixel academy icons, and a
+  service worker that pre-caches the public learning routes, manifest, icons,
+  music, and sound effect.
+- Added network-first navigation caching and cache-first same-origin asset
+  caching. Local profile, course, exercise, attempt, and audio preference data
+  continue using browser storage while offline.
+- Kept protected personalized-question, resume, and feedback POST responses out
+  of the cache. Standard interview fallback and saved local attempts remain the
+  recovery path when service-backed personalization is unavailable.
+
+## Validation Result
+
+- ESLint passed without warnings.
+- TypeScript strict type checking passed.
+- All 168 Vitest tests passed across 42 test files.
+- The production build passed, generated all eight public pages plus both PWA
+  icon sizes, and retained the three protected interview service routes.
+- All public pages, the manifest, service worker, both icons, and both audio
+  files returned HTTP 200 from the production server. Audio and icons use
+  immutable one-year caching; the service worker correctly uses no-cache.
+
+Known limitation: Browsers may block unprompted media playback. Ameego attempts
+playback immediately and retries after the first user interaction without
+changing the stored preference. There is no remote learner-data store in the
+current MVP, so local progress has no pending server synchronization queue;
+service-backed operations require a deliberate retry after reconnection.
+
+---
+
 # Milestone Update - Cross-Page Pixel Visual Consistency Pass
 
 Status: Implemented and validated on 2026-07-16.
@@ -894,3 +943,41 @@ Status: Implemented and validated on 2026-07-16.
   rendered or returned by the public routes.
 - Full lint, type checking, test, build, and formatting results are recorded in
   Contribution 016 of `docs/CODEX_WORKFLOW.md`.
+
+---
+
+# Milestone Update - Uploaded-Asset Academy Campus
+
+Status: Implemented and validated on 2026-07-16.
+
+## Completed
+
+- Replaced only the Academy Hub scene with the supplied campus background and
+  five supplied transparent building PNGs.
+- Positioned Main Building at center, Interview Center upper-left, Speech Hall
+  upper-right, Progress Library lower-left, and Courses Building lower-right.
+- Preserved the real `/academy`, `/practice`, `/progress`, `/learn`, and
+  `/settings` destinations; unfinished Speech Hall uses an in-scene Coming Soon
+  notice instead of a fabricated route.
+- Added responsive fixed-aspect composition, non-overlapping hit regions,
+  keyboard focus, descriptive labels, hover/press feedback, contact shadows,
+  brightness matching, and restrained window glow.
+- Added Academy-specific route, asset, style, and responsive-contract tests.
+- Corrected the final layout with smaller non-overlapping percentages, an
+  explicit contained background image layer, always-styled map labels, a native
+  locked Speech Hall control, and fresh byte-identical asset URLs that bypass stale
+  cache-first copies from earlier iterations.
+
+## Validation Result
+
+- Academy-focused tests passed: 9 tests across 2 files.
+- ESLint and TypeScript strict type checking passed.
+- All 171 Vitest tests passed across 42 test files.
+- The Next.js production build passed and generated `/academy`, `/practice`,
+  `/progress`, `/learn`, and `/settings` as public static routes.
+- The fixed source aspect ratio, five non-overlapping percentage regions,
+  mobile/coarse-pointer labels, focus states, and tablet/mobile breakpoints are
+  covered by Academy style contracts.
+- The supported in-app browser reported no available backend after its required
+  retry, so screenshot inspection at desktop, tablet, and mobile widths could
+  not be performed in this environment.

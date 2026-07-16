@@ -255,20 +255,28 @@ screen rather than a conventional marketing layout.
 
 ### Academy Hub Map
 
-The `/academy` route is a dense top-down campus map modeled on the second panel
-of the approved reference. It is a navigation scene rather than a dashboard.
+The `/academy` route is a dense top-down campus map built from the supplied
+nighttime campus background and five supplied transparent building PNGs. It is
+a navigation scene rather than a dashboard.
 
 - A compact top HUD contains back navigation, Ameego Academy identity, zeroed
   XP, and level 01 without claiming unstored progress.
-- Interview Center is a highlighted campus building linked to `/practice`.
-- Progress Library is a lit campus building linked to `/progress`.
-- Speech Hall is visibly dimmed and marked Coming Soon without a fake route.
-- Courtyard is an environmental landmark rather than an unavailable link.
-- The bottom navigation connects Courses to `/learn` and Progress to
-  `/progress`; Settings remains visibly unavailable until a real route exists.
-- Layered grass plots, crossing paths, plaza stone, pond, terrain pixels,
-  fences, signs, trees, lamps, and glowing building windows create a detailed
-  code-native pixel environment without gradients or soft card styling.
+- Main Building occupies the center approach and links to the Academy home.
+- Interview Center occupies the upper-left plot and links to `/practice`;
+  Speech Hall occupies the upper-right plot as a permanently aligned disabled
+  building with a Coming Soon label and no navigation or dialog.
+- Progress Library occupies the lower-left plot and links to `/progress`;
+  Courses Building occupies the lower-right plot and links to `/learn`.
+- The bottom navigation retains the real Courses, Progress, and Settings routes.
+- Building overlays retain their original aspect ratios and use restrained
+  contact shadows, brightness matching, window-toned glow, and hard pixel focus
+  outlines to integrate with the supplied map without altering the artwork.
+- The complete `1672 / 941` campus composition remains visible at desktop,
+  tablet, and mobile sizes; touch devices keep compact location labels visible.
+- Final proportional placement is Main `50% / 77.5% / 24%`, Interview
+  `24.5% / 31.5% / 21%`, Speech `75.5% / 31.5% / 21%`, Progress
+  `24% / 63.5% / 19%`, and Courses `76% / 63.5% / 19%`, expressed as
+  `left / top / width`.
 - The shared site header, footer, and backdrop are hidden only while the hub is
   mounted; other pages keep their existing composition.
 - Interactive buildings and bottom-navigation links have visible keyboard
@@ -421,3 +429,25 @@ The implemented reference screens now use a single dense frame specification:
 - Responsive rules reduce columns before reducing control size, preserve DOM
   and focus order, and remove decorative scene details only when needed to keep
   learning content and actions visible.
+
+## Audio and Connectivity HUD
+
+- A compact fixed control cluster remains visible across all screens, including
+  the title screen and Academy map where the shared header is hidden.
+- The music button exposes a clear Music/Muted state, accessible action label,
+  pressed state, title hint when autoplay is waiting for interaction, and the
+  same black border, navy panel, blue-gray inset, and hard shadow as other HUD
+  controls.
+- Online and Offline states use both text and a green or gray pixel indicator;
+  connectivity is never communicated by color alone.
+- Offline Mode adds a concise status notice explaining that cached lessons and
+  local progress remain usable.
+- Background music stays quiet and ambient, fades rather than cutting abruptly,
+  and stops during active interview responses and transcript confirmation.
+- Hover sounds have a lower volume than click and completion sounds. Keyboard
+  focus receives the same subtle navigation cue as pointer hover.
+- Music and sound effects have separate accessible switches in Settings and are
+  saved automatically on the current device.
+- Reduced-motion settings continue to disable visual animation; audio remains
+  under explicit Music and Sound Effects controls rather than being inferred
+  from motion preference.

@@ -174,6 +174,27 @@ export function InterviewSimulator() {
     [],
   );
 
+  const isInterviewFocusMode = step === "interview" || step === "confirm";
+
+  useEffect(() => {
+    document.documentElement.dataset.interviewFocus = String(isInterviewFocusMode);
+    window.dispatchEvent(
+      new CustomEvent("ameego:interview-state", {
+        detail: { active: isInterviewFocusMode },
+      }),
+    );
+  }, [isInterviewFocusMode]);
+
+  useEffect(
+    () => () => {
+      delete document.documentElement.dataset.interviewFocus;
+      window.dispatchEvent(
+        new CustomEvent("ameego:interview-state", { detail: { active: false } }),
+      );
+    },
+    [],
+  );
+
   useEffect(() => {
     if (step !== "interview" && step !== "confirm") return;
     const timer = window.setInterval(

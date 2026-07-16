@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { CharacterPortrait } from "@/components/CharacterPortrait";
+import { useAudioExperience } from "@/components/AudioExperienceProvider";
 import { PixelButton } from "@/components/PixelButton";
 import { readCourseProgress } from "@/lib/course-progress";
 import { readExerciseProgress } from "@/lib/exercise-progress";
@@ -26,16 +27,11 @@ type SettingsState =
 
 type PendingReset = "progress" | "all" | null;
 
-const settingsSections = [
-  "Profile",
-  "Preferences",
-  "Privacy",
-  "Resume & Data",
-  "Permissions",
-  "About",
-];
+const settingsSections = ["Privacy", "Resume & Data", "Permissions", "About"];
 
 export function SettingsPanel() {
+  const { musicEnabled, setMusicEnabled, setSoundEffectsEnabled, soundEffectsEnabled } =
+    useAudioExperience();
   const [state, setState] = useState<SettingsState>({ status: "loading" });
   const [name, setName] = useState(DEFAULT_LEARNER_PROFILE.name);
   const [focus, setFocus] = useState(DEFAULT_LEARNER_PROFILE.focus);
@@ -132,18 +128,17 @@ export function SettingsPanel() {
         {announcement}
       </p>
       <nav className={styles.settingsNav} aria-label="Settings sections">
-        {settingsSections.map((section, index) =>
-          index === 0 ? (
-            <span key={section} aria-current="page">
-              {section}
-            </span>
-          ) : (
-            <span key={section} aria-disabled="true">
-              {section}
-              <small>Coming soon</small>
-            </span>
-          ),
-        )}
+        <span aria-current="page">Profile</span>
+        <a href="#audio-settings">
+          Audio
+          <small>Available</small>
+        </a>
+        {settingsSections.map((section) => (
+          <span key={section} aria-disabled="true">
+            {section}
+            <small>Coming soon</small>
+          </span>
+        ))}
       </nav>
 
       <section className={styles.profilePanel} aria-labelledby="profile-heading">
@@ -237,6 +232,48 @@ export function SettingsPanel() {
                 <p>Profile and learning activity are stored on this device.</p>
               </div>
             </article>
+          </div>
+        </section>
+
+        <section
+          className={styles.audioSettings}
+          id="audio-settings"
+          aria-labelledby="audio-settings-heading"
+        >
+          <header>
+            <div>
+              <h3 id="audio-settings-heading">Audio</h3>
+              <p>Choose how the academy sounds on this device.</p>
+            </div>
+            <span>Saved automatically</span>
+          </header>
+          <div className={styles.audioToggleGrid}>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={musicEnabled}
+              onClick={() => setMusicEnabled(!musicEnabled)}
+            >
+              <span aria-hidden="true">♪</span>
+              <div>
+                <strong>Background Music</strong>
+                <small>Pauses automatically during interview questions.</small>
+              </div>
+              <output>{musicEnabled ? "On" : "Off"}</output>
+            </button>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={soundEffectsEnabled}
+              onClick={() => setSoundEffectsEnabled(!soundEffectsEnabled)}
+            >
+              <span aria-hidden="true">◆</span>
+              <div>
+                <strong>Sound Effects</strong>
+                <small>Hover, click, dialog, and completion sounds.</small>
+              </div>
+              <output>{soundEffectsEnabled ? "On" : "Off"}</output>
+            </button>
           </div>
         </section>
 
