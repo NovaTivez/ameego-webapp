@@ -106,8 +106,9 @@ After the simulation, transition to the Feedback Report.
 - Session Analysis is limited to question progress, draft presence, confirmed
   transcripts, measured microphone-listening time, and a labeled filler-word
   draft scan.
-- Camera preview remains optional and disabled until a real privacy-safe camera
-  feature exists; no visual or human-state analysis is implied.
+- Camera preview remains optional until enabled; when on, it shows local
+  mirrored preview plus neutral face-presence and head-orientation labels.
+  Camera signals never feed Intelligent Feedback.
 - Next always leads to editable transcript confirmation before persistence.
 - End never records an incomplete session as a completed attempt.
 

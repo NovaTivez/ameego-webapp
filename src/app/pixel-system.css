@@ -809,6 +809,32 @@ select {
   font-size: 0.76rem;
 }
 
+.camera-intent {
+  margin-top: 10px;
+  padding: 10px;
+  border: 2px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: var(--game-inset);
+}
+
+.camera-intent label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--game-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.camera-intent input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--game-green);
+}
+
 .fallback-notice,
 .personalized-notice,
 .interview-no-resume,

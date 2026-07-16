@@ -1,7 +1,10 @@
 import { InterviewRoomScene } from "@/components/InterviewRoomScene";
 import { PixelIcon } from "@/components/PixelIcon";
 import { PixelProgress } from "@/components/PixelProgress";
+import type { CameraStatus, FacePresence, HeadOrientation } from "@/lib/camera/types";
+import { cameraPresenceLabels } from "@/lib/camera/types";
 import type { ConfirmedResponse, InterviewQuestion } from "@/lib/interview/contracts";
+import type { RefObject } from "react";
 
 import styles from "./interview-session.module.css";
 
@@ -20,6 +23,14 @@ type InterviewSessionViewProps = {
   modeError: string;
   confirmedResponses: ConfirmedResponse[];
   fillerWordCount: number;
+  cameraVideoRef: RefObject<HTMLVideoElement | null>;
+  cameraStatus: CameraStatus;
+  cameraPresence: FacePresence;
+  cameraOrientation: HeadOrientation;
+  cameraErrorMessage: string;
+  onCameraEnable: () => void;
+  onCameraDisable: () => void;
+  onCameraRetry: () => void;
   onDraftChange: (value: string) => void;
   onMicrophoneToggle: () => void;
   onEnd: () => void;
@@ -43,6 +54,14 @@ export function InterviewSessionView({
   modeError,
   confirmedResponses,
   fillerWordCount,
+  cameraVideoRef,
+  cameraStatus,
+  cameraPresence,
+  cameraOrientation,
+  cameraErrorMessage,
+  onCameraEnable,
+  onCameraDisable,
+  onCameraRetry,
   onDraftChange,
   onMicrophoneToggle,
   onEnd,
@@ -50,6 +69,14 @@ export function InterviewSessionView({
   onBack,
   onConfirm,
 }: InterviewSessionViewProps) {
+  const labels = cameraPresenceLabels(cameraStatus, cameraPresence, cameraOrientation);
+  const cameraActive = cameraStatus === "active" || cameraStatus === "starting";
+  const showVideo = cameraStatus === "active" || cameraStatus === "starting";
+  const canRetry =
+    cameraStatus === "denied" ||
+    cameraStatus === "unavailable" ||
+    cameraStatus === "interrupted";
+
   return (
     <section className={styles.sessionShell} aria-label="Interview simulation">
       <div className={styles.mainColumn}>
@@ -195,15 +222,76 @@ export function InterviewSessionView({
         <section className={styles.sidePanel} aria-labelledby="camera-heading">
           <h3 id="camera-heading" className={styles.sideTitle}>
             <span>Optional Camera</span>
-            <span className={styles.statusDot} aria-hidden="true" />
+            <span
+              className={styles.statusDot}
+              data-camera-status={cameraStatus}
+              aria-hidden="true"
+            />
           </h3>
-          <div className={styles.cameraScreen}>
-            <PixelIcon name="camera" size="large" />
-            <span>Preview not enabled</span>
+          <div
+            className={styles.cameraScreen}
+            data-active={showVideo ? "true" : "false"}
+          >
+            <video
+              ref={cameraVideoRef}
+              className={styles.cameraVideo}
+              playsInline
+              muted
+              autoPlay
+              aria-label="Optional mirrored camera preview"
+              hidden={!showVideo}
+            />
+            {!showVideo ? (
+              <>
+                <PixelIcon name="camera" size="large" />
+                <span>
+                  {cameraStatus === "denied"
+                    ? "Permission denied"
+                    : cameraStatus === "unavailable"
+                      ? "Camera unavailable"
+                      : cameraStatus === "interrupted"
+                        ? "Camera interrupted"
+                        : "Preview off"}
+                </span>
+              </>
+            ) : null}
           </div>
+          <div className={styles.cameraActions}>
+            {cameraActive ? (
+              <button
+                type="button"
+                className={styles.cameraAction}
+                onClick={onCameraDisable}
+              >
+                Disable camera
+              </button>
+            ) : canRetry ? (
+              <button
+                type="button"
+                className={styles.cameraAction}
+                onClick={onCameraRetry}
+              >
+                Retry camera
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.cameraAction}
+                onClick={onCameraEnable}
+              >
+                Enable camera
+              </button>
+            )}
+          </div>
+          {cameraErrorMessage ? (
+            <p className={styles.cameraError} role="status">
+              {cameraErrorMessage}
+            </p>
+          ) : null}
           <p className={styles.cameraNote}>
-            Camera analysis is not implemented. No face, posture, eye-contact, or emotion
-            data is captured.
+            Optional on-device framing reminders only. No recording is stored. Face presence
+            and approximate head orientation are shown here and never sent to interview
+            feedback. No emotion, eye-contact, or hiring judgments.
           </p>
         </section>
 
@@ -236,6 +324,9 @@ export function InterviewSessionView({
               label="Filler words (draft scan)"
               value={String(fillerWordCount)}
             />
+            <AnalysisRow label="Camera" value={labels.camera} />
+            <AnalysisRow label="Face" value={labels.face} />
+            <AnalysisRow label="Orientation" value={labels.orientation} />
           </dl>
         </section>
       </aside>

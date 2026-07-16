@@ -182,7 +182,7 @@ npm.cmd run start
 - Raw resume bytes are used only for extraction and are not written into attempt history.
 - Feedback is evidence-based communication practice, not an official grade or hiring decision.
 - The evaluator does not assess emotion, honesty, intelligence, employability, accent, confidence, nervousness, or eye contact.
-- The camera panel is a non-functional placeholder; no video or face analysis exists.
+- Optional camera framing runs on-device (face in frame + approximate head orientation). Preview is not stored, never sent to GPT-5.6, and never required to finish an interview.
 - Comparison never claims broad improvement from one isolated rubric score.
 - AI question-generation failures offer a clearly labeled non-personalized general-question path.
 

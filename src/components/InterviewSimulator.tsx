@@ -12,6 +12,7 @@ import { PixelIcon } from "@/components/PixelIcon";
 import { PixelPanel } from "@/components/PixelPanel";
 import { ResumeProfileEditor } from "@/components/ResumeProfileEditor";
 import { PracticeLobbyScene } from "@/components/PracticeLobbyScene";
+import { useCameraPresence } from "@/hooks/useCameraPresence";
 import {
   DEFAULT_INTERVIEW_SETUP,
   EMPTY_RESUME_PROFILE,
@@ -164,8 +165,14 @@ export function InterviewSimulator() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [speakingSeconds, setSpeakingSeconds] = useState(0);
   const [announcement, setAnnouncement] = useState("");
+  const [cameraIntent, setCameraIntent] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
+  const isActiveSession = step === "interview" || step === "confirm";
+  const camera = useCameraPresence({
+    enabled: cameraIntent,
+    active: isActiveSession,
+  });
 
   useEffect(
     () => () => {
@@ -174,7 +181,7 @@ export function InterviewSimulator() {
     [],
   );
 
-  const isInterviewFocusMode = step === "interview" || step === "confirm";
+  const isInterviewFocusMode = isActiveSession;
 
   useEffect(() => {
     document.documentElement.dataset.interviewFocus = String(isInterviewFocusMode);
@@ -599,11 +606,11 @@ export function InterviewSimulator() {
     setEvaluationError("");
     setFocusedRetryGoal("");
     setSpeakingSeconds(0);
+    setCameraIntent(false);
   };
 
   const currentQuestion = questionSet?.questions[questionIndex];
   const isPreparationStep = step === "setup" || step === "resume" || step === "review";
-  const isActiveSession = step === "interview" || step === "confirm";
   const fillerWordCount = countFillerWords(draft);
   const interviewTypeLabel =
     setup.interviewType === "custom"
@@ -920,6 +927,20 @@ export function InterviewSimulator() {
               <span>Record speech, then review and edit the transcript.</span>
             </button>
           </div>
+          <div className="camera-intent">
+            <label htmlFor="camera-intent">
+              <input
+                id="camera-intent"
+                type="checkbox"
+                checked={cameraIntent}
+                onChange={(event) => setCameraIntent(event.target.checked)}
+              />
+              <span>
+                Optional camera — on-device framing reminders only. Preview stays on this
+                device, is not stored, and never affects interview feedback.
+              </span>
+            </label>
+          </div>
           {modeError ? (
             <div className="interview-inline-error" role="alert">
               {modeError}
@@ -944,6 +965,17 @@ export function InterviewSimulator() {
           modeError={modeError}
           confirmedResponses={responses}
           fillerWordCount={fillerWordCount}
+          cameraVideoRef={camera.videoRef}
+          cameraStatus={camera.status}
+          cameraPresence={camera.presence}
+          cameraOrientation={camera.orientation}
+          cameraErrorMessage={camera.errorMessage}
+          onCameraEnable={() => setCameraIntent(true)}
+          onCameraDisable={() => setCameraIntent(false)}
+          onCameraRetry={() => {
+            setCameraIntent(false);
+            queueMicrotask(() => setCameraIntent(true));
+          }}
           onDraftChange={setDraft}
           onMicrophoneToggle={isListening ? stopListening : startListening}
           onEnd={endInterview}

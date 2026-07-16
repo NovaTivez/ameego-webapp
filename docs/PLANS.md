@@ -981,3 +981,32 @@ Status: Implemented and validated on 2026-07-16.
 - The supported in-app browser reported no available backend after its required
   retry, so screenshot inspection at desktop, tablet, and mobile widths could
   not be performed in this environment.
+
+---
+
+# Milestone Update - Optional On-Device Face Presence Tracking
+
+Status: Implemented on 2026-07-17.
+
+## Completed
+
+- Added optional MediaPipe Face Landmarker presence tracking for the interview
+  simulator only.
+- Mode-screen intent checkbox stores session-only preference; `getUserMedia`
+  and model load begin when the interview room mounts if intent is on.
+- Mid-session Enable / Disable / Retry controls replace the disabled camera
+  placeholder with a mirrored local preview.
+- Session Analysis shows Camera, Face, and Orientation with neutral labels:
+  In frame / Out of frame / Not detected; Facing camera / Turned slightly /
+  Turned away; Permission denied / Unavailable / Interrupted.
+- Soft-fail behavior keeps Next, Confirm, and save available when camera
+  permission fails or the track drops.
+- Camera signals stay out of attempt storage, Progress Library, and
+  `/api/interview/evaluate`.
+
+## Known Limitations
+
+- Face Landmarker WASM/model assets load from CDN on first opt-in (online
+  required for the first model fetch).
+- Presence aggregates are not persisted across attempts.
+- Posture scoring and eye-contact indicators remain out of scope.

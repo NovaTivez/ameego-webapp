@@ -11,7 +11,7 @@ Use this before final submission. Do not check items that are not actually done.
 
 - [ ] **Demo video recorded** — Public video under three minutes, following [`docs/DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
 - [ ] Video includes: learner problem, Academy, STAR lesson, exercise, interview simulation, GPT-5.6 feedback, recommendation/retry/compare beat, Codex acceleration (factual), team decisions.
-- [ ] Video does **not** claim fabricated results, offline evaluation, Speech Hall features, or camera analysis.
+- [ ] Video does **not** claim fabricated results, offline evaluation, Speech Hall features, or that GPT scores body language / emotion from the camera.
 
 ## Repository
 

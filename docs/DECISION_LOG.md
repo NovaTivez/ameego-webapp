@@ -691,3 +691,34 @@ inventing unfinished functionality.
 Consequences: The entire campus remains visible rather than being cropped to
 fill unusual screens. Buildings and labels become smaller on narrow phones, but
 the underlying links, focus outlines, and bottom navigation remain available.
+
+---
+
+## Decision 018 - Optional On-Device Face Presence Only
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: Phase 9 optional webcam indicators were still a disabled placeholder.
+The product forbids emotion, confidence, eye-contact, and hireability claims,
+and GPT STAR evaluation must remain transcript-only.
+
+Decision: Implement optional MediaPipe Face Landmarker tracking for face
+presence, frame membership, and rough head-orientation buckets. Opt-in on the
+mode screen stores session intent; camera starts when the interview room
+mounts. Mid-session Enable/Disable/Retry remains available. Soft-fail never
+blocks transcript confirmation. No camera data is persisted or sent to
+evaluation APIs. Labels stay neutral descriptive language.
+
+Alternatives considered: BlazeFace-only presence, server-side vision, storing
+session aggregates on attempts, or recreating reference confidence/nerves
+scores.
+
+Reason: Local MediaPipe matches the allowed AGENTS.md indicators without
+expanding into prohibited human-state inference or changing the educational
+feedback loop.
+
+Consequences: Learners can practice framing during interviews. First opt-in
+requires a CDN model fetch. Offline academy routes still work; camera ML does
+not.

@@ -886,11 +886,13 @@
   box-shadow: 2px 2px 0 #03060b;
 }
 .cameraScreen {
+  position: relative;
   display: grid;
   min-height: 162px;
   gap: 7px;
   place-items: center;
   place-content: center;
+  overflow: hidden;
   color: #9caabd;
   background: #050b14;
   border: 3px solid #03060b;
@@ -899,6 +901,18 @@
   box-shadow:
     inset 16px 0 0 rgba(77, 99, 129, 0.08),
     inset -16px 0 0 rgba(77, 99, 129, 0.08);
+}
+.cameraScreen[data-active="true"] {
+  place-items: stretch;
+  place-content: stretch;
+}
+.cameraVideo {
+  width: 100%;
+  height: 100%;
+  min-height: 162px;
+  object-fit: cover;
+  transform: scaleX(-1);
+  background: #050b14;
 }
 .cameraScreen svg {
   width: 36px;
@@ -911,11 +925,57 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+.cameraActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cameraAction {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #03060b;
+}
+.cameraAction:hover {
+  background: #1a2740;
+}
+.cameraAction:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+.cameraError {
+  margin: 8px 0 0;
+  color: #f0b4b4;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
 .cameraNote {
   margin: 8px 0 0;
   color: #aebbd0;
   font-size: 0.75rem;
   line-height: 1.45;
+}
+.statusDot[data-camera-status="active"] {
+  background: var(--green, #3ecf8e);
+}
+.statusDot[data-camera-status="starting"] {
+  background: var(--yellow);
+}
+.statusDot[data-camera-status="denied"],
+.statusDot[data-camera-status="unavailable"],
+.statusDot[data-camera-status="interrupted"] {
+  background: #e35d6a;
+}
+.statusDot[data-camera-status="off"] {
+  background: #6b7a90;
 }
 .analysisPanel {
   padding: 10px;

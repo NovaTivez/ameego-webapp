@@ -178,12 +178,15 @@ describe("InterviewSimulator", () => {
 
     await reachModeWithoutResume(user);
     expect(screen.getByText(/your personalized interview is ready/i)).toBeVisible();
+    expect(screen.getByLabelText(/optional camera/i)).toBeVisible();
     await user.click(screen.getByRole("button", { name: /text response/i }));
     expect(await screen.findByLabelText(/interview simulation/i)).toBeVisible();
-    expect(screen.getByText(/preview not enabled/i)).toBeVisible();
+    expect(screen.getByText(/preview off/i)).toBeVisible();
     expect(
-      screen.getByText(/no face, posture, eye-contact, or emotion data/i),
+      screen.getByText(/optional on-device framing reminders only/i),
     ).toBeVisible();
+    expect(screen.getByText(/^Camera$/i).parentElement).toHaveTextContent(/Off/i);
+    expect(screen.queryByText(/\bconfidence\b|\bnervousness\b|\bemployability\b/i)).not.toBeInTheDocument();
 
     for (const [index, question] of generatedQuestions.entries()) {
       expect(await screen.findByRole("heading", { name: question.text })).toBeVisible();
@@ -271,6 +274,59 @@ describe("InterviewSimulator", () => {
       await screen.findByRole("heading", { name: /how would you like to answer/i }),
     ).toBeVisible();
     expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+  });
+
+  it("keeps the interview usable when camera permission is denied", async () => {
+    const user = userEvent.setup();
+    const previousMediaDevices = navigator.mediaDevices;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: {
+        getUserMedia: vi.fn(async () => {
+          throw new DOMException("Permission denied", "NotAllowedError");
+        }),
+      },
+    });
+
+    try {
+      render(<InterviewSimulator />);
+      await reachModeWithoutResume(user);
+      await user.click(screen.getByLabelText(/optional camera/i));
+      await user.click(screen.getByRole("button", { name: /text response/i }));
+
+      const simulator = await screen.findByLabelText(/interview simulation/i);
+      expect(
+        await within(simulator).findByText(/camera permission was denied/i),
+      ).toBeVisible();
+      expect(
+        within(simulator).getByRole("button", { name: /retry camera/i }),
+      ).toBeVisible();
+      expect(within(simulator).getByLabelText(/your response/i)).toBeEnabled();
+      await user.type(
+        within(simulator).getByLabelText(/your response/i),
+        "Still works.",
+      );
+      await user.click(
+        within(simulator).getByRole("button", { name: /review response/i }),
+      );
+      expect(
+        within(simulator).getByLabelText(/review and edit your transcript/i),
+      ).toHaveValue("Still works.");
+    } finally {
+      Object.defineProperty(navigator, "mediaDevices", {
+        configurable: true,
+        value: previousMediaDevices,
+      });
+    }
   });
 
   it("shows setup validation before allowing progress", async () => {
