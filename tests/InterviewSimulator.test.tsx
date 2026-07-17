@@ -405,7 +405,116 @@ describe("InterviewSimulator", () => {
     expect(
       await screen.findByRole("heading", { name: /how would you like to answer/i }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /continue or start clean/i }),
+    ).toBeVisible();
     expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+  });
+
+  it("resumes a paused interview at its current question with confirmed responses intact", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<InterviewSimulator />);
+
+    await reachModeWithoutResume(user);
+    await selectResponseMode(user, "text");
+    await user.type(
+      await screen.findByLabelText(/your response/i),
+      "Confirmed answer one.",
+    );
+    await user.click(screen.getByRole("button", { name: /review response/i }));
+    await user.click(screen.getByRole("button", { name: /confirm and continue/i }));
+    expect(
+      await screen.findByRole("heading", { name: generatedQuestions[1].text }),
+    ).toBeVisible();
+
+    await user.type(screen.getByLabelText(/your response/i), "Unfinished second answer.");
+    await user.click(
+      screen.getByRole("button", {
+        name: /end interview without saving a completed attempt/i,
+      }),
+    );
+    await user.click(
+      within(
+        await screen.findByRole("dialog", { name: /end this interview/i }),
+      ).getByRole("button", { name: /^end interview$/i }),
+    );
+
+    expect(
+      screen.getByText(/1 confirmed response will be ready to resume at question 2/i),
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /resume interview/i }));
+
+    const simulator = await screen.findByLabelText(/interview simulation/i);
+    expect(
+      within(simulator).getByRole("heading", { name: generatedQuestions[1].text }),
+    ).toBeVisible();
+    expect(within(simulator).getByLabelText(/your response/i)).toHaveValue("");
+    expect(
+      within(simulator).getByRole("progressbar", { name: "Learning Progress" }),
+    ).toHaveAttribute("aria-valuenow", "2");
+  });
+
+  it("discards a paused interview and restarts the prepared scenario at Question 1", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<InterviewSimulator />);
+
+    await reachModeWithoutResume(user);
+    await selectResponseMode(user, "text");
+    await user.type(
+      await screen.findByLabelText(/your response/i),
+      "Confirmed answer one.",
+    );
+    await user.click(screen.getByRole("button", { name: /review response/i }));
+    await user.click(screen.getByRole("button", { name: /confirm and continue/i }));
+    expect(
+      await screen.findByRole("heading", { name: generatedQuestions[1].text }),
+    ).toBeVisible();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /end interview without saving a completed attempt/i,
+      }),
+    );
+    await user.click(
+      within(
+        await screen.findByRole("dialog", { name: /end this interview/i }),
+      ).getByRole("button", { name: /^end interview$/i }),
+    );
+    await user.click(screen.getByRole("button", { name: /discard and start over/i }));
+
+    expect(
+      screen.queryByRole("heading", { name: /continue or start clean/i }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: /continue to interview/i })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: /text response/i }));
+    await user.click(screen.getByRole("button", { name: /continue to interview/i }));
+
+    const simulator = await screen.findByLabelText(/interview simulation/i);
+    expect(
+      within(simulator).getByRole("heading", { name: generatedQuestions[0].text }),
+    ).toBeVisible();
+    expect(within(simulator).getByLabelText(/your response/i)).toHaveValue("");
+    expect(
+      within(simulator).getByRole("progressbar", { name: "Learning Progress" }),
+    ).toHaveAttribute("aria-valuenow", "1");
   });
 
   it("keeps the interview usable when camera permission is denied", async () => {

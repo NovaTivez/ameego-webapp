@@ -1164,7 +1164,7 @@
 .modeWorkspace {
   grid-area: mode-main;
   display: grid;
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto auto auto;
   width: 100% !important;
   height: auto;
   min-height: 0;
@@ -1253,6 +1253,50 @@
   gap: 10px;
   padding: 10px;
   overflow: visible;
+}
+
+.pausedSession {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  border-bottom: 3px solid var(--game-border);
+  background: #2d2410;
+  box-shadow: inset 0 -1px 0 #715c28;
+}
+
+.pausedSession > div {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pausedSession h2,
+.pausedSession p {
+  margin: 0;
+}
+
+.pausedSession h2 {
+  color: #fff1b1;
+  font-family: var(--game-font-ui);
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pausedSession p {
+  margin-top: 4px;
+  color: var(--game-text);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.pausedSession :global(.pixel-button) {
+  min-width: 184px;
+  min-height: 44px;
+  justify-content: center;
 }
 
 .responseModeGrid {
@@ -1835,6 +1879,15 @@
 
   .modeContent {
     grid-template-columns: minmax(0, 1fr) 235px;
+  }
+
+  .pausedSession {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pausedSession :global(.pixel-button) {
+    width: 100%;
   }
 
   .responseModeCard {

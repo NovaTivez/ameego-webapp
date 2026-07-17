@@ -1767,6 +1767,30 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Recoverable Ended Interview Sessions
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Added an explicit paused-session decision after a learner ends an interview
+  before completion.
+- Resume preserves confirmed answers and returns to the current question.
+- Discard clears question position, responses, drafts, timers, recognition,
+  speech, camera intent, and selected mode before returning to Question 1.
+- Preserved the prepared scenario and questions without storing a partial
+  attempt or making another generation request.
+- Added simulator coverage for both resume and discard recovery paths.
+
+## Validation
+
+- All 17 focused simulator tests pass, along with strict TypeScript, Prettier,
+  diff integrity, and the production build with 33 generated routes.
+- Focused ESLint continues to report the pre-existing InterviewSimulator
+  speech-effect rule error and hook warnings only.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.

@@ -1460,3 +1460,31 @@ coordinates.
 Consequences: Desktop and responsive layouts share the same symmetric map
 composition. The small-screen fit-to-viewport rule remains intact, and future
 position changes that would introduce horizontal drift fail the style contract.
+
+---
+
+## Decision 042 - Make Ended Interview Sessions Explicitly Recoverable
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: Ending an incomplete interview returned the learner to mode selection
+with confirmed responses and question position still in memory, but provided no
+clear way to either continue or discard that partial state.
+
+Decision: Treat the mode screen after an intentional end as a paused session.
+Resume keeps confirmed responses and the next question, while Discard clears
+all session-only response, timer, speech-recognition, and camera-intent state
+and returns to Question 1 using the already prepared scenario and questions.
+
+Alternatives considered: Silently discard all state on end, preserve the state
+without explaining it, regenerate questions, or persist an incomplete attempt.
+
+Reason: Learners need a deliberate recovery choice during practice and demos.
+Keeping the prepared scenario avoids unnecessary AI requests, while never
+mistaking an unfinished session for a saved attempt.
+
+Consequences: An unfinished draft is discarded when ending, matching the dialog
+copy. Confirmed responses remain available only until the learner explicitly
+discards them; no partial attempt is stored in history.

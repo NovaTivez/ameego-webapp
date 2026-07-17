@@ -238,6 +238,7 @@ export function InterviewSimulator() {
   const [cameraIntent, setCameraIntent] = useState(false);
   const [cameraPreviewOpen, setCameraPreviewOpen] = useState(false);
   const [selectedInputMode, setSelectedInputMode] = useState<InputMode | null>(null);
+  const [hasPausedSession, setHasPausedSession] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const wantListeningRef = useRef(false);
   const interviewerSpeechRef = useRef<SpeakQuestionHandle | null>(null);
@@ -526,6 +527,7 @@ export function InterviewSimulator() {
       if (!parsed) throw new Error("personalization_unavailable");
       setQuestionSet(parsed);
       setQuestionStatus("idle");
+      setHasPausedSession(false);
       setCameraPreviewOpen(false);
       setSelectedInputMode(onboardingPracticeModeRef.current);
       setStep("mode");
@@ -539,6 +541,7 @@ export function InterviewSimulator() {
   const useGeneralFallback = () => {
     setQuestionSet(createGeneralQuestionFallback(confirmedContext));
     setQuestionStatus("idle");
+    setHasPausedSession(false);
     setCameraPreviewOpen(false);
     setSelectedInputMode(onboardingPracticeModeRef.current);
     setStep("mode");
@@ -548,6 +551,7 @@ export function InterviewSimulator() {
   const beginTextMode = () => {
     setInputMode("text");
     setModeError("");
+    setHasPausedSession(false);
     setElapsedSeconds(0);
     setSpeakingSeconds(0);
     setStep("interview");
@@ -563,6 +567,7 @@ export function InterviewSimulator() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
       setInputMode("microphone");
+      setHasPausedSession(false);
       setElapsedSeconds(0);
       setSpeakingSeconds(0);
       setStep("interview");
@@ -719,10 +724,43 @@ export function InterviewSimulator() {
       stopListening();
     }
     setSpeechError("");
+    setDraft("");
+    setDraftError("");
+    setInterimTranscript("");
     setCameraPreviewOpen(false);
+    setHasPausedSession(true);
     setStep("mode");
     setAnnouncement(
-      "Interview ended without saving a completed attempt. Your scenario and confirmed responses are preserved.",
+      "Interview paused without saving a completed attempt. Choose Resume to keep confirmed responses or Discard to start Question 1 again.",
+    );
+  };
+
+  const discardPausedSession = () => {
+    interviewerSpeechTokenRef.current += 1;
+    interviewerSpeechRef.current?.cancel();
+    interviewerSpeechRef.current = null;
+    cancelInterviewSpeech();
+    wantListeningRef.current = false;
+    recognitionRef.current?.abort?.();
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    setIsListening(false);
+    setIsInterviewerSpeaking(false);
+    setQuestionIndex(0);
+    setDraft("");
+    setDraftError("");
+    setResponses([]);
+    setInterimTranscript("");
+    setSpeechError("");
+    setElapsedSeconds(0);
+    setSpeakingSeconds(0);
+    setCameraIntent(false);
+    setCameraPreviewOpen(false);
+    setSelectedInputMode(null);
+    setModeError("");
+    setHasPausedSession(false);
+    setAnnouncement(
+      "Partial interview discarded. Choose a response mode to begin again at Question 1.",
     );
   };
 
@@ -888,6 +926,7 @@ export function InterviewSimulator() {
     setSpeakingSeconds(0);
     setCameraPreviewOpen(false);
     setSelectedInputMode(null);
+    setHasPausedSession(false);
     setStep("mode");
     setAnnouncement(
       "Retry ready. The same scenario, questions, and focused learning goal were preserved.",
@@ -915,6 +954,7 @@ export function InterviewSimulator() {
     setCameraIntent(false);
     setCameraPreviewOpen(false);
     setSelectedInputMode(null);
+    setHasPausedSession(false);
   };
 
   const currentQuestion = questionSet?.questions[questionIndex];
@@ -1342,6 +1382,29 @@ export function InterviewSimulator() {
               </div>
             </header>
 
+            {hasPausedSession ? (
+              <section
+                className={preparationStyles.pausedSession}
+                aria-labelledby="paused-session-heading"
+              >
+                <div>
+                  <PixelBadge tone="amber">Interview paused</PixelBadge>
+                  <div>
+                    <h2 id="paused-session-heading">Continue or start clean?</h2>
+                    <p>
+                      {responses.length} confirmed{" "}
+                      {responses.length === 1 ? "response" : "responses"} will be ready to
+                      resume at Question {questionIndex + 1} of{" "}
+                      {questionSet.questions.length}. Your unfinished draft was discarded.
+                    </p>
+                  </div>
+                </div>
+                <PixelButton variant="secondary" onClick={discardPausedSession}>
+                  Discard and Start Over
+                </PixelButton>
+              </section>
+            ) : null}
+
             <div className={preparationStyles.modeContent}>
               <div className={preparationStyles.responseModeGrid}>
                 <button
@@ -1425,14 +1488,18 @@ export function InterviewSimulator() {
                     {modeError}
                   </div>
                 ) : (
-                  <p>Nothing starts until you select a mode and continue.</p>
+                  <p>
+                    {hasPausedSession
+                      ? "Resume keeps confirmed responses and returns to your current question."
+                      : "Nothing starts until you select a mode and continue."}
+                  </p>
                 )}
               </div>
               <PixelButton
                 onClick={continueWithSelectedMode}
                 disabled={!selectedInputMode}
               >
-                Continue to Interview
+                {hasPausedSession ? "Resume Interview" : "Continue to Interview"}
               </PixelButton>
             </footer>
           </PixelPanel>

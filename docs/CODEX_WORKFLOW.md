@@ -1855,3 +1855,26 @@ Validation result: The 1440px browser audit measured the map and Main Building
 at the exact 720px center axis, with paired top buildings centered at symmetric
 360px and 1080px positions. Focused Academy tests, strict TypeScript, Prettier,
 diff integrity, and the 33-route production build pass.
+
+## Contribution 047 - Recoverable Ended Interview Sessions
+
+Feature: Give learners an explicit Resume or Discard decision after ending an
+interview before completion.
+
+Codex inspected: The simulator session state, end-dialog behavior, response
+confirmation transition, microphone and speech cleanup, camera intent, restart
+behavior, mode-screen UI, and existing simulator tests.
+
+Codex implemented: A paused-session mode-screen panel, a Resume action that
+keeps confirmed responses and the current question, and a Discard action that
+clears all session-only state while retaining the generated scenario. End now
+removes the unfinished draft as its dialog promises.
+
+Scope protection: Incomplete interviews are still never saved as attempts;
+completed attempt storage, retry behavior, question generation, setup data, and
+feedback contracts are unchanged.
+
+Validation result: All 17 focused simulator tests pass, including new end-to-
+resume and end-to-discard flows. Strict TypeScript, Prettier, diff integrity,
+and the 33-route production build pass. Focused ESLint retains only the existing
+InterviewSimulator speech-effect rule error and related hook warnings.
