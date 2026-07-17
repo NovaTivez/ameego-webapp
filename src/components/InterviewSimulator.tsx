@@ -75,6 +75,7 @@ type PreparationStep = Extract<Step, "setup" | "resume" | "review">;
 type EvaluationFailure =
   "invalid_result" | "missing_data" | "service_failure" | "storage_failure" | null;
 type InputMode = "text" | "microphone";
+type AsyncAction = "questions" | "resume" | "evaluation";
 
 const STEP_LABELS = [
   "Setup",
@@ -248,6 +249,21 @@ export function InterviewSimulator() {
   const cameraCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const cameraPreviewTriggerRef = useRef<HTMLButtonElement | null>(null);
   const onboardingPracticeModeRef = useRef<InputMode | null>(null);
+  const requestTokenRef = useRef<Record<AsyncAction, number>>({
+    questions: 0,
+    resume: 0,
+    evaluation: 0,
+  });
+  const requestInFlightRef = useRef<Record<AsyncAction, boolean>>({
+    questions: false,
+    resume: false,
+    evaluation: false,
+  });
+  const requestControllerRef = useRef<Record<AsyncAction, AbortController | null>>({
+    questions: null,
+    resume: null,
+    evaluation: null,
+  });
   const isActiveSession = step === "interview" || step === "confirm";
   const {
     attachVideo: attachCameraVideo,
@@ -259,6 +275,48 @@ export function InterviewSimulator() {
     enabled: cameraIntent,
     active: isActiveSession || cameraPreviewOpen,
   });
+
+  const beginRequest = (action: AsyncAction) => {
+    if (requestInFlightRef.current[action]) return null;
+
+    requestControllerRef.current[action]?.abort();
+    const controller = new AbortController();
+    const token = requestTokenRef.current[action] + 1;
+    requestTokenRef.current[action] = token;
+    requestInFlightRef.current[action] = true;
+    requestControllerRef.current[action] = controller;
+    return { controller, token };
+  };
+
+  const isCurrentRequest = (
+    action: AsyncAction,
+    token: number,
+    controller: AbortController,
+  ) =>
+    requestTokenRef.current[action] === token &&
+    requestControllerRef.current[action] === controller &&
+    !controller.signal.aborted;
+
+  const finishRequest = (
+    action: AsyncAction,
+    token: number,
+    controller: AbortController,
+  ) => {
+    if (!isCurrentRequest(action, token, controller)) return;
+    requestInFlightRef.current[action] = false;
+    requestControllerRef.current[action] = null;
+  };
+
+  const cancelRequest = (action: AsyncAction) => {
+    requestTokenRef.current[action] += 1;
+    requestInFlightRef.current[action] = false;
+    requestControllerRef.current[action]?.abort();
+    requestControllerRef.current[action] = null;
+  };
+
+  const cancelAllRequests = () => {
+    (Object.keys(requestControllerRef.current) as AsyncAction[]).forEach(cancelRequest);
+  };
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -294,6 +352,12 @@ export function InterviewSimulator() {
       interviewerSpeechRef.current?.cancel();
       interviewerSpeechRef.current = null;
       cancelInterviewSpeech();
+      (Object.keys(requestControllerRef.current) as AsyncAction[]).forEach((action) => {
+        requestTokenRef.current[action] += 1;
+        requestInFlightRef.current[action] = false;
+        requestControllerRef.current[action]?.abort();
+        requestControllerRef.current[action] = null;
+      });
     },
     [],
   );
@@ -432,19 +496,25 @@ export function InterviewSimulator() {
       return;
     }
 
+    const request = beginRequest("resume");
+    if (!request) return;
     setResumeStatus("extracting");
     setResumeError("");
     try {
+      const fileData = await fileAsDataUrl(resumeFile);
+      if (!isCurrentRequest("resume", request.token, request.controller)) return;
       const response = await fetch("/api/interview/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: request.controller.signal,
         body: JSON.stringify({
           filename: resumeFile.name,
           mimeType: resumeFile.type || "application/octet-stream",
-          fileData: await fileAsDataUrl(resumeFile),
+          fileData,
         }),
       });
       const result = await readServicePayload(response);
+      if (!isCurrentRequest("resume", request.token, request.controller)) return;
       if (!response.ok) throw new Error("resume_personalization_unavailable");
       const profile =
         result && typeof result === "object" && "profile" in result
@@ -458,8 +528,11 @@ export function InterviewSimulator() {
       setStep("review");
       setAnnouncement("Resume information extracted. Review every detail before use.");
     } catch {
+      if (!isCurrentRequest("resume", request.token, request.controller)) return;
       setResumeStatus("error");
       setResumeError(RESUME_PERSONALIZATION_UNAVAILABLE_MESSAGE);
+    } finally {
+      finishRequest("resume", request.token, request.controller);
     }
   };
 
@@ -480,7 +553,9 @@ export function InterviewSimulator() {
   };
 
   const clearResumeFile = () => {
+    cancelRequest("resume");
     setResumeFile(null);
+    setResumeStatus("idle");
     setResumeError("");
     if (resumeInputRef.current) {
       resumeInputRef.current.value = "";
@@ -507,15 +582,19 @@ export function InterviewSimulator() {
   };
 
   const generateQuestions = async () => {
+    const request = beginRequest("questions");
+    if (!request) return;
     setQuestionStatus("loading");
     setQuestionError("");
     try {
       const response = await fetch("/api/interview/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: request.controller.signal,
         body: JSON.stringify(confirmedContext),
       });
       const result = await readServicePayload(response);
+      if (!isCurrentRequest("questions", request.token, request.controller)) return;
       if (!response.ok) throw new Error("personalization_unavailable");
       const parsed = parseQuestionSet(result, confirmedContext);
       if (!parsed) throw new Error("personalization_unavailable");
@@ -527,12 +606,16 @@ export function InterviewSimulator() {
       setStep("mode");
       setAnnouncement("Personalized questions are ready. Choose an input mode.");
     } catch {
+      if (!isCurrentRequest("questions", request.token, request.controller)) return;
       setQuestionStatus("error");
       setQuestionError(PERSONALIZATION_UNAVAILABLE_MESSAGE);
+    } finally {
+      finishRequest("questions", request.token, request.controller);
     }
   };
 
   const useGeneralFallback = () => {
+    cancelRequest("questions");
     setQuestionSet(createGeneralQuestionFallback(confirmedContext));
     setQuestionStatus("idle");
     setHasPausedSession(false);
@@ -851,6 +934,8 @@ export function InterviewSimulator() {
 
   const evaluateCompletedAttempt = async () => {
     if (!completedAttempt) return;
+    const requestState = beginRequest("evaluation");
+    if (!requestState) return;
     const request: EvaluationRequest = {
       attemptId: completedAttempt.id,
       role: completedAttempt.context.setup.role,
@@ -869,6 +954,7 @@ export function InterviewSimulator() {
       setEvaluationStatus("error");
       setEvaluationFailure("missing_data");
       setEvaluationError("The saved transcript is incomplete and cannot be evaluated.");
+      finishRequest("evaluation", requestState.token, requestState.controller);
       return;
     }
 
@@ -880,9 +966,13 @@ export function InterviewSimulator() {
       const response = await fetch("/api/interview/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: requestState.controller.signal,
         body: JSON.stringify(validatedRequest),
       });
       const result = await readServicePayload(response);
+      if (!isCurrentRequest("evaluation", requestState.token, requestState.controller)) {
+        return;
+      }
       if (!response.ok) {
         const code = serviceFailureCode(result);
         setEvaluationStatus("error");
@@ -923,14 +1013,20 @@ export function InterviewSimulator() {
       setEvaluationStatus("idle");
       setAnnouncement("Evidence-based interview feedback is ready.");
     } catch {
+      if (!isCurrentRequest("evaluation", requestState.token, requestState.controller)) {
+        return;
+      }
       setEvaluationStatus("error");
       setEvaluationFailure("service_failure");
       setEvaluationError(FEEDBACK_UNAVAILABLE_MESSAGE);
+    } finally {
+      finishRequest("evaluation", requestState.token, requestState.controller);
     }
   };
 
   const retrySameScenario = () => {
     if (!evaluation || !questionSet) return;
+    cancelRequest("evaluation");
     setFocusedRetryGoal(evaluation.nextPracticeAction);
     setQuestionIndex(0);
     setDraft("");
@@ -954,6 +1050,7 @@ export function InterviewSimulator() {
   };
 
   const restart = () => {
+    cancelAllRequests();
     setStep("setup");
     setSetup(DEFAULT_INTERVIEW_SETUP);
     setResumeFile(null);

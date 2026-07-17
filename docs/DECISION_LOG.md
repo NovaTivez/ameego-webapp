@@ -1516,3 +1516,32 @@ keeps its existing pointer interaction unchanged.
 Consequences: Keyboard focus cannot escape the modal while it is open. Escape,
 the close icon, and Camera Off all preserve a predictable return point; camera
 readiness and retry controls remain functional.
+
+---
+
+## Decision 044 - Serialize Client-Side Interview AI Actions
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: Resume extraction, question generation, and feedback evaluation relied
+on rendered disabled state only. Rapid input could start overlapping requests,
+allowing stale responses to overwrite current UI or attempt feedback.
+
+Decision: Give each action type a synchronous in-flight ref, monotonic token,
+and AbortController. A second rapid invocation is ignored; results and errors
+apply only when their controller and token are current. Abort and invalidate all
+requests on unmount, and invalidate relevant work when its local state is
+cleared or reset.
+
+Alternatives considered: Debouncing clicks, trusting button disabled state,
+allowing last-response-wins behavior, or adding server-side idempotency only.
+
+Reason: This preserves predictable UI and local persistence before a React
+render can update controls, without changing API payloads or consuming extra
+rate-limit budget.
+
+Consequences: Only one effective browser request exists per action type. Stale
+responses cannot write questions, resume details, evaluation state, or saved
+attempt feedback after cancellation or unmount.

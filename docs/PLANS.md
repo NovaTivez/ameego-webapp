@@ -1810,6 +1810,30 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Interview AI Request Concurrency Guards
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Added per-action request tokens, in-flight refs, and AbortControllers for
+  question generation, resume extraction, and feedback evaluation.
+- Locked each action synchronously before React re-renders its disabled state.
+- Ignored results and errors from stale or aborted work.
+- Aborted pending requests on unmount and invalidated them during resume clear,
+  fallback, retry, and restart actions.
+- Added rapid duplicate-click coverage for all three action types and unmount
+  abort coverage.
+
+## Validation
+
+- All 21 focused simulator tests pass, along with strict TypeScript, Prettier,
+  diff integrity, and the production build with 33 generated routes.
+- Focused ESLint reports only the pre-existing InterviewSimulator speech-effect
+  rule error and related hook warnings.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.

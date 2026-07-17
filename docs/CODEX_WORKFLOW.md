@@ -1898,3 +1898,26 @@ Iâ€™m Ready, interview start, and pointer behavior are unchanged.
 Validation result: All 18 focused simulator tests pass, including the keyboard
 trap and focus-restoration assertion. Strict TypeScript, Prettier, diff
 integrity, and the 33-route production build pass.
+
+## Contribution 049 - Interview AI Request Concurrency Guards
+
+Feature: Prevent duplicate and stale browser requests for questions, resume
+extraction, and feedback evaluation.
+
+Codex inspected: Each async simulator handler, associated loading states,
+attempt-evaluation persistence, resume cleanup, retry/reset paths, unmount
+cleanup, and focused component tests.
+
+Codex implemented: A per-action synchronous request gate with tokens and abort
+controllers, signal-aware fetch requests, stale-result checks, and invalidation
+on unmount, resume clearing, fallback, retry, and restart. New tests invoke all
+three actions twice before a render can disable their controls and assert a
+single effective request; unmount abort behavior is also covered.
+
+Scope protection: API paths, request bodies, validation, fallback questions,
+resume profiles, completed-attempt storage format, evaluation format, and user-
+facing failure messages remain unchanged.
+
+Validation result: All 21 focused simulator tests pass. Strict TypeScript,
+Prettier, diff integrity, and the 33-route production build pass. Focused ESLint
+reports only the existing speech-effect error and related hook warnings.

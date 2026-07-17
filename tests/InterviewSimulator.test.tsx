@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -214,6 +214,45 @@ describe("InterviewSimulator", () => {
     ).toHaveClass("pixel-button-primary");
   });
 
+  it("ignores rapid duplicate question-generation clicks and aborts on unmount", async () => {
+    const user = userEvent.setup();
+    let requestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      requestSignal = init?.signal ?? undefined;
+      return new Promise<Response>(() => {});
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { unmount } = render(<InterviewSimulator />);
+
+    await completeRequiredSetup(user);
+    await user.click(screen.getByRole("button", { name: /continue without resume/i }));
+    const startButton = screen.getByRole("button", {
+      name: /confirm and generate questions/i,
+    });
+    fireEvent.click(startButton);
+    fireEvent.click(startButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    unmount();
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it("ignores rapid duplicate resume-extraction clicks", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(() => new Promise<Response>(() => {}));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<InterviewSimulator />);
+
+    await completeRequiredSetup(user);
+    const file = new File(["resume text"], "resume.txt", { type: "text/plain" });
+    await user.upload(screen.getByLabelText(/resume file/i), file);
+    const extractButton = screen.getByRole("button", { name: /extract resume/i });
+    fireEvent.click(extractButton);
+    fireEvent.click(extractButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  });
+
   it("supports the complete no-resume text flow, progression, confirmation, and saving", async () => {
     const user = userEvent.setup();
     vi.stubGlobal(
@@ -273,6 +312,38 @@ describe("InterviewSimulator", () => {
     const stored = window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
     expect(stored).toContain("Confirmed answer number 3");
     expect(stored).not.toMatch(/confidence|nervousness|eye.contact/i);
+  }, 15_000);
+
+  it("ignores rapid duplicate feedback-evaluation clicks", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/interview/questions") {
+        return Promise.resolve(
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+        );
+      }
+      return new Promise<Response>(() => {});
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<InterviewSimulator />);
+
+    await reachModeWithoutResume(user);
+    await completeTextInterview(user);
+    const evaluateButton = screen.getByRole("button", {
+      name: /generate intelligent feedback/i,
+    });
+    fireEvent.click(evaluateButton);
+    fireEvent.click(evaluateButton);
+
+    await waitFor(() => {
+      const evaluationCalls = fetchMock.mock.calls.filter(
+        ([input]) => String(input) === "/api/interview/evaluate",
+      );
+      expect(evaluationCalls).toHaveLength(1);
+    });
   }, 15_000);
 
   it("presents the immersive mode-selection scene before starting a response mode", async () => {
