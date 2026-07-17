@@ -9,6 +9,10 @@ import {
   createGeneralQuestionFallback,
   generatePersonalizedQuestions,
 } from "@/lib/interview/questions";
+import {
+  normalizeQuestionSetCandidate,
+  parseQuestionSet,
+} from "@/lib/interview/validation";
 
 const context: ConfirmedInterviewContext = {
   setup: {
@@ -66,14 +70,53 @@ describe("personalized question generation", () => {
     expect(fetcher).toHaveBeenCalledOnce();
   });
 
-  it("rejects invalid AI output", async () => {
+  it("repairs short Llama output by padding to the requested count", async () => {
     const fetcher = vi.fn(
       async () =>
         new Response(
           JSON.stringify({
             choices: [
-              { message: { content: JSON.stringify({ questions: [questions[0]] }) } },
+              {
+                message: {
+                  content: JSON.stringify({
+                    questions: [
+                      {
+                        id: "1",
+                        category: "Intro",
+                        text: "Tell us why this opportunity interests you.",
+                      },
+                      {
+                        category: "resume_project",
+                        question: "Describe a challenge you handled with a team.",
+                      },
+                    ],
+                  }),
+                },
+              },
             ],
+          }),
+          { status: 200 },
+        ),
+    );
+
+    const result = await generatePersonalizedQuestions(context, {
+      apiKey: "test-key",
+      fetcher: fetcher as typeof fetch,
+    });
+
+    expect(result.source).toBe("ai");
+    expect(result.questions).toHaveLength(3);
+    expect(
+      result.questions.some((question) => question.category === "resume_project"),
+    ).toBe(false);
+  });
+
+  it("rejects empty AI output", async () => {
+    const fetcher = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [{ message: { content: JSON.stringify({ questions: [] }) } }],
           }),
           { status: 200 },
         ),
@@ -87,6 +130,38 @@ describe("personalized question generation", () => {
     ).rejects.toMatchObject({
       kind: "invalid_output",
     } satisfies Partial<InterviewAIError>);
+  });
+
+  it("normalizes categories and remaps resume questions without a resume", () => {
+    const normalized = normalizeQuestionSetCandidate(
+      {
+        questions: [
+          {
+            id: "q1",
+            category: "Introduction",
+            text: "Tell us why this opportunity interests you.",
+          },
+          {
+            id: "q2",
+            category: "resume_project",
+            text: "Describe a challenge you handled with a team.",
+          },
+          {
+            id: "q3",
+            category: "role",
+            text: "How would you approach an accessible interface task?",
+          },
+        ],
+      },
+      context,
+    );
+    expect(parseQuestionSet(normalized, context)).toMatchObject({
+      questions: [
+        expect.objectContaining({ category: "introductory" }),
+        expect.objectContaining({ category: "behavioral" }),
+        expect.objectContaining({ category: "role_specific" }),
+      ],
+    });
   });
 
   it("creates a clearly sourced no-resume fallback with the requested length", () => {

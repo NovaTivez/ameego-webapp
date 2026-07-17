@@ -23,6 +23,12 @@ import {
   type SpeechRecognitionLike,
 } from "@/lib/audio/speech-recognition";
 import {
+  cancelInterviewSpeech,
+  interviewerSpeechTimeoutMs,
+  speakInterviewQuestion,
+  type SpeakQuestionHandle,
+} from "@/lib/audio/speech-synthesis";
+import {
   DEFAULT_INTERVIEW_SETUP,
   EMPTY_RESUME_PROFILE,
   type ConfirmedInterviewContext,
@@ -211,6 +217,7 @@ export function InterviewSimulator() {
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const [speechError, setSpeechError] = useState("");
+  const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [completedAttempt, setCompletedAttempt] =
     useState<CompletedInterviewAttempt | null>(null);
@@ -229,6 +236,8 @@ export function InterviewSimulator() {
   const [selectedInputMode, setSelectedInputMode] = useState<InputMode | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const wantListeningRef = useRef(false);
+  const interviewerSpeechRef = useRef<SpeakQuestionHandle | null>(null);
+  const interviewerSpeechTokenRef = useRef(0);
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const cameraDialogRef = useRef<HTMLElement | null>(null);
   const isActiveSession = step === "interview" || step === "confirm";
@@ -262,6 +271,10 @@ export function InterviewSimulator() {
       wantListeningRef.current = false;
       recognitionRef.current?.abort?.();
       recognitionRef.current?.stop();
+      interviewerSpeechTokenRef.current += 1;
+      interviewerSpeechRef.current?.cancel();
+      interviewerSpeechRef.current = null;
+      cancelInterviewSpeech();
     },
     [],
   );
@@ -304,6 +317,74 @@ export function InterviewSimulator() {
     );
     return () => window.clearInterval(timer);
   }, [isListening]);
+
+  useEffect(() => {
+    const questionText = questionSet?.questions[questionIndex]?.text?.trim() ?? "";
+
+    const stopInterviewerSpeech = () => {
+      interviewerSpeechTokenRef.current += 1;
+      interviewerSpeechRef.current?.cancel();
+      interviewerSpeechRef.current = null;
+      cancelInterviewSpeech();
+      setIsInterviewerSpeaking(false);
+    };
+
+    if (step !== "interview" || !questionText) {
+      stopInterviewerSpeech();
+      return;
+    }
+
+    // Learner turn stays locked until the interviewer finishes speaking.
+    if (wantListeningRef.current || recognitionRef.current) {
+      wantListeningRef.current = false;
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      setIsListening(false);
+      setInterimTranscript("");
+    }
+
+    const token = interviewerSpeechTokenRef.current + 1;
+    interviewerSpeechTokenRef.current = token;
+    interviewerSpeechRef.current?.cancel();
+    setIsInterviewerSpeaking(true);
+    setAnnouncement("Interviewer is speaking. Your turn starts when the question finishes.");
+
+    const handle = speakInterviewQuestion(questionText);
+    interviewerSpeechRef.current = handle;
+
+    const timeoutMs = interviewerSpeechTimeoutMs(questionText);
+    const timeoutId = window.setTimeout(() => {
+      if (interviewerSpeechTokenRef.current !== token) return;
+      handle.cancel();
+    }, timeoutMs);
+
+    void handle.finished.then((reason) => {
+      window.clearTimeout(timeoutId);
+      if (interviewerSpeechTokenRef.current !== token) return;
+      interviewerSpeechRef.current = null;
+      setIsInterviewerSpeaking(false);
+      if (reason === "ended" || reason === "cancelled") {
+        setAnnouncement("Your turn. Answer the question when you are ready.");
+      } else if (reason === "unsupported" || reason === "error") {
+        setAnnouncement(
+          "Interviewer speech was unavailable. You can answer now using text or microphone.",
+        );
+      }
+    });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (interviewerSpeechTokenRef.current === token) {
+        handle.cancel();
+        interviewerSpeechRef.current = null;
+      }
+    };
+  }, [
+    step,
+    questionIndex,
+    questionSet?.questions[questionIndex]?.id,
+    questionSet?.questions[questionIndex]?.text,
+  ]);
 
   const confirmedContext: ConfirmedInterviewContext = { setup, resumeProfile };
 
@@ -513,6 +594,10 @@ export function InterviewSimulator() {
   };
 
   const startListening = () => {
+    if (isInterviewerSpeaking) {
+      setSpeechError("Wait for the interviewer to finish speaking before using the microphone.");
+      return;
+    }
     const Recognition = getSpeechRecognitionConstructor();
     if (!Recognition) {
       setSpeechError(
@@ -597,6 +682,11 @@ export function InterviewSimulator() {
   };
 
   const endInterview = () => {
+    interviewerSpeechTokenRef.current += 1;
+    interviewerSpeechRef.current?.cancel();
+    interviewerSpeechRef.current = null;
+    cancelInterviewSpeech();
+    setIsInterviewerSpeaking(false);
     if (isListening || wantListeningRef.current) {
       stopListening();
     }
@@ -609,6 +699,10 @@ export function InterviewSimulator() {
   };
 
   const reviewTranscript = () => {
+    if (isInterviewerSpeaking) {
+      setDraftError("Wait for the interviewer to finish speaking before continuing.");
+      return;
+    }
     if (isListening || wantListeningRef.current) stopListening();
     setSpeechError("");
     const error = validateTranscript(draft);
@@ -1439,6 +1533,7 @@ export function InterviewSimulator() {
           draftError={draftError}
           saveError={saveError}
           speechError={speechError}
+          isInterviewerSpeaking={isInterviewerSpeaking}
           confirmedResponses={responses}
           fillerWordCount={fillerWordCount}
           cameraVideoRef={attachCameraVideo}
@@ -1452,7 +1547,10 @@ export function InterviewSimulator() {
             setCameraIntent(false);
             queueMicrotask(() => setCameraIntent(true));
           }}
-          onDraftChange={setDraft}
+          onDraftChange={(value) => {
+            if (isInterviewerSpeaking) return;
+            setDraft(value);
+          }}
           onMicrophoneToggle={isListening ? stopListening : startListening}
           onEnd={endInterview}
           onNext={reviewTranscript}

@@ -22,6 +22,7 @@ type InterviewSessionViewProps = {
   draftError: string;
   saveError: string;
   speechError: string;
+  isInterviewerSpeaking: boolean;
   confirmedResponses: ConfirmedResponse[];
   fillerWordCount: number;
   cameraVideoRef: Ref<HTMLVideoElement>;
@@ -54,6 +55,7 @@ export function InterviewSessionView({
   draftError,
   saveError,
   speechError,
+  isInterviewerSpeaking,
   confirmedResponses,
   fillerWordCount,
   cameraVideoRef,
@@ -159,17 +161,28 @@ export function InterviewSessionView({
                 {inputMode === "microphone" ? "Mic + editable text" : "Text mode"}
               </span>
             </div>
+            <p
+              className={styles.interviewerTurnStatus}
+              data-speaking={isInterviewerSpeaking ? "true" : "false"}
+              aria-live="polite"
+            >
+              {isInterviewerSpeaking
+                ? "Interviewer speaking… wait for the question to finish before your turn."
+                : "Your turn. Answer when you are ready."}
+            </p>
             {inputMode === "microphone" ? (
               <p
                 className={styles.listeningStatus}
                 data-listening={isListening ? "true" : "false"}
                 aria-live="polite"
               >
-                {isListening
-                  ? interimTranscript
-                    ? `Listening… ${interimTranscript}`
-                    : "Listening… speak your answer, then stop the mic to review."
-                  : "Mic ready. Start the microphone, or type in the transcript box."}
+                {isInterviewerSpeaking
+                  ? "Microphone locked until the interviewer finishes."
+                  : isListening
+                    ? interimTranscript
+                      ? `Listening… ${interimTranscript}`
+                      : "Listening… speak your answer, then stop the mic to review."
+                    : "Mic ready. Start the microphone, or type in the transcript box."}
               </p>
             ) : null}
             {speechError ? (
@@ -183,16 +196,18 @@ export function InterviewSessionView({
                   type="button"
                   className={styles.microphoneButton}
                   onClick={onMicrophoneToggle}
-                  disabled={inputMode !== "microphone"}
+                  disabled={inputMode !== "microphone" || isInterviewerSpeaking}
                   data-listening={isListening}
                   data-mic-state={isListening ? "active" : "off"}
                   aria-pressed={inputMode === "microphone" ? isListening : undefined}
                   aria-label={
                     inputMode !== "microphone"
                       ? "Microphone unavailable in text mode"
-                      : isListening
-                        ? "Stop microphone"
-                        : "Start microphone"
+                      : isInterviewerSpeaking
+                        ? "Microphone locked while interviewer is speaking"
+                        : isListening
+                          ? "Stop microphone"
+                          : "Start microphone"
                   }
                 >
                   <PixelIcon name="microphone" />
@@ -204,7 +219,11 @@ export function InterviewSessionView({
                   aria-live="polite"
                 >
                   <span aria-hidden="true" />
-                  {isListening ? "Microphone active" : "Microphone off"}
+                  {isInterviewerSpeaking
+                    ? "Waiting for interviewer"
+                    : isListening
+                      ? "Microphone active"
+                      : "Microphone off"}
                 </span>
               </div>
               <div className={styles.responseField}>
@@ -216,8 +235,17 @@ export function InterviewSessionView({
                   rows={3}
                   value={draft}
                   onChange={(event) => onDraftChange(event.target.value)}
+                  disabled={isInterviewerSpeaking}
                   aria-invalid={Boolean(draftError)}
+                  aria-describedby={
+                    isInterviewerSpeaking ? "interviewer-turn-lock" : undefined
+                  }
                 />
+                {isInterviewerSpeaking ? (
+                  <span id="interviewer-turn-lock" className={styles.fieldHint}>
+                    Response input unlocks after the interviewer finishes speaking.
+                  </span>
+                ) : null}
                 {isListening && interimTranscript ? (
                   <span className={styles.interimTranscript} aria-hidden="true">
                     {interimTranscript}
@@ -232,6 +260,7 @@ export function InterviewSessionView({
                   type="button"
                   className={styles.nextButton}
                   onClick={onNext}
+                  disabled={isInterviewerSpeaking}
                   aria-label="Next: review response"
                 >
                   Next

@@ -136,6 +136,114 @@ export function parseConfirmedContext(value: unknown): ConfirmedInterviewContext
   return resumeProfile ? { setup: validatedSetup.data, resumeProfile } : null;
 }
 
+function coerceQuestionCategory(
+  value: unknown,
+): (typeof QUESTION_CATEGORIES)[number] | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (QUESTION_CATEGORIES.includes(normalized as (typeof QUESTION_CATEGORIES)[number])) {
+    return normalized as (typeof QUESTION_CATEGORIES)[number];
+  }
+  if (normalized === "intro" || normalized === "introduction") return "introductory";
+  if (normalized === "behaviour" || normalized === "behavior") return "behavioral";
+  if (normalized === "resume" || normalized === "project" || normalized === "resume_projects") {
+    return "resume_project";
+  }
+  if (normalized === "role" || normalized === "technical" || normalized === "role_related") {
+    return "role_specific";
+  }
+  return null;
+}
+
+function questionTextFrom(candidate: Record<string, unknown>): string | null {
+  for (const key of ["text", "question", "prompt"] as const) {
+    const value = candidate[key];
+    if (typeof value !== "string") continue;
+    const text = value.trim();
+    if (text.length >= 10 && text.length <= 500) return text;
+  }
+  return null;
+}
+
+/**
+ * Repair common Llama JSON drift before strict question-set validation.
+ */
+export function normalizeQuestionSetCandidate(
+  value: unknown,
+  context: ConfirmedInterviewContext,
+): unknown {
+  if (!isRecord(value) && !Array.isArray(value)) return value;
+
+  const rawQuestions = Array.isArray(value)
+    ? value
+    : Array.isArray((value as Record<string, unknown>).questions)
+      ? ((value as Record<string, unknown>).questions as unknown[])
+      : null;
+  if (!rawQuestions) return value;
+
+  const allowResume = hasResumeInformation(context.resumeProfile);
+  const seenIds = new Set<string>();
+  const seenText = new Set<string>();
+  const questions: InterviewQuestion[] = [];
+
+  for (const [index, item] of rawQuestions.entries()) {
+    if (!isRecord(item)) continue;
+    let category = coerceQuestionCategory(item.category);
+    if (!category) continue;
+    if (category === "resume_project" && !allowResume) {
+      category = "behavioral";
+    }
+    const text = questionTextFrom(item);
+    if (!text) continue;
+    const textKey = text.toLowerCase();
+    if (seenText.has(textKey)) continue;
+
+    let id =
+      typeof item.id === "string" && /^[a-z0-9_-]{1,40}$/i.test(item.id.trim())
+        ? item.id.trim()
+        : `q${index + 1}`;
+    if (seenIds.has(id)) id = `q${questions.length + 1}`;
+    while (seenIds.has(id)) id = `${id}_${questions.length + 1}`;
+
+    seenIds.add(id);
+    seenText.add(textKey);
+    questions.push({ id, category, text });
+  }
+
+  return { questions };
+}
+
+export function explainQuestionParseFailure(
+  value: unknown,
+  context: ConfirmedInterviewContext,
+): string {
+  if (!isRecord(value) || !Array.isArray(value.questions)) return "questions_missing";
+  if (value.questions.length !== context.setup.questionCount) {
+    return `questions_count_${value.questions.length}_expected_${context.setup.questionCount}`;
+  }
+
+  const allowResume = hasResumeInformation(context.resumeProfile);
+  const seenIds = new Set<string>();
+  const seenText = new Set<string>();
+  for (const [index, candidate] of value.questions.entries()) {
+    if (!isRecord(candidate)) return `question_${index}_not_object`;
+    const id = typeof candidate.id === "string" ? candidate.id : "";
+    const category = coerceQuestionCategory(candidate.category);
+    const text = questionTextFrom(candidate);
+    if (!id || !/^[a-z0-9_-]{1,40}$/i.test(id)) return `question_${index}_id`;
+    if (seenIds.has(id)) return `question_${index}_duplicate_id`;
+    if (!category) return `question_${index}_category`;
+    if (!text) return `question_${index}_text`;
+    if (seenText.has(text.toLowerCase())) return `question_${index}_duplicate_text`;
+    if (category === "resume_project" && !allowResume) {
+      return `question_${index}_resume_without_profile`;
+    }
+    seenIds.add(id);
+    seenText.add(text.toLowerCase());
+  }
+  return "unknown";
+}
+
 export function parseQuestionSet(
   value: unknown,
   context: ConfirmedInterviewContext,
