@@ -48,9 +48,8 @@ export function interviewerSpeechTimeoutMs(text: string): number {
 export function getSpeechSynthesis(
   speechWindow: Window & typeof globalThis = window,
 ): SpeechSynthesisLike | null {
-  const synthesis = (
-    speechWindow as unknown as { speechSynthesis?: SpeechSynthesisLike }
-  ).speechSynthesis;
+  const synthesis = (speechWindow as unknown as { speechSynthesis?: SpeechSynthesisLike })
+    .speechSynthesis;
   return synthesis ?? null;
 }
 
@@ -64,9 +63,7 @@ export function pickInterviewVoice(
   voices: SpeechSynthesisVoiceLike[],
 ): SpeechSynthesisVoiceLike | null {
   if (!voices.length) return null;
-  const english = voices.filter((voice) =>
-    voice.lang.toLowerCase().startsWith("en"),
-  );
+  const english = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
   const pool = english.length > 0 ? english : voices;
   return (
     pool.find((voice) =>
@@ -91,7 +88,8 @@ export function speakInterviewQuestion(
   options: SpeakQuestionOptions = {},
 ): SpeakQuestionHandle {
   const trimmed = text.trim();
-  const synthesis = options.synthesis === undefined ? getSpeechSynthesis() : options.synthesis;
+  const synthesis =
+    options.synthesis === undefined ? getSpeechSynthesis() : options.synthesis;
   const createUtterance = options.createUtterance ?? defaultCreateUtterance;
 
   if (!synthesis || !trimmed) {
@@ -104,8 +102,9 @@ export function speakInterviewQuestion(
 
   let settled = false;
   let utteranceKeepAlive: SpeechSynthesisUtteranceLike | null = null;
-  let resolveFinished: (reason: "ended" | "cancelled" | "error" | "unsupported") => void =
-    () => undefined;
+  let resolveFinished: (
+    reason: "ended" | "cancelled" | "error" | "unsupported",
+  ) => void = () => undefined;
   const finished = new Promise<"ended" | "cancelled" | "error" | "unsupported">(
     (resolve) => {
       resolveFinished = resolve;

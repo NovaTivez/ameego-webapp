@@ -53,11 +53,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const kind = error instanceof InterviewAIError ? error.kind : "provider";
     if (process.env.NODE_ENV !== "production") {
-      console.error(
-        "[questions]",
-        kind,
-        error instanceof Error ? error.message : error,
-      );
+      console.error("[questions]", kind, error instanceof Error ? error.message : error);
     }
     return NextResponse.json(
       { error: PERSONALIZATION_UNAVAILABLE_MESSAGE },

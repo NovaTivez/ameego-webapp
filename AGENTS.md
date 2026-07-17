@@ -232,36 +232,36 @@ Do not replace major technologies without documenting the decision.
 ## Suggested Source Organization
 
 src/
-  app/
+app/
 
-  components/
-    ui/
-    pixel/
-    courses/
-    simulation/
-    feedback/
-    progress/
+components/
+ui/
+pixel/
+courses/
+simulation/
+feedback/
+progress/
 
-  features/
-    academy/
-    courses/
-    exercises/
-    interview/
-    feedback/
-    progress/
+features/
+academy/
+courses/
+exercises/
+interview/
+feedback/
+progress/
 
-  lib/
-    ai/
-    audio/
-    transcription/
-    database/
-    validation/
+lib/
+ai/
+audio/
+transcription/
+database/
+validation/
 
-  prompts/
+prompts/
 
-  types/
+types/
 
-  tests/
+tests/
 
 ---
 

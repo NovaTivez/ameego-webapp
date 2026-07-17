@@ -42,11 +42,11 @@ Progress is stored only in the browser. AI calls stay on the server. Feedback is
 
 All model calls use the **Groq** chat API from **server-only** routes (JSON object mode, timeouts, second-pass runtime validation of schema, evidence, and safety):
 
-| Capability                       | Route                           | Notes                                                                                              |
-| -------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Optional resume fact extraction  | `POST /api/interview/resume`    | Text resumes (`.txt`/`.md`/`.rtf`) extract best; binary PDFs may need manual highlights               |
-| Personalized interview questions | `POST /api/interview/questions` | Falls back to clearly labeled general (non-AI) questions if generation fails                       |
-| STAR communication evaluation    | `POST /api/interview/evaluate`  | **No offline fallback.** Requires `GROQ_API_KEY`. Evidence must be an exact transcript substring   |
+| Capability                       | Route                           | Notes                                                                                            |
+| -------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Optional resume fact extraction  | `POST /api/interview/resume`    | Text resumes (`.txt`/`.md`/`.rtf`) extract best; binary PDFs may need manual highlights          |
+| Personalized interview questions | `POST /api/interview/questions` | Falls back to clearly labeled general (non-AI) questions if generation fails                     |
+| STAR communication evaluation    | `POST /api/interview/evaluate`  | **No offline fallback.** Requires `GROQ_API_KEY`. Evidence must be an exact transcript substring |
 
 Default model: `llama-3.1-8b-instant` (cheapest Llama on Groq) via `GROQ_MODEL` (optional override).
 

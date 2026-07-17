@@ -57,9 +57,7 @@ function coerceScore(value: unknown): number | null {
 function coerceCriterion(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const normalized = value.trim().toLowerCase();
-  return EVALUATION_CRITERIA.includes(
-    normalized as (typeof EVALUATION_CRITERIA)[number],
-  )
+  return EVALUATION_CRITERIA.includes(normalized as (typeof EVALUATION_CRITERIA)[number])
     ? normalized
     : null;
 }
@@ -216,9 +214,7 @@ export function normalizeEvaluationCandidate(
         typeof item.evidence === "string" ? item.evidence : "",
       );
       const action =
-        typeof item.improvementAction === "string"
-          ? item.improvementAction.trim()
-          : "";
+        typeof item.improvementAction === "string" ? item.improvementAction.trim() : "";
       const improvementAction =
         action.length >= 10 && !PLACEHOLDER_ACTION.test(action)
           ? action

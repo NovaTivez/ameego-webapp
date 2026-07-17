@@ -44,9 +44,7 @@ describe("interview speech synthesis helpers", () => {
   it("scales timeout with question length", () => {
     expect(interviewerSpeechTimeoutMs("Hi")).toBe(8_000);
     expect(
-      interviewerSpeechTimeoutMs(
-        Array.from({ length: 40 }, () => "question").join(" "),
-      ),
+      interviewerSpeechTimeoutMs(Array.from({ length: 40 }, () => "question").join(" ")),
     ).toBeGreaterThan(8_000);
   });
 

@@ -179,50 +179,50 @@ improvementAction
 ## Example Structure
 
 {
-  "summary": "",
-  "strengths": [],
-  "improvements": [],
-  "rubric": {
-    "relevance": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    },
-    "structure": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    },
-    "specificity": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    },
-    "starCompleteness": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    },
-    "reflection": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    },
-    "clarity": {
-      "score": 0,
-      "explanation": "",
-      "evidence": "",
-      "improvementAction": ""
-    }
-  },
-  "recommendedLessonId": "",
-  "nextPracticeAction": "",
-  "improvedExample": ""
+"summary": "",
+"strengths": [],
+"improvements": [],
+"rubric": {
+"relevance": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+},
+"structure": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+},
+"specificity": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+},
+"starCompleteness": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+},
+"reflection": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+},
+"clarity": {
+"score": 0,
+"explanation": "",
+"evidence": "",
+"improvementAction": ""
+}
+},
+"recommendedLessonId": "",
+"nextPracticeAction": "",
+"improvedExample": ""
 }
 
 ## Evidence Rules

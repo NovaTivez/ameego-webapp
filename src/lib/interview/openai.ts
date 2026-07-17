@@ -83,7 +83,8 @@ function schemaFromBody(body: StructuredRequestBody): {
   const format = body.text?.format;
   if (!format || format.type !== "json_schema" || !format.schema) return null;
   return {
-    name: typeof format.name === "string" && format.name.trim() ? format.name : "response",
+    name:
+      typeof format.name === "string" && format.name.trim() ? format.name : "response",
     schema: format.schema,
   };
 }
@@ -115,8 +116,7 @@ function inputToUserText(input: unknown): string {
           continue;
         }
         if (typed.type === "input_file" && typeof typed.file_data === "string") {
-          const filename =
-            typeof typed.filename === "string" ? typed.filename : "resume";
+          const filename = typeof typed.filename === "string" ? typed.filename : "resume";
           const decoded = decodeDataUrlText(typed.file_data, filename);
           chunks.push(
             decoded
@@ -174,7 +174,10 @@ function buildChatMessages(body: StructuredRequestBody): Array<{
 
   return [
     { role: "system", content: systemParts.join("\n\n") },
-    { role: "user", content: inputToUserText(body.input) || "Produce the JSON response." },
+    {
+      role: "user",
+      content: inputToUserText(body.input) || "Produce the JSON response.",
+    },
   ];
 }
 
@@ -193,8 +196,7 @@ export async function requestStructuredResponse(
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const model =
-    (options.model ?? process.env.GROQ_MODEL)?.trim() || DEFAULT_GROQ_MODEL;
+  const model = (options.model ?? process.env.GROQ_MODEL)?.trim() || DEFAULT_GROQ_MODEL;
 
   try {
     const response = await (options.fetcher ?? fetch)(GROQ_CHAT_URL, {
@@ -213,10 +215,7 @@ export async function requestStructuredResponse(
     });
 
     if (!response.ok) {
-      throw new InterviewAIError(
-        "provider",
-        `Groq returned status ${response.status}.`,
-      );
+      throw new InterviewAIError("provider", `Groq returned status ${response.status}.`);
     }
 
     return (await response.json()) as unknown;

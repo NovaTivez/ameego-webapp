@@ -140,16 +140,27 @@ function coerceQuestionCategory(
   value: unknown,
 ): (typeof QUESTION_CATEGORIES)[number] | null {
   if (typeof value !== "string") return null;
-  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
   if (QUESTION_CATEGORIES.includes(normalized as (typeof QUESTION_CATEGORIES)[number])) {
     return normalized as (typeof QUESTION_CATEGORIES)[number];
   }
   if (normalized === "intro" || normalized === "introduction") return "introductory";
   if (normalized === "behaviour" || normalized === "behavior") return "behavioral";
-  if (normalized === "resume" || normalized === "project" || normalized === "resume_projects") {
+  if (
+    normalized === "resume" ||
+    normalized === "project" ||
+    normalized === "resume_projects"
+  ) {
     return "resume_project";
   }
-  if (normalized === "role" || normalized === "technical" || normalized === "role_related") {
+  if (
+    normalized === "role" ||
+    normalized === "technical" ||
+    normalized === "role_related"
+  ) {
     return "role_specific";
   }
   return null;

@@ -66,11 +66,12 @@ export async function evaluateInterview(
         criteria: Array.isArray((normalized as { rubricScores?: unknown }).rubricScores)
           ? (
               normalized as {
-                rubricScores: Array<{ criterion?: unknown; evidence?: unknown }>
+                rubricScores: Array<{ criterion?: unknown; evidence?: unknown }>;
               }
             ).rubricScores.map((item) => ({
               criterion: item.criterion,
-              evidence: typeof item.evidence === "string" ? item.evidence.slice(0, 80) : null,
+              evidence:
+                typeof item.evidence === "string" ? item.evidence.slice(0, 80) : null,
             }))
           : null,
       });

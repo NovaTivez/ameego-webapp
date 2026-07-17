@@ -27,12 +27,13 @@ export function createPresenceDebounceState(): PresenceDebounceState {
   };
 }
 
-export function isCenterInFrame(centerX: number, centerY: number, inset = FRAME_INSET): boolean {
+export function isCenterInFrame(
+  centerX: number,
+  centerY: number,
+  inset = FRAME_INSET,
+): boolean {
   return (
-    centerX >= inset &&
-    centerX <= 1 - inset &&
-    centerY >= inset &&
-    centerY <= 1 - inset
+    centerX >= inset && centerX <= 1 - inset && centerY >= inset && centerY <= 1 - inset
   );
 }
 

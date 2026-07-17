@@ -1,10 +1,5 @@
 export type CameraStatus =
-  | "off"
-  | "starting"
-  | "active"
-  | "denied"
-  | "unavailable"
-  | "interrupted";
+  "off" | "starting" | "active" | "denied" | "unavailable" | "interrupted";
 
 export type FacePresence = "unknown" | "in_frame" | "out_of_frame" | "not_detected";
 
