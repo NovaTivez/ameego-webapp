@@ -1991,6 +1991,29 @@ Repository Prettier, strict TypeScript, and the 33-route production build pass.
 Repository ESLint retains only the pre-existing speech-effect rule error and
 related hook warnings in `InterviewSimulator`.
 
+## Contribution 054 - Synchronized Academy HUD Progress
+
+Feature: Replace the false XP and level header placeholders with real learner
+progress.
+
+Codex inspected: The global and campus header HUDs, Progress Library snapshot
+calculation, course and exercise completion stores, interview-attempt saves,
+reset behavior, and existing header and campus tests.
+
+Codex implemented: A shared client-side HUD that calculates the same snapshot
+as the Progress Library, reports truthful accessible status text, and refreshes
+after supported same-tab progress writes through a small browser event. The
+native storage event continues to support changes made in another tab.
+
+Scope protection: XP values, level thresholds, storage schemas, lesson and
+exercise behavior, interview persistence, and the Progress Library remain
+unchanged.
+
+Validation result: All 21 focused MainNav and Academy Hub tests pass.
+Repository Prettier, strict TypeScript, and the 33-route production build pass.
+Repository ESLint retains the pre-existing speech-effect rule error and three
+related hook warnings in `InterviewSimulator`.
+
 ## Contribution 052 - Compact Live Interview Session Layout
 
 Feature: Keep core interview controls usable on narrow and short viewports.

@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AcademyHubPage from "@/app/academy/page";
+import { starMethodLesson } from "@/content/interview-foundations";
+import { completeLesson } from "@/lib/course-progress";
 import { saveOnboardingPreferences } from "@/lib/onboarding";
 
 const router = vi.hoisted(() => ({ replace: vi.fn() }));
@@ -25,10 +27,13 @@ describe("Academy Hub", () => {
     render(<AcademyHubPage />);
 
     expect(await screen.findByRole("heading", { name: "Ameego Academy" })).toBeVisible();
-    expect(screen.getByLabelText("Academy player status")).toHaveTextContent("XP0000");
-    expect(screen.getByLabelText("Academy player status")).toHaveTextContent("LV01");
+    const playerStatus = await screen.findByLabelText(
+      "Academy player status: 0 experience points, level 1",
+    );
+    expect(playerStatus).toHaveTextContent("XP0");
+    expect(playerStatus).toHaveTextContent("LV1");
     const controls = screen.getByLabelText("Academy campus controls");
-    expect(controls).toContainElement(screen.getByLabelText("Academy player status"));
+    expect(controls).toContainElement(playerStatus);
     expect(controls).toContainElement(
       screen.getByLabelText("Audio and connection controls"),
     );
@@ -41,6 +46,17 @@ describe("Academy Hub", () => {
     expect(screen.getByText("Progress Library")).toBeVisible();
     expect(screen.getByText("Courses")).toBeVisible();
     expect(screen.getAllByText("Coming Soon")).toHaveLength(1);
+  });
+
+  it("uses the Progress Library calculation in the campus HUD", async () => {
+    completeLesson(window.localStorage, starMethodLesson.id);
+    render(<AcademyHubPage />);
+
+    const playerStatus = await screen.findByLabelText(
+      "Academy player status: 100 experience points, level 1",
+    );
+    expect(playerStatus).toHaveTextContent("XP100");
+    expect(playerStatus).toHaveTextContent("LV1");
   });
 
   it("connects every available map destination to its real route", async () => {

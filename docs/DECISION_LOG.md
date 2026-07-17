@@ -1664,3 +1664,34 @@ reset for quota, privacy, or general browser-storage failures.
 Consequences: Lessons, exercises, and the learner profile remain intact during
 interview-history repair. Once confirmed, the next completed attempt can create
 a new valid attempt store.
+
+---
+
+## Decision 049 - Render HUD Progress From the Shared Learner Snapshot
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The global navigation and campus HUD displayed `XP 0000` and `LV 01`
+as static chrome while the Progress Library already calculated real learner
+progress from browser storage. The mismatch undermined the progress story and
+caused assistive technology to announce values that were not true.
+
+Decision: Use the existing `calculateProgress` inputs for a shared client-side
+HUD component. Publish a browser event after supported progress mutations so
+open HUDs refresh immediately, while retaining the storage event for other
+browser contexts. Use explicit loading or unavailable text rather than fake
+numbers if the snapshot cannot be read.
+
+Alternatives considered: Keep decorative values but hide them from assistive
+technology, remove XP and level from the HUD, or duplicate progress reads in
+each header separately.
+
+Reason: A single display component preserves the same XP and level contract in
+both Academy surfaces, reflects same-tab mutations without a page reload, and
+does not imply achievements that were never saved.
+
+Consequences: Header progress relies on the existing browser-local persistence
+model and remains unavailable when that data is malformed or inaccessible.
+Progress formulas and persistence contracts remain centralized and unchanged.

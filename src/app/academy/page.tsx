@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { ExperienceControls } from "@/components/ExperienceControls";
 import { AcademyOnboardingGate } from "@/components/AcademyOnboardingGate";
-import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
+import { PlayerProgressHud } from "@/components/PlayerProgressHud";
 
 import { AcademyCampusMap } from "./AcademyCampusMap";
 import styles from "./academy.module.css";
@@ -31,10 +31,7 @@ export default function AcademyHubPage() {
               <h1 id="academy-hub-title">Ameego Academy</h1>
             </div>
             <div className={styles.headerControls} aria-label="Academy campus controls">
-              <div className={styles.playerStatus} aria-label="Academy player status">
-                <PixelHudStat label="XP" value="0000" icon="star" />
-                <PixelHudStat label="LV" value="01" />
-              </div>
+              <PlayerProgressHud className={styles.playerStatus} />
               <ExperienceControls />
               <Link
                 className={styles.settingsLink}

@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MainNav } from "@/components/MainNav";
+import { starMethodLesson } from "@/content/interview-foundations";
+import { completeLesson } from "@/lib/course-progress";
 
 const navigation = vi.hoisted(() => ({ pathname: "/practice" }));
 
@@ -23,6 +25,7 @@ vi.mock("@/components/ExperienceControls", () => ({
 describe("MainNav", () => {
   beforeEach(() => {
     navigation.pathname = "/practice";
+    window.localStorage.clear();
   });
 
   it("provides every core route", () => {
@@ -57,23 +60,40 @@ describe("MainNav", () => {
     );
   });
 
-  it("renders the consistent back, XP, and level HUD", () => {
+  it("renders the consistent back, real XP, and level HUD", async () => {
     render(<MainNav />);
 
     expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
       "href",
       "/academy",
     );
-    const status = screen.getByLabelText(/academy player status/i);
-    expect(status).toHaveTextContent("XP0000");
-    expect(status).toHaveTextContent("LV01");
+    const status = await screen.findByLabelText(
+      "Academy player status: 0 experience points, level 1",
+    );
+    expect(status).toHaveTextContent("XP0");
+    expect(status).toHaveTextContent("LV1");
   });
 
-  it("groups player, audio, connection, and Settings controls", () => {
+  it("refreshes header progress after learning activity is saved", async () => {
+    render(<MainNav />);
+    await screen.findByLabelText("Academy player status: 0 experience points, level 1");
+
+    completeLesson(window.localStorage, starMethodLesson.id);
+
+    const status = await screen.findByLabelText(
+      "Academy player status: 100 experience points, level 1",
+    );
+    expect(status).toHaveTextContent("XP100");
+    expect(status).toHaveTextContent("LV1");
+  });
+
+  it("groups player, audio, connection, and Settings controls", async () => {
     render(<MainNav />);
 
     const controls = screen.getByLabelText(/academy header controls/i);
-    expect(controls).toContainElement(screen.getByLabelText(/academy player status/i));
+    expect(controls).toContainElement(
+      await screen.findByLabelText(/academy player status:/i),
+    );
     expect(controls).toContainElement(
       screen.getByLabelText(/audio and connection controls/i),
     );

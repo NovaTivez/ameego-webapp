@@ -2,6 +2,7 @@ import { COURSE_PROGRESS_STORAGE_KEY } from "@/lib/course-progress";
 import { AUDIO_PREFERENCES_STORAGE_KEY } from "@/lib/audio/preferences";
 import { EXERCISE_PROGRESS_STORAGE_KEY } from "@/lib/exercise-progress";
 import { INTERVIEW_ATTEMPTS_STORAGE_KEY } from "@/lib/interview/attempts";
+import { notifyProgressUpdated } from "@/lib/progress-events";
 
 export const LEARNER_PROFILE_STORAGE_KEY = "ameego:learner-profile:v1";
 
@@ -79,6 +80,7 @@ export function clearLearningProgress(storage: Storage): void {
   ]) {
     storage.removeItem(key);
   }
+  notifyProgressUpdated();
 }
 
 export function resetAllLearnerData(storage: Storage): void {

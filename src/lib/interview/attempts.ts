@@ -11,6 +11,7 @@ import {
   parseQuestionSet,
   validateTranscript,
 } from "@/lib/interview/validation";
+import { notifyProgressUpdated } from "@/lib/progress-events";
 
 export const INTERVIEW_ATTEMPTS_STORAGE_KEY = "ameego:interview-attempts:v1";
 
@@ -179,6 +180,7 @@ export function readInterviewAttempts(storage: Storage): AttemptStore {
 
 export function clearInterviewAttempts(storage: Storage): void {
   storage.removeItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
+  notifyProgressUpdated();
 }
 
 export function saveCompletedAttempt(
@@ -193,6 +195,7 @@ export function saveCompletedAttempt(
     attempts: [...current.attempts, validated].slice(-20),
   };
   storage.setItem(INTERVIEW_ATTEMPTS_STORAGE_KEY, JSON.stringify(next));
+  notifyProgressUpdated();
   return next;
 }
 
@@ -224,6 +227,7 @@ export function saveAttemptEvaluation(
     INTERVIEW_ATTEMPTS_STORAGE_KEY,
     JSON.stringify({ version: 1, attempts }),
   );
+  notifyProgressUpdated();
   return nextAttempt;
 }
 

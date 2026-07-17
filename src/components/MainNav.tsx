@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ExperienceControls } from "@/components/ExperienceControls";
-import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
+import { PlayerProgressHud } from "@/components/PlayerProgressHud";
 
 const navItems = [
   { href: "/academy", label: "Academy" },
@@ -102,10 +102,7 @@ export function MainNav() {
         </nav>
         {!usesFullscreenWorld ? (
           <div className="hud-control-group" aria-label="Academy header controls">
-            <div className="hud-player-status" aria-label="Academy player status">
-              <PixelHudStat label="XP" value="0000" icon="star" />
-              <PixelHudStat label="LV" value="01" />
-            </div>
+            <PlayerProgressHud className="hud-player-status" />
             <ExperienceControls />
             <Link
               className="hud-settings-link"

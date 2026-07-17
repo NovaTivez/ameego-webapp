@@ -1691,6 +1691,41 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - Synchronized Academy HUD Progress
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Replaced the decorative `XP 0000` and `LV 01` placeholders in the global
+  header and Academy campus HUD with the shared Progress Library calculation.
+- Added a small browser-only progress update event so both HUDs refresh after
+  lesson completion, STAR exercise attempts, saved interview attempts,
+  feedback saves, or progress resets in the current tab.
+- Kept cross-tab updates responsive through the native storage event.
+- Added accurate live player-status labels for assistive technology. During a
+  brief initial load or a storage read failure, the UI no longer presents fake
+  progress values.
+- Added regression coverage for the global header's immediate refresh and the
+  campus HUD's persisted progress snapshot.
+
+## Scope
+
+- XP rules, level thresholds, local-storage schemas, course completion,
+  exercise scoring, interview saving, and Progress Library presentation are
+  unchanged. The HUD now reads the same existing snapshot instead of a static
+  display value.
+
+## Validation
+
+- Focused MainNav and Academy Hub tests pass: 2 files and 21 tests.
+- Repository formatting and strict TypeScript checks pass.
+- The 33-route production build passes.
+- Repository ESLint retains the existing `InterviewSimulator` speech-effect
+  error and three related hook warnings, unrelated to this change.
+
+---
+
 # Milestone Update - Stable Camera Preview Handoff
 
 Status: Implemented on 2026-07-18.
