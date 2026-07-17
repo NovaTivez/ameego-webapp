@@ -1545,3 +1545,33 @@ rate-limit budget.
 Consequences: Only one effective browser request exists per action type. Stale
 responses cannot write questions, resume details, evaluation state, or saved
 attempt feedback after cancellation or unmount.
+
+---
+
+## Decision 045 - Preserve Camera Activity During Interview Handoff
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: Confirming an optional camera preview closes its modal before the
+asynchronous microphone-permission request completes. The camera hook then saw
+no active consumer, stopped the established stream, and started it again once
+the interview session mounted.
+
+Decision: Keep camera activity enabled through a dedicated
+`isStartingInterview` handoff state. It begins before closing a confirmed
+preview and ends atomically with either the session transition or a failed
+microphone start.
+
+Alternatives considered: Starting the interview before microphone permission,
+requesting microphone access before closing the preview, or changing the camera
+hook to retain streams without any active owner.
+
+Reason: The state makes the ownership transition explicit, keeps the existing
+preview stream attached to the next video element, and preserves the current
+permission and failure flows.
+
+Consequences: Camera-on text and microphone starts no longer have a false
+inactive render between preview and session. Cancel, reset, and failed-start
+paths still clear the handoff state and release the camera normally.

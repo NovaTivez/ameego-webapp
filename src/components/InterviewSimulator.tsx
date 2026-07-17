@@ -197,6 +197,14 @@ function countFillerWords(transcript: string): number {
   return transcript.match(/\b(?:um+|uh+|erm+|ah+)\b|\byou know\b/gi)?.length ?? 0;
 }
 
+export function shouldKeepCameraActive(
+  isActiveSession: boolean,
+  cameraPreviewOpen: boolean,
+  isStartingInterview: boolean,
+): boolean {
+  return isActiveSession || cameraPreviewOpen || isStartingInterview;
+}
+
 export function InterviewSimulator() {
   const [step, setStep] = useState<Step>("setup");
   const [setup, setSetup] = useState<InterviewSetup>(DEFAULT_INTERVIEW_SETUP);
@@ -238,6 +246,7 @@ export function InterviewSimulator() {
   const [announcement, setAnnouncement] = useState("");
   const [cameraIntent, setCameraIntent] = useState(false);
   const [cameraPreviewOpen, setCameraPreviewOpen] = useState(false);
+  const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [selectedInputMode, setSelectedInputMode] = useState<InputMode | null>(null);
   const [hasPausedSession, setHasPausedSession] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -273,7 +282,11 @@ export function InterviewSimulator() {
     errorMessage: cameraErrorMessage,
   } = useCameraPresence({
     enabled: cameraIntent,
-    active: isActiveSession || cameraPreviewOpen,
+    active: shouldKeepCameraActive(
+      isActiveSession,
+      cameraPreviewOpen,
+      isStartingInterview,
+    ),
   });
 
   const beginRequest = (action: AsyncAction) => {
@@ -602,6 +615,7 @@ export function InterviewSimulator() {
       setQuestionStatus("idle");
       setHasPausedSession(false);
       setCameraPreviewOpen(false);
+      setIsStartingInterview(false);
       setSelectedInputMode(onboardingPracticeModeRef.current);
       setStep("mode");
       setAnnouncement("Personalized questions are ready. Choose an input mode.");
@@ -620,6 +634,7 @@ export function InterviewSimulator() {
     setQuestionStatus("idle");
     setHasPausedSession(false);
     setCameraPreviewOpen(false);
+    setIsStartingInterview(false);
     setSelectedInputMode(onboardingPracticeModeRef.current);
     setStep("mode");
     setAnnouncement("Standard interview questions selected. Your practice can continue.");
@@ -631,12 +646,14 @@ export function InterviewSimulator() {
     setHasPausedSession(false);
     setElapsedSeconds(0);
     setSpeakingSeconds(0);
+    setIsStartingInterview(false);
     setStep("interview");
   };
 
   const beginMicrophoneMode = async () => {
     setModeError("");
     if (!navigator.mediaDevices?.getUserMedia) {
+      setIsStartingInterview(false);
       setModeError("Microphone access is unavailable. Choose text response mode.");
       return;
     }
@@ -647,8 +664,10 @@ export function InterviewSimulator() {
       setHasPausedSession(false);
       setElapsedSeconds(0);
       setSpeakingSeconds(0);
+      setIsStartingInterview(false);
       setStep("interview");
     } catch {
+      setIsStartingInterview(false);
       setModeError(
         "Microphone permission was denied or unavailable. Text response mode still works.",
       );
@@ -686,6 +705,7 @@ export function InterviewSimulator() {
   };
 
   const confirmCameraPreview = () => {
+    setIsStartingInterview(true);
     setCameraPreviewOpen(false);
     cameraPreviewTriggerRef.current = null;
     setAnnouncement("Camera preview confirmed. Starting your interview.");
@@ -693,6 +713,7 @@ export function InterviewSimulator() {
   };
 
   const closeCameraPreview = () => {
+    setIsStartingInterview(false);
     setCameraPreviewOpen(false);
     setCameraIntent(false);
     setAnnouncement("Camera preview closed. Camera is now off.");
@@ -830,6 +851,7 @@ export function InterviewSimulator() {
     setDraft("");
     setDraftError("");
     setInterimTranscript("");
+    setIsStartingInterview(false);
     setCameraPreviewOpen(false);
     setHasPausedSession(true);
     setStep("mode");
@@ -858,6 +880,7 @@ export function InterviewSimulator() {
     setElapsedSeconds(0);
     setSpeakingSeconds(0);
     setCameraIntent(false);
+    setIsStartingInterview(false);
     setCameraPreviewOpen(false);
     setSelectedInputMode(null);
     setModeError("");
@@ -1040,6 +1063,7 @@ export function InterviewSimulator() {
     setEvaluationError("");
     setElapsedSeconds(0);
     setSpeakingSeconds(0);
+    setIsStartingInterview(false);
     setCameraPreviewOpen(false);
     setSelectedInputMode(null);
     setHasPausedSession(false);
@@ -1069,6 +1093,7 @@ export function InterviewSimulator() {
     setFocusedRetryGoal("");
     setSpeakingSeconds(0);
     setCameraIntent(false);
+    setIsStartingInterview(false);
     setCameraPreviewOpen(false);
     setSelectedInputMode(null);
     setHasPausedSession(false);

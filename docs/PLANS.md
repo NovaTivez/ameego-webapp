@@ -1691,6 +1691,33 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - Stable Camera Preview Handoff
+
+Status: Implemented on 2026-07-18.
+
+## Completed
+
+- Kept the optional camera session active from preview confirmation until the
+  interview session has mounted, including while microphone permission is
+  pending.
+- Kept the existing video-ref stream transfer as the handoff mechanism, avoiding
+  a second camera request or visible restart.
+- Cleared the transient handoff state on failed microphone starts, camera-close,
+  interview end, retry, discard, and full restart paths.
+- Added a focused regression contract for preview, handoff, session, and idle
+  camera activity states.
+
+## Validation
+
+- Repository Prettier and strict TypeScript pass.
+- All 22 focused `InterviewSimulator` tests and the existing camera-ref handoff
+  test pass.
+- The production build passes and generates all 33 routes.
+- Repository ESLint retains only the pre-existing `InterviewSimulator`
+  speech-effect rule error and related hook warnings.
+
+---
+
 # Milestone Update - Academy Hub Narrow-Viewport Recovery
 
 Status: Implemented and validated on 2026-07-18.

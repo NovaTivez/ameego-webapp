@@ -1921,3 +1921,26 @@ facing failure messages remain unchanged.
 Validation result: All 21 focused simulator tests pass. Strict TypeScript,
 Prettier, diff integrity, and the 33-route production build pass. Focused ESLint
 reports only the existing speech-effect error and related hook warnings.
+
+## Contribution 050 - Stable Camera Preview-to-Interview Handoff
+
+Feature: Keep the optional camera preview stream alive while an interview starts.
+
+Codex inspected: Camera hook lifecycle rules, preview dialog confirmation,
+asynchronous microphone permission, video ref handoff, reset paths, and existing
+camera tests.
+
+Codex implemented: A short-lived interview-start handoff state is now included
+in camera activity. It begins before closing the preview, remains true while
+microphone permission is pending, and clears alongside the interview transition
+or a failed/cancelled path. The existing ref callback transfers the same stream
+to the mounted interview video element.
+
+Scope protection: Camera permission messaging, optional camera behavior,
+microphone permission behavior, face-presence detection, recording policy, and
+all interview state remain unchanged.
+
+Validation result: All 22 focused simulator tests and the existing camera-ref
+handoff test pass. Repository Prettier, strict TypeScript, and the 33-route
+production build pass. Repository ESLint retains only the pre-existing
+speech-effect rule error and related hook warnings in `InterviewSimulator`.

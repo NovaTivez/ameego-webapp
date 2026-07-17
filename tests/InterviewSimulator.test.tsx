@@ -2,7 +2,10 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { InterviewSimulator } from "@/components/InterviewSimulator";
+import {
+  InterviewSimulator,
+  shouldKeepCameraActive,
+} from "@/components/InterviewSimulator";
 import { INTERVIEW_ATTEMPTS_STORAGE_KEY } from "@/lib/interview/attempts";
 import { saveOnboardingPreferences } from "@/lib/onboarding";
 
@@ -96,6 +99,13 @@ describe("InterviewSimulator", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+
+  it("keeps the camera stream active while preview ownership hands off to an interview", () => {
+    expect(shouldKeepCameraActive(false, true, false)).toBe(true);
+    expect(shouldKeepCameraActive(false, false, true)).toBe(true);
+    expect(shouldKeepCameraActive(true, false, false)).toBe(true);
+    expect(shouldKeepCameraActive(false, false, false)).toBe(false);
   });
 
   it("renders the RPG setup controls, progress tracker, and live summary", async () => {
