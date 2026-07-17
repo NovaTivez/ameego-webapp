@@ -4,9 +4,36 @@ import { PixelProgress } from "@/components/PixelProgress";
 import type { CameraStatus, FacePresence, HeadOrientation } from "@/lib/camera/types";
 import { cameraPresenceLabels } from "@/lib/camera/types";
 import type { ConfirmedResponse, InterviewQuestion } from "@/lib/interview/contracts";
-import { useEffect, useRef, useState, type KeyboardEvent, type Ref } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type Ref,
+} from "react";
 
 import styles from "./interview-session.module.css";
+
+const MOBILE_SESSION_BREAKPOINT = "(max-width: 760px)";
+
+function isNarrowSessionViewport(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia(MOBILE_SESSION_BREAKPOINT).matches
+  );
+}
+
+function subscribeToSessionViewport(listener: () => void) {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return () => undefined;
+  }
+
+  const media = window.matchMedia(MOBILE_SESSION_BREAKPOINT);
+  media.addEventListener("change", listener);
+  return () => media.removeEventListener("change", listener);
+}
 
 type InterviewSessionViewProps = {
   step: "interview" | "confirm";
@@ -74,6 +101,11 @@ export function InterviewSessionView({
   onConfirm,
 }: InterviewSessionViewProps) {
   const [endDialogOpen, setEndDialogOpen] = useState(false);
+  const isNarrowSession = useSyncExternalStore(
+    subscribeToSessionViewport,
+    isNarrowSessionViewport,
+    () => false,
+  );
   const endTriggerRef = useRef<HTMLButtonElement>(null);
   const endDialogRef = useRef<HTMLElement>(null);
   const cancelEndRef = useRef<HTMLButtonElement>(null);
@@ -323,7 +355,15 @@ export function InterviewSessionView({
         )}
       </div>
 
-      <aside className={styles.sideColumn} aria-label="Optional session tools">
+      <details
+        className={styles.sideColumn}
+        aria-label="Optional session tools"
+        open={!isNarrowSession}
+      >
+        <summary className={styles.mobileToolsSummary}>
+          <span>Optional session tools</span>
+          <span>Camera and analysis</span>
+        </summary>
         <section className={styles.sidePanel} aria-labelledby="camera-heading">
           <h3 id="camera-heading" className={styles.sideTitle}>
             <span>Optional Camera</span>
@@ -431,7 +471,7 @@ export function InterviewSessionView({
             <AnalysisRow label="Orientation" value={labels.orientation} />
           </dl>
         </section>
-      </aside>
+      </details>
 
       {endDialogOpen ? (
         <div className={styles.endDialogBackdrop}>

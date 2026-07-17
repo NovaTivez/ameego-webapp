@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const styles = readFileSync("src/components/interview-session.module.css", "utf8");
 const room = readFileSync("src/components/InterviewRoomScene.tsx", "utf8");
+const sessionView = readFileSync("src/components/InterviewSessionView.tsx", "utf8");
 
 describe("Interview Simulator immersive layout contract", () => {
   it("fills the active viewport with a dense desktop simulator grid", () => {
@@ -51,5 +52,22 @@ describe("Interview Simulator immersive layout contract", () => {
     expect(styles).not.toMatch(
       /border-radius|linear-gradient|radial-gradient|backdrop-filter/,
     );
+  });
+
+  it("uses intentional mobile scrolling, compact room sizing, and collapsible tools", () => {
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)[\s\S]*?\.simulatorScreen\s*\{[\s\S]*?height: auto;[\s\S]*?overflow: auto/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)[\s\S]*?body\):has\(\.simulatorScreen\)[\s\S]*?overflow: visible/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)[\s\S]*?\.responsePanel,[\s\S]*?\.confirmationPanel\s*\{[\s\S]*?position: sticky/,
+    );
+    expect(styles).toMatch(/\.mobileToolsSummary\s*\{[\s\S]*?display: flex/);
+    expect(styles).toContain("@media (max-width: 760px) and (max-height: 520px)");
+    expect(styles).not.toContain("min-height: 730px");
+    expect(sessionView).toContain("<details");
+    expect(sessionView).toContain("Camera and analysis");
   });
 });

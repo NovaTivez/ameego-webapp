@@ -1718,6 +1718,32 @@ Status: Implemented on 2026-07-18.
 
 ---
 
+# Milestone Update - Responsive Live Interview Session
+
+Status: Implemented on 2026-07-18.
+
+## Completed
+
+- Replaced mobile fixed-height clipping with intentional document scrolling.
+- Reduced room minimums at narrow and short heights while preserving the scene.
+- Kept response and confirmation panels sticky so Next and End remain reachable.
+- Collapsed optional camera and analysis tools behind a mobile disclosure by
+  default, while keeping the desktop sidebar open.
+- Added responsive layout contracts for overflow, compact scene sizing, sticky
+  controls, and the optional-tools disclosure.
+
+## Validation
+
+- All 29 focused simulator and responsive-style tests pass.
+- Browser QA confirmed controls at 375×667 and 667×375, plus the open sidebar
+  and full shell at 1440×900.
+- Repository Prettier and strict TypeScript pass.
+- The production build passes and generates all 33 routes.
+- Repository ESLint retains only the pre-existing `InterviewSimulator`
+  speech-effect rule error and related hook warnings.
+
+---
+
 # Milestone Update - Microphone Response Capability Gate
 
 Status: Implemented on 2026-07-18.

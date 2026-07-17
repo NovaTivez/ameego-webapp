@@ -1967,3 +1967,28 @@ Validation result: All 28 focused simulator and speech-recognition tests pass.
 Repository Prettier, strict TypeScript, and the 33-route production build pass.
 Repository ESLint retains only the pre-existing speech-effect rule error and
 related hook warnings in `InterviewSimulator`.
+
+## Contribution 052 - Compact Live Interview Session Layout
+
+Feature: Keep core interview controls usable on narrow and short viewports.
+
+Codex inspected: The fixed focus-mode overflow rules, live session grid,
+room-scene sizing, response action layout, camera/analysis sidebar, responsive
+breakpoints, and a live text interview at 375px portrait, 667×375 landscape,
+and 1440px desktop.
+
+Codex implemented: Mobile now uses intentional document scrolling, compact room
+height rules, sticky response and confirmation panels, and a closed-by-default
+native disclosure for optional camera and analysis tools. A short-height rule
+further reduces scene chrome without changing the desktop studio.
+
+Scope protection: Interview questions, TTS locking, transcript behavior,
+camera permissions, analysis data, end-dialog behavior, and desktop layout are
+unchanged.
+
+Validation result: All 29 focused simulator and responsive-style tests pass.
+Browser QA confirms Next and End in view at 375×667 and 667×375, with optional
+tools closed; the 1440×900 desktop studio retains its open sidebar and full
+viewport shell. Repository Prettier, strict TypeScript, and the 33-route
+production build pass. Repository ESLint retains only the pre-existing
+speech-effect rule error and related hook warnings in `InterviewSimulator`.

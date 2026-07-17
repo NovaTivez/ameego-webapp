@@ -1604,3 +1604,33 @@ keyboard-accessible text fallback.
 Consequences: Unsupported browsers never start a microphone interview that
 cannot transcribe. Capture permission is still requested only after a supported
 learner intentionally continues with microphone mode.
+
+---
+
+## Decision 047 - Prioritize Live Response Controls on Compact Screens
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The live simulator inherited a fixed desktop viewport and large room
+minimums on mobile. Short or narrow screens could put Next and End Interview
+below an inaccessible fold while secondary camera and analysis panels consumed
+space.
+
+Decision: On viewports at or below 760px, allow the session shell to scroll
+with the page, reduce the room height proportionally, keep response and
+confirmation panels sticky at the bottom, and collapse optional session tools
+behind a native disclosure. Apply a smaller room profile below 520px height.
+
+Alternatives considered: Horizontal scrolling, removing the room scene,
+permanently hiding analysis tools, or retaining the fixed-height shell and
+shrinking every control.
+
+Reason: The learner must always be able to reach response, transcript, Next,
+and End actions. The scene remains present but yields space to the primary task,
+while secondary tooling remains available on demand.
+
+Consequences: Desktop retains the full two-column, fixed-viewport studio. On
+mobile, optional camera/analysis are closed initially and page scrolling is
+intentional rather than clipped.
