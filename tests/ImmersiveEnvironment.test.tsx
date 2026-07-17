@@ -20,13 +20,19 @@ describe("immersive pixel environments", () => {
     expect(screen.getByText(/Build one clear story/i)).toBeVisible();
   });
 
-  it("labels preparation and reflection scenes without inventing analysis", () => {
+  it("uses the supplied panorama for preparation and the combined coach scene after completion", () => {
     const { rerender } = render(<PracticeLobbyScene stage="resume" />);
-    expect(screen.getByLabelText(/preparation lobby/i)).toBeVisible();
-    expect(screen.getByText(/resume is optional/i)).toBeVisible();
+    const panorama = screen.getByLabelText(/panoramic interview center room/i);
+    expect(panorama).toHaveClass("practice-lobby-panorama");
+    expect(panorama).toBeEmptyDOMElement();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.queryByText(/resume is optional/i)).not.toBeInTheDocument();
 
     rerender(<FeedbackRoomScene />);
-    expect(screen.getByLabelText(/reflection room/i)).toBeVisible();
+    expect(screen.getByLabelText(/after interview completion/i)).toBeVisible();
+    expect(
+      screen.getByRole("img", { name: /ameego interview coach seated/i }),
+    ).toHaveAttribute("src", expect.stringContaining("mode-coach-desk.png"));
     expect(
       screen.queryByText(/confidence score|eye contact score/i),
     ).not.toBeInTheDocument();

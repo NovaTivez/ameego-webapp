@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { MainNav } from "@/components/MainNav";
 import { GameWorldBackdrop } from "@/components/GameWorldBackdrop";
 import { AudioExperienceProvider } from "@/components/AudioExperienceProvider";
-import { ExperienceControls } from "@/components/ExperienceControls";
 
 import "./globals.css";
 import "./pixel-system.css";
@@ -27,7 +26,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <a className="skip-link" href="#main-content">
             Skip to main content
           </a>
-          <ExperienceControls />
           <div className="site-shell">
             <MainNav />
             <main id="main-content" tabIndex={-1}>

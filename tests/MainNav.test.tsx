@@ -9,6 +9,17 @@ vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
 }));
 
+vi.mock("@/components/ExperienceControls", () => ({
+  ExperienceControls: () => (
+    <div aria-label="Audio and connection controls">
+      <button type="button">Music</button>
+      <span role="status" aria-label="Online">
+        Online
+      </span>
+    </div>
+  ),
+}));
+
 describe("MainNav", () => {
   beforeEach(() => {
     navigation.pathname = "/practice";
@@ -55,6 +66,52 @@ describe("MainNav", () => {
     expect(status).toHaveTextContent("LV01");
   });
 
+  it("groups player, audio, connection, and Settings controls", () => {
+    render(<MainNav />);
+
+    const controls = screen.getByLabelText(/academy header controls/i);
+    expect(controls).toContainElement(screen.getByLabelText(/academy player status/i));
+    expect(controls).toContainElement(
+      screen.getByLabelText(/audio and connection controls/i),
+    );
+    expect(screen.getByRole("link", { name: /open settings/i })).toHaveAttribute(
+      "href",
+      "/settings",
+    );
+  });
+
+  it("keeps standalone experience controls on the fullscreen title route", () => {
+    navigation.pathname = "/";
+    render(<MainNav />);
+
+    expect(screen.queryByLabelText(/academy header controls/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/audio and connection controls/i)).toBeVisible();
+  });
+
+  it("leaves campus experience controls to the campus header", () => {
+    navigation.pathname = "/academy";
+    render(<MainNav />);
+
+    expect(screen.queryByLabelText(/academy header controls/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/audio and connection controls/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("returns from the Main Building dashboard to the Academy campus", () => {
+    navigation.pathname = "/academy/home";
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
+    expect(screen.getByRole("link", { name: "Academy" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
   it("returns from the Courses page to the Academy Hub", () => {
     navigation.pathname = "/learn";
     render(<MainNav />);
@@ -63,6 +120,15 @@ describe("MainNav", () => {
       "href",
       "/academy",
     );
+  });
+
+  it("returns from a dedicated lesson to the Interview Skills Academy", () => {
+    navigation.pathname = "/learn/academy/speaking-clearly";
+    render(<MainNav />);
+
+    expect(
+      screen.getByRole("link", { name: /back to interview skills academy/i }),
+    ).toHaveAttribute("href", "/learn");
   });
 
   it("returns from Settings to the Academy Hub", () => {

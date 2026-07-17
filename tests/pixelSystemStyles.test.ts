@@ -28,7 +28,12 @@ describe("compact pixel-game style contract", () => {
   });
 
   it("styles the global HUD and required reusable primitives", () => {
-    expect(system).toMatch(/\.site-header\s*{[\s\S]*?min-height:\s*44px/);
+    expect(system).toMatch(/\.site-header\s*{[\s\S]*?min-height:\s*68px/);
+    expect(system).toMatch(/\.site-header\s*{[\s\S]*?padding:\s*0 clamp\(24px/);
+    expect(system).toMatch(/\.hud-control-group\s*{[\s\S]*?gap:\s*8px/);
+    expect(system).toMatch(/\.music-toggle,[\s\S]*?width:\s*88px/);
+    expect(system).toMatch(/\.music-toggle,[\s\S]*?min-height:\s*36px/);
+    expect(system).toMatch(/\.hud-settings-link\s*{[\s\S]*?width:\s*36px/);
     expect(system).toMatch(/\.site-header nav\s*{[\s\S]*?display:\s*none/);
     expect(system).toMatch(/\.site-footer\s*{[\s\S]*?display:\s*none/);
     expect(system).toMatch(/\.pixel-hud-stat\s*{/);

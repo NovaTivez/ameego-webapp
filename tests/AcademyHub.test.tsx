@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import AcademyHubPage from "@/app/academy/page";
@@ -10,11 +10,19 @@ describe("Academy Hub", () => {
     expect(screen.getByRole("heading", { name: "Ameego Academy" })).toBeVisible();
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("XP0000");
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("LV01");
+    const controls = screen.getByLabelText("Academy campus controls");
+    expect(controls).toContainElement(screen.getByLabelText("Academy player status"));
+    expect(controls).toContainElement(
+      screen.getByLabelText("Audio and connection controls"),
+    );
+    expect(controls).toContainElement(screen.getByRole("link", { name: "Settings" }));
+    expect(controls).toHaveTextContent(/Music|Muted/);
+    expect(controls).toHaveTextContent("Online");
     expect(screen.getByText("Main Building")).toBeVisible();
     expect(screen.getByText("Interview Center")).toBeVisible();
     expect(screen.getByText("Speech Hall")).toBeVisible();
     expect(screen.getByText("Progress Library")).toBeVisible();
-    expect(screen.getAllByText("Courses")).toHaveLength(2);
+    expect(screen.getByText("Courses")).toBeVisible();
     expect(screen.getAllByText("Coming Soon")).toHaveLength(1);
   });
 
@@ -23,7 +31,7 @@ describe("Academy Hub", () => {
 
     expect(
       screen.getByRole("link", { name: "Open Main Building, Academy home" }),
-    ).toHaveAttribute("href", "/academy");
+    ).toHaveAttribute("href", "/academy/home");
     expect(screen.getByRole("link", { name: "Enter Interview Center" })).toHaveAttribute(
       "href",
       "/practice",
@@ -44,26 +52,19 @@ describe("Academy Hub", () => {
       "/learn",
     );
 
-    const shortcuts = screen.getByRole("navigation", { name: "Academy shortcuts" });
-    expect(within(shortcuts).getByRole("link", { name: "Courses" })).toHaveAttribute(
-      "href",
-      "/learn",
-    );
-    expect(within(shortcuts).getByRole("link", { name: "Progress" })).toHaveAttribute(
-      "href",
-      "/progress",
-    );
-    expect(within(shortcuts).getByRole("link", { name: "Settings" })).toHaveAttribute(
-      "href",
-      "/settings",
-    );
+    const settings = screen.getByRole("link", { name: "Settings" });
+    expect(settings).toHaveAttribute("href", "/settings");
+    expect(settings).not.toHaveTextContent("Settings");
+    expect(
+      screen.queryByRole("navigation", { name: "Academy shortcuts" }),
+    ).not.toBeInTheDocument();
   });
 
   it("uses the uploaded Academy artwork with the correct paths and alt text", () => {
     render(<AcademyHubPage />);
 
     const assets = [
-      ["/images/academy/campus-map-v2.png", ""],
+      ["/images/academy/campus-map-v3.png", ""],
       ["/images/academy/main-building-v2.png", "Main Building"],
       ["/images/academy/interview-center-v2.png", "Interview Center building"],
       ["/images/academy/speech-hall-v2.png", "Speech Hall building"],

@@ -1527,6 +1527,339 @@ h3 {
   border-color: var(--mint-300);
 }
 
+/* Post-interview results use the full page canvas and intentionally continue below
+   the completed simulator room so long feedback can breathe instead of being packed
+   into the live-session frame. */
+body:has(.interview-results-mode) {
+  padding: 0;
+  background: #050b14;
+}
+
+body:has(.interview-results-mode) .site-shell {
+  min-height: 100svh;
+  border: 0;
+  background: #07111f;
+  box-shadow: none;
+}
+
+body:has(.interview-results-mode) .site-header nav,
+body:has(.interview-results-mode) .site-footer,
+body:has(.interview-results-mode) .game-world-backdrop {
+  display: none;
+}
+
+.interview-simulator.interview-results-mode {
+  width: 100%;
+  max-width: none;
+  gap: 0;
+  padding: 10px 0 0;
+  background: #07111f;
+}
+
+.interview-results-mode > .interview-simulator-header,
+.interview-results-mode > .interview-stepper {
+  display: none;
+}
+
+.interview-complete-layout {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.interview-complete-hero {
+  position: relative;
+  width: calc(100% - 20px);
+  height: clamp(230px, 32svh, 300px);
+  min-height: 230px;
+  margin: 0 10px;
+  overflow: hidden;
+  border: 3px solid var(--game-border);
+  border-radius: 2px;
+  background: #03070d;
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    inset 0 -7px 0 rgba(1, 4, 10, 0.34),
+    5px 5px 0 rgba(1, 4, 10, 0.76);
+  isolation: isolate;
+}
+
+.interview-complete-hero .feedback-room-scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  background: #03070d url("/images/interview/header-panorama.png") center center / cover
+    no-repeat;
+  box-shadow: none;
+}
+
+.interview-complete-hero .feedback-room-scene::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: rgba(2, 8, 17, 0.16);
+  content: "";
+  pointer-events: none;
+}
+
+.feedback-complete-coach {
+  position: absolute;
+  z-index: 2;
+  bottom: -66px;
+  left: 50%;
+  width: clamp(255px, 25.5vw, 345px);
+  height: auto;
+  object-fit: contain;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  user-select: none;
+}
+
+.interview-complete-summary {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  left: clamp(18px, 12vw, 170px);
+  display: grid;
+  width: min(340px, 30vw);
+  gap: 7px;
+  padding: 12px 14px;
+  border: 3px solid var(--game-border);
+  border-radius: 2px;
+  color: #07111f;
+  background: #fff8df;
+  box-shadow:
+    inset 0 0 0 2px #cbc1a4,
+    5px 5px 0 rgba(1, 4, 10, 0.72);
+}
+
+.interview-complete-summary::after {
+  position: absolute;
+  right: -18px;
+  bottom: 16px;
+  width: 18px;
+  height: 18px;
+  border-right: 3px solid var(--game-border);
+  border-bottom: 3px solid var(--game-border);
+  background: #fff8df;
+  content: "";
+  transform: skew(38deg);
+}
+
+.interview-complete-summary h2 {
+  max-width: none;
+  margin: 0;
+  color: #000;
+  font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.interview-complete-summary p {
+  margin: 0;
+  color: #07111f;
+  font-size: clamp(0.66rem, 0.85vw, 0.76rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.interview-complete-summary .pixel-badge {
+  justify-self: start;
+  margin: 0;
+}
+
+.feedback-scroll-link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-self: start;
+  gap: 12px;
+  padding: 7px 10px;
+  border: 3px solid var(--game-border);
+  color: var(--game-border);
+  background: var(--game-green-highlight);
+  box-shadow:
+    inset 0 0 0 1px #a6ef9e,
+    4px 4px 0 var(--game-border);
+  font-family: var(--game-font-ui);
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.feedback-scroll-link:hover,
+.feedback-scroll-link:focus-visible {
+  background: #8cec84;
+  transform: translate(-1px, -1px);
+}
+
+.feedback-scroll-link span {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.interview-feedback-report {
+  display: grid;
+  gap: clamp(22px, 3vw, 36px);
+  width: 100%;
+  min-width: 0;
+  padding: clamp(36px, 6vw, 76px) clamp(16px, 5vw, 72px);
+  background: var(--game-canvas);
+  scroll-margin-top: 86px;
+}
+
+.interview-feedback-report > * {
+  width: min(100%, 1320px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.interview-feedback-report .evaluation-request {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(20px, 4vw, 54px);
+  min-height: 280px;
+  align-items: center;
+  padding: clamp(24px, 5vw, 54px);
+  border: 4px solid var(--game-border);
+  background: var(--game-panel-850);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    8px 8px 0 var(--game-border);
+}
+
+.interview-feedback-report .evaluation-request.is-loading {
+  border-color: var(--game-yellow-dark);
+  box-shadow:
+    inset 6px 0 0 var(--game-yellow),
+    8px 8px 0 var(--game-border);
+}
+
+.evaluation-request-copy h2 {
+  max-width: 26ch;
+  margin: 8px 0 12px;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  text-transform: uppercase;
+}
+
+.evaluation-request-copy > p:last-child {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--game-text-muted);
+  line-height: 1.7;
+}
+
+.interview-feedback-report .evaluation-request > .pixel-button {
+  min-width: min(300px, 100%);
+  min-height: 58px;
+  padding: 14px 18px;
+  border-color: var(--game-border);
+  background: var(--game-green-highlight);
+  color: var(--game-border);
+  font-size: 0.78rem;
+  box-shadow:
+    inset 0 0 0 1px #a6ef9e,
+    6px 6px 0 var(--game-border);
+}
+
+.evaluation-error {
+  max-width: 900px;
+  padding: 20px;
+}
+
+.interview-final-action {
+  display: grid;
+  justify-items: center;
+  padding: clamp(28px, 5vw, 50px);
+  border-top: 3px solid var(--game-line);
+  text-align: center;
+}
+
+.interview-final-action h2 {
+  max-width: none;
+  margin: 6px 0 8px;
+  text-transform: uppercase;
+}
+
+.interview-final-action > p:not(.eyebrow) {
+  max-width: 64ch;
+  margin: 0 0 20px;
+  color: var(--game-text-muted);
+}
+
+.interview-final-action .pixel-button {
+  min-width: min(300px, 100%);
+}
+
+@media (max-width: 760px) {
+  .interview-complete-hero {
+    height: 260px;
+    min-height: 260px;
+  }
+
+  .interview-complete-summary {
+    top: 14px;
+    left: 14px;
+    width: min(320px, 42vw);
+  }
+
+  .feedback-complete-coach {
+    bottom: -58px;
+    width: 270px;
+  }
+
+  .interview-feedback-report .evaluation-request {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .interview-feedback-report .evaluation-request > .pixel-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .interview-complete-hero {
+    height: 390px;
+    min-height: 390px;
+    margin: 0 5px;
+    width: calc(100% - 10px);
+  }
+
+  .interview-complete-summary {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    padding: 10px;
+  }
+
+  .interview-complete-summary::after {
+    display: none;
+  }
+
+  .feedback-complete-coach {
+    bottom: -60px;
+    width: 240px;
+  }
+
+  .interview-feedback-report {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .interview-final-action .pixel-button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 900px) {
   .interview-stepper {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -4944,75 +5277,6 @@ h3 {
   box-shadow: inset 0 14px 0 var(--wood-500);
 }
 
-.feedback-room-scene {
-  min-height: 340px;
-  margin-bottom: var(--space-5);
-}
-
-.feedback-results-board {
-  position: absolute;
-  top: 10%;
-  left: 25%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  width: 52%;
-  padding: var(--space-3);
-  border: 7px solid var(--wood-700);
-  background: var(--ink-900);
-  color: var(--mint-300);
-  text-align: center;
-}
-
-.feedback-results-board .pixel-icon,
-.feedback-results-board span {
-  grid-column: 1 / -1;
-  justify-self: center;
-}
-
-.feedback-results-board span {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.feedback-results-board i {
-  height: 10px;
-  background: var(--mint-300);
-}
-
-.feedback-scene-character {
-  position: absolute;
-  z-index: 3;
-  bottom: 12%;
-  left: 6%;
-}
-
-.feedback-trophy-shelf {
-  position: absolute;
-  right: 7%;
-  bottom: 20%;
-  display: flex;
-  align-items: end;
-  justify-content: space-around;
-  width: 150px;
-  height: 100px;
-  border-bottom: 12px solid var(--wood-700);
-}
-
-.feedback-trophy-shelf > span {
-  width: 45px;
-  height: 55px;
-  background: var(--amber-300);
-  clip-path: polygon(0 0, 100% 0, 82% 70%, 60% 70%, 60% 100%, 40% 100%, 40% 70%, 18% 70%);
-}
-
-.feedback-trophy-shelf i {
-  width: 18px;
-  height: 38px;
-  background: var(--paper-300);
-}
-
 /* Reading and exercise surfaces become places, not floating cards */
 .lesson-article,
 .star-exercise,
@@ -5136,19 +5400,13 @@ h3 {
   }
 
   .practice-notice-board,
-  .practice-filing-cabinet,
-  .feedback-trophy-shelf {
+  .practice-filing-cabinet {
     display: none;
   }
 
   .practice-lobby-counter {
     right: 6%;
     left: 28%;
-  }
-
-  .feedback-results-board {
-    left: 24%;
-    width: 70%;
   }
 }
 
@@ -5180,8 +5438,7 @@ h3 {
   }
 
   .learning-scene-character,
-  .practice-lobby-character,
-  .feedback-scene-character {
+  .practice-lobby-character {
     transform: scale(0.82);
     transform-origin: bottom left;
   }
@@ -5202,11 +5459,6 @@ h3 {
 
   .practice-lobby-counter {
     left: 20%;
-  }
-
-  .feedback-results-board {
-    left: 18%;
-    width: 78%;
   }
 
   .lesson-reading-column {

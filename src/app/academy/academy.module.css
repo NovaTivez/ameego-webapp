@@ -1,7 +1,9 @@
 .screen {
-  min-height: 100vh;
-  min-height: 100svh;
-  padding: 12px;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  overflow: hidden;
   background: #02050d;
 }
 
@@ -29,43 +31,46 @@
 
 .frame {
   position: relative;
-  display: grid;
-  grid-template-rows: 48px minmax(0, 1fr) 60px;
-  width: min(1280px, 100%);
-  min-height: calc(100vh - 24px);
-  min-height: calc(100svh - 24px);
-  margin: 0 auto;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
   overflow: hidden;
-  border: 4px solid #01030a;
-  outline: 2px solid #405675;
-  outline-offset: -7px;
+  border: 0;
+  outline: 0;
   background: #081426;
-  box-shadow:
-    inset 0 0 0 3px #172846,
-    6px 6px 0 #01030a;
+  box-shadow: none;
 }
 
 .hud {
-  z-index: 20;
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  right: 0;
+  left: 0;
   display: flex;
+  height: 72px;
   min-width: 0;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 14px 0 8px;
-  border-bottom: 4px solid #01030a;
-  background: #101e35;
-  box-shadow: inset 0 -2px 0 #344967;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 3px solid #01030a;
+  background: rgba(8, 20, 38, 0.94);
+  box-shadow:
+    inset 0 -2px 0 #344967,
+    0 4px 0 rgba(1, 3, 10, 0.62);
 }
 
 .identity,
-.playerStatus {
+.playerStatus,
+.headerControls {
   display: flex;
   align-items: center;
 }
 
 .identity {
+  flex: 0 1 auto;
   min-width: 0;
-  gap: 10px;
+  gap: 12px;
 }
 
 .identity h1 {
@@ -82,8 +87,9 @@
 
 .backLink {
   display: grid;
-  width: 32px;
-  height: 30px;
+  width: 42px;
+  height: 42px;
+  flex: none;
   place-items: center;
   border: 2px solid #020713;
   color: #90a5bd;
@@ -104,40 +110,98 @@
   outline-offset: 2px;
 }
 
+.headerControls {
+  min-width: 0;
+  margin-left: auto;
+  gap: 8px;
+}
+
 .playerStatus {
-  gap: 18px;
+  gap: 8px;
   color: #f4c84f;
   font-family: var(--font-pixel);
   font-size: 0.72rem;
 }
 
 .playerStatus :global(.pixel-hud-stat) {
+  width: 84px;
+  min-height: 42px;
+  justify-content: center;
   gap: 5px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  padding: 5px 8px;
+  border: 2px solid #020713;
+  background: #172842;
+  box-shadow:
+    inset 0 0 0 1px #405676,
+    2px 2px 0 #020713;
 }
 
 .playerStatus :global(.pixel-hud-stat) strong {
   color: #f4c84f;
 }
 
+.settingsLink {
+  display: grid;
+  width: 84px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border: 2px solid #020713;
+  color: #dce6ee;
+  background: #172842;
+  box-shadow:
+    inset 0 0 0 1px #405676,
+    2px 2px 0 #020713;
+}
+
+.settingsLink:hover,
+.settingsLink:focus-visible {
+  color: #f4c84f;
+  background: #213654;
+}
+
+.settingsLink:focus-visible {
+  outline: 3px solid #f4c84f;
+  outline-offset: 2px;
+}
+
+.headerControls :global(.experience-controls) {
+  position: static;
+  z-index: auto;
+  gap: 8px;
+}
+
+.headerControls :global(.music-toggle),
+.headerControls :global(.connection-status) {
+  width: 84px;
+  min-height: 42px;
+  flex: none;
+}
+
+:global(body):has(.screen) :global(.offline-mode-notice) {
+  top: 78px;
+  right: 16px;
+}
+
 .mapStage {
   display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
   min-width: 0;
   min-height: 0;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #071222;
-  box-shadow: inset 0 0 0 3px #13243b;
+  background: #02050d;
+  box-shadow: none;
 }
 
 .map {
   position: relative;
-  width: min(100%, 1280px, calc((100svh - 132px) * 1.776833));
-  max-width: 1280px;
+  width: max(100vw, calc(100svh * 1.776833));
+  flex: none;
+  max-width: none;
   aspect-ratio: 1672 / 941;
   overflow: hidden;
   background-color: #10233a;
@@ -146,20 +210,10 @@
 
 .mapBackground {
   z-index: 0;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   pointer-events: none;
   user-select: none;
-}
-
-.map::after {
-  position: absolute;
-  z-index: 30;
-  inset: 0;
-  border: 2px solid rgba(80, 110, 145, 0.42);
-  box-shadow: inset 0 0 0 2px rgba(1, 5, 13, 0.52);
-  content: "";
-  pointer-events: none;
 }
 
 .location {
@@ -184,33 +238,33 @@
 
 .mainBuilding {
   z-index: 8;
-  top: 77.5%;
+  top: 75.5%;
   left: 50%;
   width: 24%;
 }
 
 .interviewCenter {
-  top: 31.5%;
-  left: 24.5%;
+  top: 29.5%;
+  left: 25%;
   width: 21%;
 }
 
 .speechHall {
-  top: 31.5%;
-  left: 75.5%;
+  top: 29.5%;
+  left: 75%;
   width: 21%;
   transform-origin: center center;
 }
 
 .progressLibrary {
-  top: 63.5%;
-  left: 24%;
+  top: 61.5%;
+  left: 25%;
   width: 19%;
 }
 
 .coursesBuilding {
-  top: 63.5%;
-  left: 76%;
+  top: 61.5%;
+  left: 75%;
   width: 19%;
 }
 
@@ -306,118 +360,102 @@
   transform: translate(-50%, -50%) scale(0.98);
 }
 
-.bottomNav {
-  z-index: 20;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 4px solid #01030a;
-  background: #101d31;
-  box-shadow: inset 0 3px 0 #344967;
-}
-
-.bottomNav > a {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border-right: 3px solid #03070e;
-  color: #eef2f3;
-  background: #101d31;
-  box-shadow: inset 0 0 0 2px #263b57;
-  font-family: var(--font-pixel);
-  font-size: clamp(0.58rem, 1.5vw, 0.76rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.bottomNav > :last-child {
-  border-right: 0;
-}
-
-.bottomNav > a:hover,
-.bottomNav > a:focus-visible {
-  color: #f4c84f;
-  background: #1b304d;
-  box-shadow:
-    inset 0 -5px 0 #3f9d4a,
-    inset 0 0 0 2px #405979;
-}
-
-.bottomNav > a:focus-visible {
-  z-index: 2;
-  outline: 3px solid #f4c84f;
-  outline-offset: -5px;
-}
-
 @media (hover: none), (pointer: coarse) {
   .locationLabel {
     opacity: 1;
   }
 }
 
-@media (max-width: 760px) {
-  .screen {
-    padding: 7px;
+@media (max-width: 900px) {
+  .hud {
+    height: 68px;
+    gap: 10px;
+    padding-inline: 12px;
   }
 
-  .frame {
-    grid-template-rows: 46px minmax(0, 1fr) 58px;
-    min-height: calc(100vh - 14px);
-    min-height: calc(100svh - 14px);
-  }
-
-  .map {
-    width: min(100%, calc((100svh - 118px) * 1.776833));
-  }
-
-  .playerStatus {
+  .identity {
     gap: 8px;
+  }
+
+  .identity h1 {
+    font-size: 0.78rem;
+  }
+
+  .headerControls,
+  .headerControls :global(.experience-controls),
+  .playerStatus {
+    gap: 6px;
+  }
+
+  .playerStatus :global(.pixel-hud-stat),
+  .headerControls :global(.music-toggle),
+  .headerControls :global(.connection-status),
+  .settingsLink {
+    width: 72px;
+    min-height: 40px;
+    height: 40px;
+  }
+
+  :global(body):has(.screen) :global(.offline-mode-notice) {
+    top: 74px;
+    right: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .identity h1 {
+    font-size: 0.7rem;
   }
 
   .location:hover,
   .location:focus-visible {
     transform: translate(-50%, -50%) scale(1.04);
   }
-
-  .bottomNav > a {
-    gap: 5px;
-  }
 }
 
 @media (max-width: 520px) {
-  :global(body):has(.screen) {
-    overflow: auto;
-  }
-
-  .screen {
-    min-width: 320px;
-    padding: 0;
-  }
-
-  .frame {
-    min-height: 100vh;
-    min-height: 100svh;
-    border-right: 0;
-    border-left: 0;
-    outline: 0;
-    box-shadow: none;
-  }
-
   .identity h1 {
-    font-size: 0.7rem;
+    display: none;
   }
 
   .hud {
-    padding-right: 8px;
+    height: 64px;
+    gap: 6px;
+    padding-inline: 6px;
+  }
+
+  .headerControls,
+  .headerControls :global(.experience-controls),
+  .playerStatus {
+    gap: 4px;
+  }
+
+  .backLink {
+    width: 36px;
+    height: 38px;
+  }
+
+  .playerStatus :global(.pixel-hud-stat),
+  .headerControls :global(.music-toggle),
+  .headerControls :global(.connection-status),
+  .settingsLink {
+    width: 52px;
+    min-height: 38px;
+    height: 38px;
+    padding-inline: 4px;
   }
 
   .playerStatus {
-    font-size: 0.56rem;
+    font-size: 0.58rem;
+  }
+
+  :global(body):has(.screen) :global(.offline-mode-notice) {
+    top: 70px;
+    right: 6px;
   }
 
   .map {
-    width: 100%;
+    width: max(100vw, calc(100svh * 1.776833));
   }
 
   .locationLabel {
@@ -430,19 +468,21 @@
       inset 0 0 0 1px #48617f,
       2px 2px 0 #03070e;
   }
+}
 
-  .bottomNav > a {
-    flex-direction: column;
-    gap: 3px;
-    font-size: 0.52rem;
+@media (max-width: 380px) {
+  .playerStatus :global(.pixel-hud-stat),
+  .headerControls :global(.music-toggle),
+  .headerControls :global(.connection-status),
+  .settingsLink {
+    width: 46px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .location,
   .buildingImage,
-  .locationLabel,
-  .bottomNav > a {
+  .locationLabel {
     transition: none;
   }
 

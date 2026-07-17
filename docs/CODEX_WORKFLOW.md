@@ -1546,3 +1546,160 @@ tests pass; repository lint and strict TypeScript checking pass; and the
 production build generates all 15 routes. The complete suite reports 197 passing
 tests and the same pre-existing `tests/interviewResume.test.ts` mock-contract
 failure.
+
+## Contribution 036 - Interview Skills Academy Learning Path
+
+Date: 2026-07-17
+
+Feature: Full-viewport Courses Building dashboard and sequential interview
+learning path.
+
+Codex inspected: The existing `/learn` route, compact module menu, STAR content
+model and route, version-1 course progress helpers, completion hook, shared pixel
+tokens, camera-presence hook, responsive course styles, component tests, and
+course-system documentation.
+
+Codex implemented: A normally scrolling Interview Skills Academy with course
+statistics, an accessible progress bar, four sequential phases, ten lesson
+checkpoints, dashboard-derived course XP and remaining time, and detailed Phase
+1 exercises. The Phase 1 flow includes company-analysis answers, required-skill
+selection, a timed preparation checklist, and optional on-device camera
+rehearsal. Later phases unlock from the existing stored lesson IDs, and the
+published STAR lesson retains its original route and completion behavior.
+
+Scope protection: No backend, API, route, authentication, navigation, audio,
+online/offline, interview, or storage-schema logic changed. The academy calls
+the existing progress and camera helpers instead of introducing parallel
+systems.
+
+Validation result: All 16 focused academy, course-progress, content, and STAR
+tests pass; repository lint and strict TypeScript checking pass; the live route
+returns HTTP 200; and the production build generates all 15 routes. The complete
+suite reports 201 passing tests and the same pre-existing
+`tests/interviewResume.test.ts` mock-contract failure. Screenshot inspection
+could not be completed because no browser backend was available.
+
+## Contribution 037 - Complete Interview Academy Curriculum and Lesson Flow
+
+Date: 2026-07-17
+
+Feature: Seventeen sequential interview lessons with dedicated exercise routes,
+badges, XP rewards, and safe AI-practice handoffs.
+
+Codex inspected: The new academy dashboard, existing STAR route and exercise,
+version-1 course progress record, browser speech-recognition adapter, local
+camera-presence hook, Interview Center feedback boundary, main navigation back
+logic, responsive pixel design system, and course tests.
+
+Codex implemented: The requested Phase 2 speaking and question curriculum,
+five-part STAR curriculum, four-part delivery curriculum, and dedicated lesson
+shell used by all non-STAR routes. Exercise variants include structured writing,
+rewriting, answer choice, checklists, a timed preparation challenge, optional
+speech transcription, neutral practice indicators, and optional camera framing.
+Every card now exposes number, title, duration, difficulty, XP, completion, and
+locked/unlocked state. Phase badges and the Interview Master completion reward
+are derived from the same stored completion IDs.
+
+Scope protection: No separate progress or XP store was introduced. Existing
+STAR completion remains readable, and AI-required practice links to the real
+Interview Center instead of presenting fabricated AI feedback. Camera and speech
+copy stays within the product's evidence and safety boundaries.
+
+Validation result: All 35 focused academy, lesson, navigation, progress, content,
+and responsive style tests pass; repository lint and strict TypeScript checking
+pass; representative routes return HTTP 200; and the production build generates
+all 31 pages. The complete suite reports 213 passing tests and the same
+pre-existing `tests/interviewResume.test.ts` mock-contract failure. Screenshot
+inspection could not run because no browser backend was available.
+
+## Contribution 038 - Main Building Academy Hub Dashboard
+
+Date: 2026-07-17
+
+Feature: Full-page Academy home base entered through the campus Main Building.
+
+Codex inspected: The fullscreen campus route and Main Building link, learner
+profile storage, 17-lesson academy content, version-1 course and exercise
+progress, saved interview attempts, validated STAR rubric output, current
+Progress Library aggregation, shared navigation, pixel design tokens, route
+tests, and responsive style contracts.
+
+Codex implemented: A new `/academy/home` dashboard with a personalized hero,
+rank and XP progression, quick actions, active course and latest attempt,
+timestamp-aware missions and streaks, compact statistics, badge previews,
+milestones, certificate eligibility, and the six-rank progression path. All
+values are derived from established local records, and unavailable duration,
+communication-score, lesson-date, and certificate-file data is identified
+plainly rather than simulated.
+
+Scope protection: The campus remains a fullscreen world, and only its Main
+Building destination changed. The dashboard does not write a second progress
+record or modify APIs, scoring, interview logic, lesson completion, global
+navigation services, music, connectivity, settings, authentication, or backend
+behavior.
+
+Validation result: All 19 focused Hub model, component, style, campus, and
+navigation tests pass; Prettier, repository lint, and strict TypeScript pass;
+the production build prerenders all 32 pages including `/academy/home`; and the
+live route returns HTTP 200. The complete suite retains the same pre-existing
+résumé extraction mock-contract failure. Browser screenshot inspection remained
+unavailable because the session exposed no browser backend.
+
+## Contribution 039 - Full-Page Progress Library Dashboard
+
+Date: 2026-07-17
+
+Feature: Responsive Progress Library information hierarchy and saved-attempt
+cards.
+
+Codex inspected: The current ProgressDashboard component, progress calculation
+and comparison helpers, saved-attempt contract, existing component tests,
+shared global attempt styles, pixel design tokens, responsive contracts, and
+route shell.
+
+Codex implemented: A full-width, normally scrolling dashboard with separate
+overview and statistics sections, equal-size completion cards, visual rubric
+skill cards, an activity timeline, featured next recommendation, reorganized
+lesson and exercise records, and two-column simulation cards that expose every
+requested metadata field. Existing transcript detail and attempt-comparison
+interfaces remain functional below the redesigned history.
+
+Scope protection: No local-storage read or write, XP calculation, progress
+derivation, attempt selection, evaluation evidence, comparison algorithm,
+backend, API, routing, interview, or global application service changed.
+
+Validation result: All 21 focused Progress Library, navigation, interaction,
+and style tests pass; Prettier, repository lint, and strict TypeScript pass; the
+production build prerenders all 32 pages; and `/progress` returns HTTP 200. The
+complete suite retains the same pre-existing resume extraction mock failure.
+Browser screenshot inspection remained unavailable because the session exposed
+no browser backend.
+
+## Contribution 040 - Campus Header Control Alignment
+
+Date: 2026-07-17
+
+Feature: Taller, contained campus HUD with consistently sized controls.
+
+Codex inspected: The fullscreen campus page and CSS module, root MainNav
+fullscreen handling, shared ExperienceControls component, PixelHudStat sizing,
+offline notice placement, existing campus component tests, responsive style
+contracts, and live campus route.
+
+Codex implemented: A 72px desktop campus header, one flex-owned right control
+group, shared 84-by-42 pixel controls for XP, Level, Music/Muted, Online, and
+Settings, a 42px Back control, and stepped laptop/mobile widths. The campus now
+renders the existing ExperienceControls component inside its header, while
+MainNav avoids rendering a duplicate on `/academy` and continues to render the
+standalone controls on the title screen.
+
+Scope protection: The same audio provider state, toggle handler, connectivity
+status, offline notice, XP and level display, Settings route, Back route, campus
+links, and backend contracts remain in use.
+
+Validation result: All 19 focused campus and navigation tests pass; Prettier,
+repository lint, and strict TypeScript pass; the production build prerenders all
+32 pages; and `/academy` returns HTTP 200 with the expected campus controls. The
+complete suite retains the same pre-existing resume extraction mock failure.
+Browser screenshot inspection remained unavailable because no browser backend
+was exposed.

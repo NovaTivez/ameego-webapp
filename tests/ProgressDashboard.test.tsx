@@ -42,11 +42,32 @@ describe("ProgressDashboard", () => {
 
     expect(await screen.findByText("1 stored attempt")).toBeVisible();
     expect(screen.getByText("Interviews Taken").parentElement).toHaveTextContent("1");
+    for (const heading of [
+      "Progress Overview",
+      "Statistics",
+      "Skill Progress",
+      "Recent Activity",
+      "Next Recommendation",
+      "Completed Lessons",
+      "Completed Exercises",
+      "Saved Interview Simulations",
+    ]) {
+      expect(screen.getByRole("heading", { name: heading })).toBeVisible();
+    }
     expect(screen.getByText(/unlock rubric-based skill bars/i)).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Recent Activity" })).toBeVisible();
     expect(
       screen.getByRole("heading", { name: /Complete the STAR Method lesson/i }),
     ).toBeVisible();
+    const attemptCard = screen
+      .getByRole("heading", { name: "Frontend intern" })
+      .closest("article");
+    expect(attemptCard).not.toBeNull();
+    expect(within(attemptCard!).getByText("Attempt 1")).toBeVisible();
+    expect(within(attemptCard!).getByText("Position")).toBeVisible();
+    expect(within(attemptCard!).getByText("Company")).toBeVisible();
+    expect(within(attemptCard!).getByText("Date and Time")).toBeVisible();
+    expect(within(attemptCard!).getByText("Transcript Status")).toBeVisible();
+    expect(within(attemptCard!).getByText("Confirmed Responses")).toBeVisible();
     await user.click(screen.getByRole("button", { name: /open attempt/i }));
     expect(
       screen.getByRole("heading", { name: /Frontend intern at Northstar Labs/i }),

@@ -6,11 +6,29 @@ const styles = readFileSync("src/app/academy/academy.module.css", "utf8");
 const campus = readFileSync("src/app/academy/AcademyCampusMap.tsx", "utf8");
 
 describe("Academy Hub map style contract", () => {
-  it("creates a full-screen hard-framed game map", () => {
-    expect(styles).toMatch(/\.screen\s*{[\s\S]*?min-height:\s*100vh/);
-    expect(styles).toMatch(/\.frame\s*{[\s\S]*?min-height:\s*calc\(100vh - 24px\)/);
-    expect(styles).toMatch(/\.frame\s*{[\s\S]*?grid-template-rows:/);
-    expect(styles).toMatch(/\.frame\s*{[\s\S]*?border:\s*4px solid/);
+  it("creates a borderless full-viewport campus with an overlay HUD", () => {
+    expect(styles).toMatch(/\.screen\s*{[\s\S]*?width:\s*100vw;[\s\S]*?height:\s*100svh/);
+    expect(styles).toMatch(
+      /\.frame\s*{[\s\S]*?width:\s*100vw;[\s\S]*?height:\s*100svh;[\s\S]*?border:\s*0;[\s\S]*?box-shadow:\s*none/,
+    );
+    expect(styles).toMatch(/\.hud\s*{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*0/);
+    expect(styles).toMatch(/\.hud\s*{[\s\S]*?height:\s*72px/);
+    expect(styles).toMatch(
+      /\.headerControls\s*{[\s\S]*?margin-left:\s*auto;[\s\S]*?gap:\s*8px/,
+    );
+    expect(styles).toMatch(
+      /\.headerControls :global\(\.music-toggle\),[\s\S]*?width:\s*84px;[\s\S]*?min-height:\s*42px/,
+    );
+    expect(styles).toMatch(
+      /\.playerStatus :global\(\.pixel-hud-stat\)\s*{[\s\S]*?width:\s*84px;[\s\S]*?min-height:\s*42px/,
+    );
+    expect(styles).toMatch(
+      /\.mapStage\s*{[\s\S]*?width:\s*100vw;[\s\S]*?height:\s*100svh/,
+    );
+    expect(styles).not.toContain(".bottomNav");
+    expect(styles).toMatch(
+      /\.settingsLink\s*{[\s\S]*?width:\s*84px;[\s\S]*?height:\s*42px/,
+    );
   });
 
   it("uses the uploaded campus scene and transparent building layers", () => {
@@ -30,10 +48,13 @@ describe("Academy Hub map style contract", () => {
     }
 
     expect(styles).toMatch(/aspect-ratio:\s*1672\s*\/\s*941/);
-    expect(styles).toMatch(/\.mapBackground\s*{[\s\S]*?object-fit:\s*contain/);
+    expect(styles).toMatch(
+      /\.map\s*{[\s\S]*?width:\s*max\(100vw, calc\(100svh \* 1\.776833\)\)/,
+    );
+    expect(styles).toMatch(/\.mapBackground\s*{[\s\S]*?object-fit:\s*cover/);
 
     for (const asset of [
-      "campus-map-v2.png",
+      "campus-map-v3.png",
       "main-building-v2.png",
       "interview-center-v2.png",
       "speech-hall-v2.png",
@@ -44,6 +65,11 @@ describe("Academy Hub map style contract", () => {
       expect(statSync(assetPath).size).toBeGreaterThan(0);
       expect(campus).toContain(`/images/academy/${asset}`);
     }
+
+    const mapAsset = readFileSync("public/images/academy/campus-map-v3.png");
+    expect(mapAsset.subarray(1, 4).toString("ascii")).toBe("PNG");
+    expect(mapAsset.readUInt32BE(16)).toBe(1672);
+    expect(mapAsset.readUInt32BE(20)).toBe(941);
   });
 
   it("uses crisp pixel styling without gradients, glass, or rounded cards", () => {
@@ -111,11 +137,11 @@ describe("Academy Hub map style contract", () => {
         ]),
       ),
     ).toEqual({
-      mainBuilding: { left: 50, top: 77.5, width: 24 },
-      interviewCenter: { left: 24.5, top: 31.5, width: 21 },
-      speechHall: { left: 75.5, top: 31.5, width: 21 },
-      progressLibrary: { left: 24, top: 63.5, width: 19 },
-      coursesBuilding: { left: 76, top: 63.5, width: 19 },
+      mainBuilding: { left: 50, top: 75.5, width: 24 },
+      interviewCenter: { left: 25, top: 29.5, width: 21 },
+      speechHall: { left: 75, top: 29.5, width: 21 },
+      progressLibrary: { left: 25, top: 61.5, width: 19 },
+      coursesBuilding: { left: 75, top: 61.5, width: 19 },
     });
 
     for (const region of regions) {
@@ -123,6 +149,24 @@ describe("Academy Hub map style contract", () => {
       expect(region.right).toBeLessThanOrEqual(100);
       expect(region.top).toBeGreaterThanOrEqual(0);
       expect(region.bottom).toBeLessThanOrEqual(100);
+    }
+
+    for (const viewportAspect of [16 / 9, 16 / 10, 4 / 3]) {
+      if (viewportAspect < mapAspect) {
+        const visibleWidth = (viewportAspect / mapAspect) * 100;
+        const horizontalCrop = (100 - visibleWidth) / 2;
+        for (const region of regions) {
+          expect(region.left).toBeGreaterThanOrEqual(horizontalCrop);
+          expect(region.right).toBeLessThanOrEqual(100 - horizontalCrop);
+        }
+      } else {
+        const visibleHeight = (mapAspect / viewportAspect) * 100;
+        const verticalCrop = (100 - visibleHeight) / 2;
+        for (const region of regions) {
+          expect(region.top).toBeGreaterThanOrEqual(verticalCrop);
+          expect(region.bottom).toBeLessThanOrEqual(100 - verticalCrop);
+        }
+      }
     }
 
     for (let first = 0; first < regions.length; first += 1) {

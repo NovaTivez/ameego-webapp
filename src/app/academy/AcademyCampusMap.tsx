@@ -81,10 +81,10 @@ export function AcademyCampusMap() {
     <div className={styles.map} aria-label="Ameego Academy campus map">
       <Image
         className={styles.mapBackground}
-        src="/images/academy/campus-map-v2.png"
+        src="/images/academy/campus-map-v3.png"
         alt=""
         fill
-        sizes="(max-width: 1280px) 100vw, 1280px"
+        sizes="100vw"
         priority
         unoptimized
       />
@@ -93,7 +93,7 @@ export function AcademyCampusMap() {
         accessibleLabel="Open Main Building, Academy home"
         alt="Main Building"
         className={styles.mainBuilding}
-        href="/academy"
+        href="/academy/home"
         image="/images/academy/main-building-v2.png"
         label="Main Building"
         width={1536}

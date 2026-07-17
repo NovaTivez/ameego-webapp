@@ -1542,3 +1542,237 @@ Status: Implemented on 2026-07-17; validation recorded with this change.
   `tests/interviewResume.test.ts` mock-contract failure.
 - Browser screenshot QA remains unavailable because no browser backend is
   exposed in this session.
+
+---
+
+# Milestone Update - Interview Skills Academy Learning Path
+
+Status: Implemented and validated on 2026-07-17.
+
+## Completed
+
+- Rebuilt the Courses Building destination as a full-width Interview Skills
+  Academy dashboard with course progress, completed lesson count, current
+  lesson, earned course XP, estimated time, and an accessible progress bar.
+- Organized Interview Foundations into four sequential RPG-style phases:
+  Preparing for Interviews, Answering Clearly, STAR Evaluation, and Interview
+  Delivery.
+- Added the complete Phase 1 curriculum for company research, role analysis,
+  interview preparation, and first impressions with practical quest workspaces.
+- Added short-answer company analysis, skill-selection checkpoints, a two-minute
+  preparation checklist, and an optional on-device camera rehearsal that reuses
+  the existing neutral camera-presence implementation.
+- Reused the version-1 course progress record for lesson completion and derived
+  dashboard totals from that validated record without creating a second store.
+- Preserved the published STAR lesson and exercise routes and made previously
+  completed STAR lessons reviewable even when earlier new phases remain
+  incomplete.
+- Added normal browser-owned page scrolling, wide desktop composition, and
+  responsive single-column tablet/mobile layouts without nested scroll areas.
+
+## Scope
+
+- No API, server logic, authentication, routing, global navigation, music,
+  online/offline handling, interview behavior, or storage schema changed.
+- Existing STAR completion data remains readable and continues to use the same
+  `ameego:course-progress:v1` key and helper functions.
+
+## Validation
+
+- Changed files pass Prettier; repository ESLint and strict TypeScript checking
+  pass.
+- All 16 focused academy, course-progress, content, and STAR lesson tests pass.
+- The production build passes and generates all 15 routes.
+- The live development route returns HTTP 200 and renders the Interview Skills
+  Academy title.
+- The complete suite reports 201 passing tests and the same pre-existing
+  `tests/interviewResume.test.ts` mock-contract failure.
+- Browser screenshot QA remains unavailable because no browser backend is
+  exposed in this session.
+
+---
+
+# Milestone Update - Complete Interview Academy Curriculum and Lesson Routes
+
+Status: Implemented and validated on 2026-07-17.
+
+## Completed
+
+- Expanded the academy from 10 overview checkpoints to the requested 17-lesson
+  curriculum across Preparing for Interviews, Answering Clearly, STAR Method,
+  and Interview Delivery.
+- Added stable slugs, objectives, difficulty levels, durations, XP rewards,
+  exercise kinds, and dedicated route metadata to every lesson card.
+- Added 16 statically generated `/learn/academy/[lessonSlug]` pages while
+  preserving the existing published STAR lesson and arrangement routes.
+- Added reusable written, rewrite, choice, checklist, timed checklist, speech,
+  simulator-handoff, and optional camera exercise workspaces.
+- Added typed speech fallbacks, neutral word count, recorded pace, and draft
+  filler-word indicators without claiming emotion, confidence, pronunciation,
+  or employability detection.
+- Routed lessons that require validated GPT feedback to the existing Interview
+  Center instead of creating unvalidated or simulated AI results.
+- Added sequential lesson unlocking, locked and completed card states, current
+  quest guidance, phase badges, reward animations, unlock notifications, and the
+  Interview Master badge with a derived +500 XP completion bonus.
+- Added a graduation-interview action that uses the existing simulator and
+  feedback-report flow after the complete course is cleared.
+- Preserved normal browser-owned page scrolling across the dashboard and every
+  dedicated lesson page with no nested vertical scroll containers.
+
+## Scope
+
+- The version-1 course progress schema, key, and helper functions are unchanged.
+- No backend, API, authentication, global navigation contract, interview,
+  scoring, evaluation, audio-preference, or online/offline behavior changed.
+- Camera practice reuses the existing on-device neutral indicator hook and never
+  stores or sends raw video through lesson progress.
+
+## Validation
+
+- Changed files pass Prettier; repository ESLint and strict TypeScript checking
+  pass.
+- All 35 focused academy, lesson-route, course-progress, navigation, content,
+  and responsive style tests pass.
+- Representative dashboard and lesson routes return HTTP 200.
+- The production build passes and generates all 31 static and parameterized
+  pages, including all 16 new academy lesson paths.
+- The complete suite reports 213 passing tests and the same pre-existing
+  `tests/interviewResume.test.ts` mock-contract failure.
+- Browser screenshot QA remains unavailable because no browser backend is
+  exposed in this session.
+
+---
+
+# Milestone Update - Main Building Academy Hub Dashboard
+
+Status: Implemented and validated on 2026-07-17.
+
+## Completed
+
+- Added a full-width `/academy/home` dashboard and connected the campus Main
+  Building to it without replacing the fullscreen campus map.
+- Added a personalized welcome hero using the existing local learner profile,
+  derived level and rank, academy XP, a rank progress bar, streak, today's goal,
+  motivational guidance, and four real-route quick actions.
+- Added Continue Your Journey, Daily Missions, Learning Streak, Recent Activity,
+  Academy Statistics, Achievements, Career Journey, Certificates, and Rank
+  Progression sections in responsive pixel-art cards.
+- Derived lesson totals, current lesson, remaining time, course XP, phase badges,
+  attempt totals, interview activity dates, and validated rubric scores from the
+  existing version-1 storage records.
+- Kept unsupported metrics honest: lesson-based daily streaks and practice
+  duration are labeled unavailable because the current records do not store
+  those timestamps or durations, and no certificate action is rendered without
+  a real downloadable certificate.
+- Used normal browser-owned page scrolling with no nested vertical scrolling,
+  plus two-column laptop/tablet and single-column narrow-screen adaptations.
+
+## Scope
+
+- No backend, API, interview, evaluation, course-completion, local-storage,
+  authentication, music, connectivity, settings, routing service, or global XP
+  persistence contract changed.
+- The Hub is a read-only presentation and aggregation layer over existing
+  records; the Progress Library remains the detailed history destination.
+
+## Validation
+
+- Changed files pass Prettier, repository ESLint, and strict TypeScript checking.
+- All 19 focused Academy Hub data, component, navigation, campus, and responsive
+  style tests pass.
+- The production build passes and prerenders `/academy/home` among 32 pages.
+- The live development route returns HTTP 200 and includes the Academy Hub title
+  and loading boundary.
+- The full suite retains the same pre-existing
+  `tests/interviewResume.test.ts` mock-contract failure and no new failure.
+- Visual screenshot inspection could not run because no browser backend was
+  exposed in this session.
+
+---
+
+# Milestone Update - Full-Page Progress Library Dashboard
+
+Status: Implemented and validated on 2026-07-17.
+
+## Completed
+
+- Expanded `/progress` into a full-width, browser-scrolling dashboard with a
+  large route header and no nested vertical scrolling regions.
+- Separated the existing records into Progress Overview, Statistics, Skill
+  Progress, Recent Activity, Next Recommendation, Completed Lessons, Completed
+  Exercises, and Saved Interview Simulations sections.
+- Added an XP and level overview, four equal-size statistic cards, responsive
+  rubric skill cards, a timeline-style activity feed, and a prominent featured
+  recommendation action.
+- Redesigned saved simulation cards with attempt number, position, company,
+  date and time, transcript status, confirmed response count, feedback status,
+  and a consistently aligned Open Attempt action.
+- Preserved saved-attempt details, transcript review, validated feedback
+  summaries, compatible-attempt comparison, empty states, and failure states.
+- Added subtle pixel-step hover, entrance, and progress animations with reduced-
+  motion fallbacks and desktop, laptop, tablet, and narrow-screen layouts.
+
+## Scope
+
+- No progress calculation, XP constant, local-storage schema, attempt contract,
+  comparison logic, backend, API, route, navigation, authentication, music,
+  connectivity, interview, scoring, or evaluation behavior changed.
+- The work is presentation-only apart from additional semantic labels and
+  section structure around the same data and handlers.
+
+## Validation
+
+- Changed files pass Prettier, repository ESLint, and strict TypeScript checking.
+- All 21 focused progress dashboard, interaction, navigation, and style tests
+  pass.
+- The production build passes and prerenders all 32 pages, including
+  `/progress`.
+- The live development route returns HTTP 200 with the Progress Library title
+  and page heading.
+- The full suite retains only the same pre-existing
+  `tests/interviewResume.test.ts` mock-contract failure.
+- Visual screenshot inspection could not run because no browser backend was
+  exposed in this session.
+
+---
+
+# Milestone Update - Campus Header Control Alignment
+
+Status: Implemented and validated on 2026-07-17.
+
+## Completed
+
+- Increased the campus overlay header from 48px to 72px on desktop and added
+  balanced horizontal and vertical padding.
+- Consolidated XP, Level, Music/Muted, Online, and Settings into one campus-owned
+  flex group so controls no longer depend on competing fixed right offsets.
+- Standardized the five desktop controls at 84px wide and 42px high with a
+  consistent 8px gap, matching borders, inset highlights, and pixel shadows.
+- Enlarged and vertically centered the Back control while retaining the AMEEGO
+  Academy identity, typography, and existing map composition.
+- Added proportional laptop, tablet, mobile, and 320px-safe compact sizing while
+  preserving the current label-hiding accessibility behavior on narrow screens.
+- Kept the offline notice below the taller header and removed the duplicate
+  root-level experience controls from the campus route only.
+
+## Scope
+
+- Music state, toggle behavior, online detection, offline notice behavior, XP,
+  level, Settings navigation, Back navigation, map routes, backend, APIs, and
+  storage are unchanged.
+- The title screen still owns its existing standalone Music and Online controls;
+  only the campus now renders that same component inside its own header.
+
+## Validation
+
+- Changed files pass Prettier, repository ESLint, and strict TypeScript checking.
+- All 19 focused campus component, route, responsive-style, and shared navigation
+  tests pass.
+- The production build passes and prerenders all 32 pages.
+- The live `/academy` route returns HTTP 200 and contains the campus control group
+  and music control.
+- The full suite retains only the same pre-existing
+  `tests/interviewResume.test.ts` mock-contract failure.
+- Visual screenshot inspection could not run because no browser backend was
+  exposed in this session.

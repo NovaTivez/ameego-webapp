@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type RefCallback } from "react";
 
 import {
   createPresenceDebounceState,
@@ -11,11 +11,7 @@ import {
   type CreateFaceDetector,
   type FaceDetector,
 } from "@/lib/camera/mediapipe";
-import type {
-  CameraStatus,
-  FacePresence,
-  HeadOrientation,
-} from "@/lib/camera/types";
+import type { CameraStatus, FacePresence, HeadOrientation } from "@/lib/camera/types";
 
 const DETECT_INTERVAL_MS = 125;
 
@@ -30,7 +26,7 @@ type UseCameraPresenceOptions = {
 };
 
 export type UseCameraPresenceResult = {
-  videoRef: RefObject<HTMLVideoElement | null>;
+  attachVideo: RefCallback<HTMLVideoElement>;
   status: CameraStatus;
   presence: FacePresence;
   orientation: HeadOrientation;
@@ -49,13 +45,23 @@ export function useCameraPresence({
   active,
   createDetector = createMediaPipeFaceDetector,
 }: UseCameraPresenceOptions): UseCameraPresenceResult {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<FaceDetector | null>(null);
   const loopRef = useRef<number | null>(null);
   const debounceRef = useRef(createPresenceDebounceState());
   const generationRef = useRef(0);
   const createDetectorRef = useRef(createDetector);
+
+  const setVideoRef = useCallback((video: HTMLVideoElement | null) => {
+    videoElementRef.current = video;
+    const stream = streamRef.current;
+    if (!video || !stream) return;
+    video.srcObject = stream;
+    void video.play().catch(() => {
+      // Autoplay can fail quietly; detect resumes once the learner starts playback.
+    });
+  }, []);
 
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatus>("idle");
   const [presence, setPresence] = useState<FacePresence>("unknown");
@@ -87,8 +93,8 @@ export function useCameraPresence({
     detectorRef.current?.close();
     detectorRef.current = null;
     debounceRef.current = createPresenceDebounceState();
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
+    if (videoElementRef.current) {
+      videoElementRef.current.srcObject = null;
     }
   }, [stopLoop]);
 
@@ -120,7 +126,7 @@ export function useCameraPresence({
       stopLoop();
       loopRef.current = window.setInterval(() => {
         if (document.visibilityState === "hidden") return;
-        const video = videoRef.current;
+        const video = videoElementRef.current;
         const detector = detectorRef.current;
         if (!video || !detector || video.readyState < 2) return;
 
@@ -173,7 +179,7 @@ export function useCameraPresence({
           };
         }
 
-        const video = videoRef.current;
+        const video = videoElementRef.current;
         if (video) {
           video.srcObject = stream;
           await video.play().catch(() => {
@@ -217,7 +223,7 @@ export function useCameraPresence({
   }, [shouldRun, stopLoop, tearDownMedia]);
 
   return {
-    videoRef,
+    attachVideo: setVideoRef,
     status,
     presence: shouldRun ? presence : "unknown",
     orientation: shouldRun ? orientation : "unknown",

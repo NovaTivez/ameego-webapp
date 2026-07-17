@@ -135,35 +135,97 @@ export function ProgressDashboard() {
 
   return (
     <div className={`${styles.dashboard} progress-dashboard`}>
-      <section aria-labelledby="progress-overview-heading">
-        <div className={styles.overviewHeading}>
+      <section className={styles.overview} aria-labelledby="progress-overview-heading">
+        <div className={styles.sectionHeading}>
           <div>
-            <p>Stored Activity</p>
-            <h2 id="progress-overview-heading">Your Progress</h2>
+            <p>Player Checkpoint</p>
+            <h2 id="progress-overview-heading">Progress Overview</h2>
           </div>
           <span>Only completed activity saved in this browser is counted.</span>
         </div>
-        <div className={styles.statGrid}>
-          <article className={styles.statCard}>
-            <span>Lessons Completed</span>
-            <strong>{state.snapshot.completedLessons.length}</strong>
-          </article>
-          <article className={styles.statCard}>
-            <span>Interviews Taken</span>
-            <strong>{state.snapshot.simulationsCompleted}</strong>
-            <small>{state.snapshot.evaluatedSimulations} with feedback</small>
-          </article>
-          <article className={styles.statCard}>
-            <span>Current Streak</span>
-            <strong>{state.snapshot.currentStreak}</strong>
-            <small>
-              {state.snapshot.currentStreak === 1 ? "Practice day" : "Practice days"}
-            </small>
-          </article>
-          <article className={styles.statCard}>
+        <div className={styles.overviewCard}>
+          <div
+            className={styles.levelEmblem}
+            aria-label={`Academy level ${state.snapshot.level}`}
+          >
+            <PixelIcon name="progress" size="large" />
             <span>Level</span>
             <strong>{String(state.snapshot.level).padStart(2, "0")}</strong>
-            <small>{state.snapshot.xp} real activity XP</small>
+          </div>
+          <div className={styles.xpOverview}>
+            <div>
+              <span>Experience Progress</span>
+              <strong>
+                {state.snapshot.xpIntoLevel} / {state.snapshot.xpPerLevel} XP
+              </strong>
+            </div>
+            <div
+              className={styles.xpTrack}
+              role="progressbar"
+              aria-label="Progress to next level"
+              aria-valuemin={0}
+              aria-valuemax={state.snapshot.xpPerLevel}
+              aria-valuenow={state.snapshot.xpIntoLevel}
+            >
+              <span
+                style={{
+                  width: `${Math.round((state.snapshot.xpIntoLevel / state.snapshot.xpPerLevel) * 100)}%`,
+                }}
+              />
+            </div>
+            <p>
+              {state.snapshot.xp} XP earned from verified lessons, exercises, saved
+              simulations, and validated feedback.
+            </p>
+          </div>
+          <dl className={styles.overviewMeta}>
+            <div>
+              <dt>Current Streak</dt>
+              <dd>
+                {state.snapshot.currentStreak}{" "}
+                {state.snapshot.currentStreak === 1 ? "day" : "days"}
+              </dd>
+            </div>
+            <div>
+              <dt>Stored Records</dt>
+              <dd>{state.snapshot.recentActivity.length}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section className={styles.statistics} aria-labelledby="statistics-heading">
+        <div className={styles.sectionHeading}>
+          <div>
+            <p>Learning Data</p>
+            <h2 id="statistics-heading">Statistics</h2>
+          </div>
+          <span>A concise view of locally stored completion records.</span>
+        </div>
+        <div className={styles.statGrid}>
+          <article className={styles.statCard}>
+            <PixelIcon name="lesson" size="medium" />
+            <span>Lessons Completed</span>
+            <strong>{state.snapshot.completedLessons.length}</strong>
+            <small>Saved lesson records</small>
+          </article>
+          <article className={styles.statCard}>
+            <PixelIcon name="star" size="medium" />
+            <span>Exercises Completed</span>
+            <strong>{state.snapshot.completedExercises.length}</strong>
+            <small>Saved practice records</small>
+          </article>
+          <article className={styles.statCard}>
+            <PixelIcon name="speech" size="medium" />
+            <span>Interviews Taken</span>
+            <strong>{state.snapshot.simulationsCompleted}</strong>
+            <small>Confirmed simulations</small>
+          </article>
+          <article className={styles.statCard}>
+            <PixelIcon name="check" size="medium" />
+            <span>Feedback Reports</span>
+            <strong>{state.snapshot.evaluatedSimulations}</strong>
+            <small>Validated evaluations</small>
           </article>
         </div>
       </section>
@@ -172,18 +234,27 @@ export function ProgressDashboard() {
         className={styles.progressGrid}
         aria-label="Skill progress and recent activity"
       >
-        <div className={styles.gamePanel}>
+        <section className={styles.gamePanel} aria-labelledby="skill-progress-heading">
           <div className={styles.panelHeading}>
-            <h2>Skill Progress</h2>
+            <div>
+              <p>Rubric Performance</p>
+              <h2 id="skill-progress-heading">Skill Progress</h2>
+            </div>
             <span>Validated rubric averages</span>
           </div>
           {state.snapshot.skillProgress.length ? (
             <div className={styles.skillList}>
               {state.snapshot.skillProgress.map((skill) => (
                 <div className={styles.skillRow} key={skill.criterion}>
-                  <div>
-                    <span>{skill.label}</span>
-                    <strong>{skill.percent}%</strong>
+                  <div className={styles.skillIdentity}>
+                    <span className={styles.skillIcon} aria-hidden="true">
+                      <PixelIcon name="star" size="small" />
+                    </span>
+                    <div>
+                      <strong>{skill.label}</strong>
+                      <small>{skill.averageScore}/5 rubric average</small>
+                    </div>
+                    <em>{skill.percent}%</em>
                   </div>
                   <div
                     className={styles.skillTrack}
@@ -195,10 +266,10 @@ export function ProgressDashboard() {
                   >
                     <span style={{ width: `${skill.percent}%` }} />
                   </div>
-                  <small>
-                    {skill.averageScore}/5 across {skill.evaluatedAttempts} validated{" "}
+                  <p>
+                    Based on {skill.evaluatedAttempts} validated{" "}
                     {skill.evaluatedAttempts === 1 ? "attempt" : "attempts"}
-                  </small>
+                  </p>
                 </div>
               ))}
             </div>
@@ -208,11 +279,14 @@ export function ProgressDashboard() {
               bars.
             </p>
           )}
-        </div>
+        </section>
 
-        <div className={styles.gamePanel}>
+        <section className={styles.gamePanel} aria-labelledby="recent-activity-heading">
           <div className={styles.panelHeading}>
-            <h2>Recent Activity</h2>
+            <div>
+              <p>Activity Feed</p>
+              <h2 id="recent-activity-heading">Recent Activity</h2>
+            </div>
             <span>{state.snapshot.recentActivity.length} stored records</span>
           </div>
           <ul className={styles.activityList}>
@@ -240,29 +314,40 @@ export function ProgressDashboard() {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       </section>
 
       <section
         className={styles.recommendation}
         aria-labelledby="next-recommendation-heading"
       >
-        <PixelIcon name="star" size="small" />
+        <span className={styles.recommendationIcon} aria-hidden="true">
+          <PixelIcon name="star" size="large" />
+        </span>
         <div>
-          <span>Next Recommendation</span>
-          <h2 id="next-recommendation-heading">{state.snapshot.recommendedNext.title}</h2>
+          <span>Featured Quest</span>
+          <h2 id="next-recommendation-heading">Next Recommendation</h2>
+          <h3>{state.snapshot.recommendedNext.title}</h3>
           <p>{state.snapshot.recommendedNext.description}</p>
         </div>
-        <PixelButton href={state.snapshot.recommendedNext.href}>Start</PixelButton>
+        <PixelButton href={state.snapshot.recommendedNext.href}>
+          Start Recommended Activity
+        </PixelButton>
       </section>
 
       <section
         className={`${styles.completionGrid} progress-completion-grid`}
         aria-label="Completed learning activities"
       >
-        <PixelPanel className="progress-completion-card">
-          <p className="eyebrow">Completed lessons</p>
-          <h2>Lesson records</h2>
+        <PixelPanel className={`${styles.completionCard} progress-completion-card`}>
+          <header className={styles.completionHeader}>
+            <PixelIcon name="lesson" size="medium" />
+            <div>
+              <p>Learning Records</p>
+              <h2>Completed Lessons</h2>
+            </div>
+            <span>{state.snapshot.completedLessons.length}</span>
+          </header>
           {state.snapshot.completedLessons.length ? (
             <ul>
               {state.snapshot.completedLessons.map((lesson) => (
@@ -275,9 +360,15 @@ export function ProgressDashboard() {
             <p>No completed lesson is stored yet.</p>
           )}
         </PixelPanel>
-        <PixelPanel className="progress-completion-card">
-          <p className="eyebrow">Completed exercises</p>
-          <h2>Practice records</h2>
+        <PixelPanel className={`${styles.completionCard} progress-completion-card`}>
+          <header className={styles.completionHeader}>
+            <PixelIcon name="star" size="medium" />
+            <div>
+              <p>Practice Records</p>
+              <h2>Completed Exercises</h2>
+            </div>
+            <span>{state.snapshot.completedExercises.length}</span>
+          </header>
           {state.snapshot.completedExercises.length ? (
             <ul>
               {state.snapshot.completedExercises.map((exercise) => (
@@ -297,11 +388,15 @@ export function ProgressDashboard() {
         </PixelPanel>
       </section>
 
-      <section id="attempt-history" aria-labelledby="attempt-history-heading">
-        <div className="progress-section-heading">
+      <section
+        id="attempt-history"
+        className={styles.attemptHistory}
+        aria-labelledby="attempt-history-heading"
+      >
+        <div className={`${styles.sectionHeading} progress-section-heading`}>
           <div>
-            <p className="eyebrow">Attempt history</p>
-            <h2 id="attempt-history-heading">Saved interview simulations</h2>
+            <p>Attempt History</p>
+            <h2 id="attempt-history-heading">Saved Interview Simulations</h2>
           </div>
           <p>
             {state.attempts.length} stored{" "}
@@ -318,33 +413,57 @@ export function ProgressDashboard() {
             <PixelButton href="/practice">Start a simulation</PixelButton>
           </PixelPanel>
         ) : (
-          <div className="attempt-history-list">
+          <div className={`${styles.attemptList} attempt-history-list`}>
             {state.attempts.map((attempt, index) => (
-              <article className="attempt-history-card" key={attempt.id}>
-                <div>
-                  <span className="attempt-number">
-                    Attempt {state.attempts.length - index}
-                  </span>
+              <article
+                className={`${styles.attemptCard} attempt-history-card`}
+                key={attempt.id}
+              >
+                <div className={styles.attemptSummary}>
+                  <div className={styles.attemptTopline}>
+                    <span className="attempt-number">
+                      Attempt {state.attempts.length - index}
+                    </span>
+                    <div className={styles.transcriptStatus}>
+                      <span>Transcript Status</span>
+                      <PixelBadge tone="plum">Saved</PixelBadge>
+                    </div>
+                  </div>
                   <h3>{attempt.context.setup.role}</h3>
                   <p>
                     {attempt.context.setup.organization} ·{" "}
                     {formatAttemptDate(attempt.completedAt)}
                   </p>
                 </div>
-                <div className="attempt-history-meta">
+                <dl className={styles.attemptMetadata}>
+                  <div>
+                    <dt>Position</dt>
+                    <dd>{attempt.context.setup.role}</dd>
+                  </div>
+                  <div>
+                    <dt>Company</dt>
+                    <dd>{attempt.context.setup.organization}</dd>
+                  </div>
+                  <div>
+                    <dt>Date and Time</dt>
+                    <dd>{formatAttemptDate(attempt.completedAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>Confirmed Responses</dt>
+                    <dd>{attempt.responses.length}</dd>
+                  </div>
+                </dl>
+                <div className={`${styles.attemptStatus} attempt-history-meta`}>
+                  <span>Feedback Status</span>
                   <PixelBadge tone={attempt.evaluation ? "mint" : "plum"}>
-                    {attempt.evaluation ? "Feedback saved" : "Transcript saved"}
+                    {attempt.evaluation ? "Feedback saved" : "Not generated"}
                   </PixelBadge>
-                  <span>
-                    {attempt.responses.length} confirmed{" "}
-                    {attempt.responses.length === 1 ? "response" : "responses"}
-                  </span>
                 </div>
                 <PixelButton
                   onClick={() => setSelectedAttemptId(attempt.id)}
                   variant="secondary"
                 >
-                  Open attempt
+                  Open Attempt
                 </PixelButton>
               </article>
             ))}
@@ -353,7 +472,10 @@ export function ProgressDashboard() {
       </section>
 
       {selectedAttempt ? (
-        <section className="attempt-detail" aria-labelledby="attempt-detail-heading">
+        <section
+          className={`${styles.attemptDetail} attempt-detail`}
+          aria-labelledby="attempt-detail-heading"
+        >
           <div className="attempt-detail-heading">
             <div>
               <p className="eyebrow">Previous attempt</p>
@@ -408,7 +530,7 @@ export function ProgressDashboard() {
       ) : null}
 
       <section
-        className="attempt-comparison"
+        className={`${styles.comparisonSection} attempt-comparison`}
         aria-labelledby="attempt-comparison-heading"
       >
         <div className="progress-section-heading">

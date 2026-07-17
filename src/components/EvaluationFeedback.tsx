@@ -1,5 +1,6 @@
 import { PixelBadge } from "@/components/PixelBadge";
 import { PixelButton } from "@/components/PixelButton";
+import { PixelIcon } from "@/components/PixelIcon";
 import type { InterviewEvaluation } from "@/lib/evaluation/contracts";
 import { getLessonRecommendation, STAR_RUBRIC } from "@/lib/evaluation/rubric";
 
@@ -26,94 +27,84 @@ export function EvaluationFeedback({
   // the normal server and client schema-validation boundary.
   if (!recommendedLesson) return null;
 
+  const overallScore =
+    evaluation.rubricScores.reduce((total, item) => total + item.score, 0) /
+    evaluation.rubricScores.length;
+
   return (
     <section
       className={`${styles.report} evaluation-feedback`}
       aria-labelledby="evaluation-heading"
     >
-      <div className="evaluation-heading-row">
+      <header className={styles.reportHeader}>
         <div>
-          <span className={styles.completionRibbon}>Learning checkpoint complete</span>
-          <p className="eyebrow">Evidence-based practice feedback</p>
-          <h2 id="evaluation-heading">Your STAR communication review</h2>
+          <span className={styles.completionRibbon}>
+            <PixelIcon name="check" size="small" />
+            Learning checkpoint complete
+          </span>
+          <h2 id="evaluation-heading">Feedback Report</h2>
+          <p>
+            A clear, evidence-based review of your STAR communication and the next actions
+            that will make your answer stronger.
+          </p>
         </div>
         <PixelBadge tone="mint">Interview Coach</PixelBadge>
+      </header>
+
+      <div className={styles.disclaimer} role="note">
+        <PixelIcon name="speech" size="small" />
+        <span>
+          This is practice feedback—not an official grade or hiring decision. It evaluates
+          only the confirmed transcript and does not assess emotion, honesty,
+          intelligence, employability, or accent.
+        </span>
       </div>
 
-      <div className="evaluation-disclaimer" role="note">
-        This is practice feedback—not an official grade or hiring decision. It evaluates
-        only the confirmed transcript and does not assess emotion, honesty, intelligence,
-        employability, or accent.
-      </div>
-
-      <section
-        className={`${styles.summaryPanel} evaluation-report-section evaluation-session-summary`}
-      >
-        <p className="evaluation-section-number" aria-hidden="true">
-          01
-        </p>
-        <div>
-          <p className="eyebrow">Educational session summary</p>
-          <h3>Overall summary</h3>
-          <p className="evaluation-session-context">
-            {session.role} practice for {session.organization}
-          </p>
-          <p className="evaluation-summary">{evaluation.summary}</p>
-          <p className="evaluation-session-meta">
-            Review based on {session.responseCount} confirmed{" "}
-            {session.responseCount === 1 ? "response" : "responses"}.
-          </p>
+      <section className={styles.sectionCard} aria-labelledby="overall-score-heading">
+        <div className={styles.sectionHeading}>
+          <PixelIcon name="star" size="medium" />
+          <div>
+            <p>Performance snapshot</p>
+            <h3 id="overall-score-heading">Overall Score</h3>
+          </div>
+        </div>
+        <div className={styles.overallGrid}>
+          <div className={styles.scoreBlock}>
+            <strong aria-label={`${overallScore.toFixed(1)} out of 5`}>
+              {overallScore.toFixed(1)}
+            </strong>
+            <span>out of 5 across STAR</span>
+          </div>
+          <div className={styles.summaryBlock}>
+            <p className={styles.sessionContext}>
+              {session.role} practice for {session.organization}
+            </p>
+            <h4>STAR performance snapshot</h4>
+            <p>
+              This score is the average of your validated Situation, Task, Action, and
+              Result rubric scores. Use the breakdown below to see where your answer is
+              strongest and what to practice next.
+            </p>
+            <p className={styles.sessionMeta}>
+              Review based on {session.responseCount} confirmed{" "}
+              {session.responseCount === 1 ? "response" : "responses"}.
+            </p>
+          </div>
         </div>
       </section>
 
-      <div className={`${styles.guidanceGrid} evaluation-guidance-grid`}>
-        <section className="evaluation-report-section">
-          <p className="evaluation-section-number" aria-hidden="true">
-            02
-          </p>
+      <section className={styles.sectionCard} aria-labelledby="star-evaluation-heading">
+        <div className={styles.sectionHeading}>
+          <PixelIcon name="progress" size="medium" />
           <div>
-            <p className="eyebrow">What you did well</p>
-            <h3>Strengths</h3>
-            <ul>
-              {evaluation.strengths.map((strength) => (
-                <li key={strength}>{strength}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-        <section className="evaluation-report-section evaluation-opportunity">
-          <p className="evaluation-section-number" aria-hidden="true">
-            03
-          </p>
-          <div>
-            <p className="eyebrow">Main improvement opportunity</p>
-            <h3>Areas to improve</h3>
-            <ul>
-              {evaluation.improvements.map((improvement) => (
-                <li key={improvement}>{improvement}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      </div>
-
-      <section
-        className={`${styles.rubricPanel} evaluation-report-block`}
-        aria-labelledby="rubric-heading"
-      >
-        <div className="evaluation-section-heading">
-          <span className="evaluation-section-number" aria-hidden="true">
-            04
-          </span>
-          <div>
-            <p className="eyebrow">Rubric breakdown</p>
-            <h3 id="rubric-heading">Rubric score summary</h3>
+            <p>Rubric breakdown</p>
+            <h3 id="star-evaluation-heading">STAR Evaluation</h3>
           </div>
         </div>
-        <div className="evaluation-rubric">
+        <div className={styles.rubricGrid}>
           {evaluation.rubricScores.map((item) => (
-            <article className="evaluation-criterion" key={item.criterion}>
-              <div className="evaluation-criterion-heading">
+            <article className={styles.criterion} key={item.criterion}>
+              <div className={styles.criterionHeader}>
                 <div>
                   <h4>{STAR_RUBRIC[item.criterion].label}</h4>
                   <p>{STAR_RUBRIC[item.criterion].description}</p>
@@ -126,78 +117,66 @@ export function EvaluationFeedback({
         </div>
       </section>
 
-      <section className="evaluation-report-block" aria-labelledby="evidence-heading">
-        <div className="evaluation-section-heading">
-          <span className="evaluation-section-number" aria-hidden="true">
-            05
-          </span>
+      <div className={styles.guidanceGrid}>
+        <section
+          className={`${styles.sectionCard} ${styles.strengthCard}`}
+          aria-labelledby="strengths-heading"
+        >
+          <div className={styles.sectionHeading}>
+            <PixelIcon name="check" size="medium" />
+            <div>
+              <p>What worked well</p>
+              <h3 id="strengths-heading">Strengths</h3>
+            </div>
+          </div>
+          <ul className={styles.guidanceList}>
+            {evaluation.strengths.map((strength) => (
+              <li key={strength}>{strength}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section
+          className={`${styles.sectionCard} ${styles.improvementCard}`}
+          aria-labelledby="improvements-heading"
+        >
+          <div className={styles.sectionHeading}>
+            <PixelIcon name="lesson" size="medium" />
+            <div>
+              <p>Where to focus next</p>
+              <h3 id="improvements-heading">Areas for Improvement</h3>
+            </div>
+          </div>
+          <ul className={styles.guidanceList}>
+            {evaluation.improvements.map((improvement) => (
+              <li key={improvement}>{improvement}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <section className={styles.sectionCard} aria-labelledby="ai-feedback-heading">
+        <div className={styles.sectionHeading}>
+          <PixelIcon name="speech" size="medium" />
           <div>
-            <p className="eyebrow">Transcript evidence</p>
-            <h3 id="evidence-heading">What the review used</h3>
+            <p>Transcript-grounded review</p>
+            <h3 id="ai-feedback-heading">AI Feedback</h3>
           </div>
         </div>
-        <div className="evaluation-evidence-list">
+        <div className={styles.feedbackSummary}>{evaluation.summary}</div>
+
+        <h4 className={styles.subsectionHeading}>Evidence from your transcript</h4>
+        <div className={styles.evidenceGrid}>
           {evaluation.rubricScores.map((item) => (
-            <figure key={item.criterion} className="evaluation-evidence-card">
+            <figure key={item.criterion} className={styles.evidenceCard}>
               <figcaption>{STAR_RUBRIC[item.criterion].label} evidence</figcaption>
               <blockquote>“{item.evidence}”</blockquote>
             </figure>
           ))}
         </div>
-      </section>
 
-      <section className="evaluation-report-block" aria-labelledby="actions-heading">
-        <div className="evaluation-section-heading">
-          <span className="evaluation-section-number" aria-hidden="true">
-            06
-          </span>
-          <div>
-            <p className="eyebrow">Specific improvement actions</p>
-            <h3 id="actions-heading">Changes to make on your next attempt</h3>
-          </div>
-        </div>
-        <ol className="evaluation-action-list">
-          {evaluation.rubricScores.map((item) => (
-            <li key={item.criterion}>
-              <strong>{STAR_RUBRIC[item.criterion].label}</strong>
-              <span>{item.improvementAction}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="evaluation-next-step evaluation-recommended-lesson">
-        <p className="evaluation-section-number" aria-hidden="true">
-          07
-        </p>
-        <div>
-          <PixelBadge tone="amber">Recommended lesson</PixelBadge>
-          <h3>{recommendedLesson.title}</h3>
-          <p>{recommendedLesson.objective}</p>
-          <PixelButton href={recommendedLesson.href} variant="secondary">
-            Open recommended lesson
-          </PixelButton>
-        </div>
-      </section>
-
-      <section className="evaluation-next-step">
-        <p className="evaluation-section-number" aria-hidden="true">
-          08
-        </p>
-        <div>
-          <PixelBadge tone="mint">Focused retry goal</PixelBadge>
-          <h3>One goal for your next attempt</h3>
-          <p>{evaluation.nextPracticeAction}</p>
-        </div>
-      </section>
-
-      <section className="evaluation-example">
-        <p className="evaluation-section-number" aria-hidden="true">
-          09
-        </p>
-        <div>
-          <p className="eyebrow">Improved answer example</p>
-          <h3>A clearer version using your confirmed facts</h3>
+        <h4 className={styles.subsectionHeading}>Improved answer example</h4>
+        <div className={styles.improvedExample}>
           <p>
             This example may reorganize only information already present in your confirmed
             transcript.
@@ -206,28 +185,41 @@ export function EvaluationFeedback({
         </div>
       </section>
 
-      <section className="evaluation-report-action" aria-labelledby="retry-heading">
-        <p className="evaluation-section-number" aria-hidden="true">
-          10
-        </p>
-        <div>
-          <p className="eyebrow">Retry simulation</p>
-          <h3 id="retry-heading">Practice the same scenario with one focused goal</h3>
-          <p>
-            Your role, organization, questions, and focused retry goal will stay with you.
-          </p>
-          <PixelButton onClick={onRetry}>Retry this simulation</PixelButton>
+      <section className={styles.sectionCard} aria-labelledby="actionable-tips-heading">
+        <div className={styles.sectionHeading}>
+          <PixelIcon name="lesson" size="medium" />
+          <div>
+            <p>Your focused improvement plan</p>
+            <h3 id="actionable-tips-heading">Actionable Tips</h3>
+          </div>
         </div>
-      </section>
+        <ol className={styles.actionList}>
+          {evaluation.rubricScores.map((item) => (
+            <li key={item.criterion}>
+              <strong>{STAR_RUBRIC[item.criterion].label}</strong>
+              <span>{item.improvementAction}</span>
+            </li>
+          ))}
+        </ol>
 
-      <section className="evaluation-report-action" aria-labelledby="continue-heading">
-        <p className="evaluation-section-number" aria-hidden="true">
-          11
-        </p>
-        <div>
-          <p className="eyebrow">Continue learning</p>
-          <h3 id="continue-heading">Return to Interview Foundations</h3>
-          <p>Review your lesson path and choose the next structured activity.</p>
+        <div className={styles.nextStepsGrid}>
+          <article className={styles.nextStep}>
+            <PixelBadge tone="mint">Focused retry goal</PixelBadge>
+            <h4>One goal for your next attempt</h4>
+            <p>{evaluation.nextPracticeAction}</p>
+            <PixelButton onClick={onRetry}>Retry this simulation</PixelButton>
+          </article>
+          <article className={styles.nextStep}>
+            <PixelBadge tone="amber">Recommended lesson</PixelBadge>
+            <h4>{recommendedLesson.title}</h4>
+            <p>{recommendedLesson.objective}</p>
+            <PixelButton href={recommendedLesson.href} variant="secondary">
+              Open recommended lesson
+            </PixelButton>
+          </article>
+        </div>
+
+        <div className={styles.learningActions}>
           <PixelButton href="/learn" variant="ghost">
             Continue learning
           </PixelButton>

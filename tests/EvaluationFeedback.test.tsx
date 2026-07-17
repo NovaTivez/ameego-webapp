@@ -28,23 +28,22 @@ const session = {
 };
 
 describe("EvaluationFeedback", () => {
-  it("renders the valid educational report in the required guidance-first order", () => {
+  it("renders the valid educational report in the required results-page order", () => {
     const { container } = render(
       <EvaluationFeedback evaluation={evaluation} session={session} onRetry={vi.fn()} />,
     );
 
     const labels = [
-      "Educational session summary",
-      "What you did well",
-      "Main improvement opportunity",
-      "Rubric breakdown",
-      "Transcript evidence",
-      "Specific improvement actions",
-      "Recommended lesson",
-      "Focused retry goal",
+      "Overall Score",
+      "STAR Evaluation",
+      "Strengths",
+      "Areas for Improvement",
+      "AI Feedback",
+      "Evidence from your transcript",
       "Improved answer example",
-      "Retry simulation",
-      "Continue learning",
+      "Actionable Tips",
+      "Focused retry goal",
+      "Recommended lesson",
     ];
     const positions = labels.map((label) => container.textContent?.indexOf(label) ?? -1);
     expect(positions.every((position) => position >= 0)).toBe(true);
@@ -53,15 +52,23 @@ describe("EvaluationFeedback", () => {
       screen.getAllByText(/^(Situation|Task|Action|Result) evidence$/i),
     ).toHaveLength(4);
     expect(screen.getByText(/not an official grade or hiring decision/i)).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Overall summary" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Feedback Report" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Overall Score" })).toBeVisible();
+    expect(screen.getByLabelText("3.5 out of 5")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Strengths" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Areas to improve" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Rubric score summary" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Areas for Improvement" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "STAR Evaluation" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "AI Feedback" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Actionable Tips" })).toBeVisible();
     expect(screen.getByText("Interview Coach")).toBeVisible();
     expect(container.textContent).not.toMatch(/openai|gpt|chatgpt|model|api/i);
     expect(
       screen.getByRole("link", { name: /open recommended lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");
+    expect(screen.getByRole("link", { name: /continue learning/i })).toHaveAttribute(
+      "href",
+      "/learn",
+    );
   });
 
   it("invokes the focused same-scenario retry action", async () => {

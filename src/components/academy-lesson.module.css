@@ -1,0 +1,853 @@
+.lessonPage {
+  display: grid;
+  width: min(100%, 1320px);
+  min-height: calc(100vh - 100px);
+  gap: 16px;
+  margin: 0 auto;
+  color: var(--game-text);
+  font-family: var(--game-font-copy);
+}
+
+:global(.academy-lesson-page) {
+  width: min(calc(100% - 24px), 1344px);
+  padding: 14px 0 32px;
+}
+
+.lessonHero,
+.learningPanel,
+.exercisePanel,
+.finishBar,
+.rewardReveal,
+.lockedLesson {
+  border: 4px solid var(--game-border);
+  background: var(--game-panel-850);
+  box-shadow:
+    inset 0 0 0 2px var(--game-line-highlight),
+    6px 6px 0 var(--game-border);
+}
+
+.lessonHero {
+  display: grid;
+  background: #132541;
+}
+
+.lessonBreadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 14px;
+  border-bottom: 3px solid var(--game-border);
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  background: var(--game-panel-900);
+}
+
+.lessonBreadcrumbs a {
+  color: var(--game-yellow);
+}
+
+.lessonBreadcrumbs a:hover,
+.lessonBreadcrumbs a:focus-visible {
+  color: #fff2a1;
+}
+
+.lessonHeroMain {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+}
+
+.lessonNumber {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border: 3px solid var(--game-border);
+  color: #151208;
+  font-family: var(--game-font-ui);
+  font-size: 1.15rem;
+  font-weight: 900;
+  background: var(--game-yellow);
+  box-shadow:
+    inset 0 0 0 2px #ffe799,
+    4px 4px 0 var(--game-border);
+}
+
+.lessonHeroMain p,
+.lessonHeroMain h1,
+.lessonHeroMain > div > span,
+.panelHeading p,
+.panelHeading h2,
+.rewardReveal p,
+.rewardReveal h2,
+.rewardReveal span {
+  margin: 0;
+}
+
+.lessonHeroMain p,
+.panelHeading p,
+.rewardReveal p {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.59rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lessonHeroMain h1 {
+  max-width: none;
+  margin: 3px 0 7px;
+  font-size: clamp(1.05rem, 2.4vw, 1.65rem);
+  text-transform: uppercase;
+}
+
+.lessonHeroMain > div > span {
+  display: block;
+  max-width: 70ch;
+  color: #c8d5e6;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.lessonHeroMain dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(88px, 1fr));
+  margin: 0;
+  border: 3px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.lessonHeroMain dl > div {
+  display: grid;
+  gap: 4px;
+  min-height: 62px;
+  align-content: center;
+  padding: 8px 10px;
+  border-right: 2px solid var(--game-border);
+}
+
+.lessonHeroMain dl > div:last-child {
+  border-right: 0;
+}
+
+.lessonHeroMain dt {
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+}
+
+.lessonHeroMain dd {
+  margin: 0;
+  color: var(--game-yellow);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.lessonProgressRow {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 3px solid var(--game-border);
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  background: var(--game-panel-900);
+}
+
+.lessonProgressRow > div {
+  height: 16px;
+  padding: 3px;
+  border: 2px solid var(--game-border);
+  background: #050b14;
+  box-shadow: inset 0 0 0 1px var(--game-line);
+}
+
+.lessonProgressRow > div > span {
+  display: block;
+  height: 100%;
+  background: var(--game-green);
+  box-shadow: inset 0 3px 0 var(--game-green-highlight);
+  transition: width 300ms steps(8, end);
+}
+
+.lessonProgressRow strong {
+  color: var(--game-yellow);
+}
+
+.learningPanel,
+.exercisePanel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.panelHeading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 3px solid var(--game-border);
+  background: var(--game-panel-900);
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.panelHeading > :global(.pixel-icon) {
+  color: var(--game-yellow);
+}
+
+.panelHeading h2 {
+  margin-top: 3px;
+  font-size: 0.94rem;
+  text-transform: uppercase;
+}
+
+.lessonSummary,
+.exerciseInstruction {
+  max-width: 88ch;
+  margin: 0;
+  color: #c8d5e6;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.topicGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.topicGrid > div {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-content: start;
+  gap: 7px 9px;
+  min-height: 126px;
+  padding: 12px;
+  border: 3px solid var(--game-border);
+  background: #0b1729;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.topicGrid > div > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 2px solid var(--game-border);
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.54rem;
+  background: var(--game-panel-800);
+}
+
+.topicGrid strong {
+  align-self: center;
+  font-family: var(--game-font-ui);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.topicGrid p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--game-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.exerciseWorkspace {
+  display: grid;
+  gap: 12px;
+}
+
+.responseField {
+  display: grid;
+  gap: 6px;
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.59rem;
+  font-weight: 900;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.responseField textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  padding: 10px 11px;
+  border: 3px solid var(--game-border);
+  color: var(--game-text);
+  font-family: var(--game-font-copy);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  background: #060e1a;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.responseField textarea:focus {
+  border-color: var(--game-yellow-dark);
+}
+
+.responseField textarea:disabled {
+  color: var(--game-text-muted);
+  background: #111a29;
+}
+
+.checkList,
+.choiceList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceList legend {
+  margin-bottom: 8px;
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.61rem;
+  text-transform: uppercase;
+}
+
+.checkList label,
+.choiceList label {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 9px 11px;
+  border: 2px solid var(--game-border);
+  color: var(--game-text);
+  font-size: 0.77rem;
+  background: #0b1729;
+  box-shadow: inset 0 0 0 1px var(--game-line);
+  cursor: pointer;
+}
+
+.checkList label:has(input:checked),
+.choiceList label:has(input:checked) {
+  border-left: 5px solid var(--game-green);
+  color: var(--game-green-highlight);
+  background: #112a25;
+}
+
+.checkList input,
+.choiceList input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--game-green);
+}
+
+.weakSample,
+.readingPrompt,
+.inlineNotice,
+.correctNotice,
+.safetyNote,
+.aiHandoff,
+.practiceIndicators,
+.recordingControls,
+.cameraWorkspace {
+  border: 3px solid var(--game-border);
+  background: #0b1729;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.timerChallenge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 3px solid var(--game-border);
+  background: #2b2430;
+  box-shadow: inset 0 0 0 2px #5b4556;
+}
+
+.timerChallenge > div {
+  display: grid;
+  gap: 3px;
+}
+
+.timerChallenge span {
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.timerChallenge strong {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 1.1rem;
+}
+
+.weakSample {
+  padding: 11px 13px;
+  border-left: 5px solid var(--game-red);
+}
+
+.weakSample span {
+  color: #ff9b9e;
+  font-family: var(--game-font-ui);
+  font-size: 0.53rem;
+  text-transform: uppercase;
+}
+
+.weakSample p {
+  margin: 6px 0 0;
+  color: #d8c6cc;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.readingPrompt {
+  margin: 0;
+  padding: 16px;
+  border-left: 5px solid var(--game-yellow);
+  color: var(--game-text);
+  font-size: 0.92rem;
+  font-style: normal;
+  line-height: 1.7;
+}
+
+.promptList {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 12px 12px 12px 32px;
+  border: 3px solid var(--game-border);
+  color: var(--game-text);
+  background: #0b1729;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.recordingControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+}
+
+.recordingControls > span {
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.54rem;
+  text-transform: uppercase;
+}
+
+.secondaryButton,
+.finishButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border: 3px solid var(--game-border);
+  color: var(--game-text);
+  font-family: var(--game-font-ui);
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    3px 3px 0 var(--game-border);
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: var(--game-panel-800);
+}
+
+.finishButton {
+  min-width: 220px;
+  background: var(--game-green);
+}
+
+.secondaryButton:disabled,
+.finishButton:disabled {
+  color: #748397;
+  background: #243146;
+  cursor: not-allowed;
+}
+
+.practiceIndicators {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+}
+
+.practiceIndicators > div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-right: 2px solid var(--game-border);
+  text-align: center;
+}
+
+.practiceIndicators > div:last-child {
+  border-right: 0;
+}
+
+.practiceIndicators dt {
+  color: var(--game-text-muted);
+  font-family: var(--game-font-ui);
+  font-size: 0.5rem;
+  text-transform: uppercase;
+}
+
+.practiceIndicators dd {
+  margin: 0;
+  color: var(--game-yellow);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.inlineNotice,
+.correctNotice,
+.safetyNote {
+  margin: 0;
+  padding: 9px 11px;
+  color: #ffb2b4;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.correctNotice {
+  border-left: 5px solid var(--game-green);
+  color: var(--game-green-highlight);
+}
+
+.safetyNote {
+  color: var(--game-text-muted);
+}
+
+.aiHandoff {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border-left: 5px solid var(--game-yellow);
+}
+
+.aiHandoff > :global(.pixel-icon) {
+  color: var(--game-yellow);
+}
+
+.aiHandoff p {
+  margin: 0;
+  color: var(--game-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.aiHandoff a {
+  padding: 7px 9px;
+  border: 2px solid var(--game-border);
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  background: var(--game-panel-800);
+  box-shadow: 2px 2px 0 var(--game-border);
+}
+
+.cameraWorkspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 12px;
+  padding: 11px;
+}
+
+.cameraFrame {
+  display: grid;
+  min-height: 250px;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid var(--game-border);
+  background: #030812;
+  box-shadow: inset 0 0 0 2px var(--game-line);
+}
+
+.cameraFrame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.cameraFrame > div {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  color: #728298;
+  font-family: var(--game-font-ui);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+}
+
+.cameraReadout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cameraReadout p {
+  margin: 0;
+  color: var(--game-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.finishBar,
+.rewardReveal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.finishBar > div,
+.rewardReveal > div {
+  display: grid;
+  gap: 4px;
+}
+
+.finishBar strong {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.finishBar span,
+.rewardReveal span {
+  color: var(--game-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.rewardReveal {
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  border-color: #1d6e31;
+  background: #123025;
+  box-shadow:
+    inset 0 0 0 2px var(--game-green),
+    6px 6px 0 var(--game-border);
+}
+
+.rewardReveal > :global(.pixel-icon) {
+  width: 44px;
+  height: 44px;
+  color: var(--game-yellow);
+}
+
+.rewardReveal h2 {
+  font-size: clamp(0.85rem, 1.7vw, 1.1rem);
+  text-transform: uppercase;
+}
+
+.lockedLesson {
+  display: grid;
+  max-width: 760px;
+  min-height: 440px;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  margin: 30px auto;
+  padding: 30px;
+  text-align: center;
+}
+
+.lockedLesson > :global(.pixel-icon) {
+  width: 54px;
+  height: 54px;
+  color: var(--game-text-muted);
+}
+
+.lockedLesson p,
+.lockedLesson h1,
+.lockedLesson > span {
+  margin: 0;
+}
+
+.lockedLesson p {
+  color: var(--game-yellow);
+  font-family: var(--game-font-ui);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.lockedLesson h1 {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.lockedLesson > span {
+  color: var(--game-text-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rewardReveal > :global(.pixel-icon) {
+    animation: rewardPulse 1.2s steps(3, end) infinite;
+  }
+
+  .topicGrid > div:hover,
+  .checkList label:hover,
+  .choiceList label:hover {
+    transform: translate(-2px, -2px);
+    box-shadow:
+      inset 0 0 0 2px var(--game-line-highlight),
+      4px 4px 0 var(--game-border);
+  }
+}
+
+@keyframes rewardPulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 980px) {
+  .lessonHeroMain {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .lessonHeroMain dl {
+    grid-column: 1 / -1;
+  }
+
+  .topicGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .lessonHeroMain {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .lessonNumber {
+    width: 48px;
+    height: 48px;
+    font-size: 0.82rem;
+  }
+
+  .lessonHeroMain dl,
+  .practiceIndicators {
+    grid-template-columns: 1fr;
+  }
+
+  .lessonHeroMain dl > div,
+  .practiceIndicators > div {
+    min-height: 48px;
+    border-right: 0;
+    border-bottom: 2px solid var(--game-border);
+  }
+
+  .lessonHeroMain dl > div:last-child,
+  .practiceIndicators > div:last-child {
+    border-bottom: 0;
+  }
+
+  .topicGrid,
+  .cameraWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .cameraFrame {
+    min-height: 220px;
+  }
+
+  .finishBar,
+  .rewardReveal {
+    grid-template-columns: 1fr;
+  }
+
+  .rewardReveal > :global(.pixel-icon) {
+    display: none;
+  }
+
+  .finishButton,
+  .rewardReveal :global(.pixel-button) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  :global(.academy-lesson-page) {
+    width: min(calc(100% - 12px), 1344px);
+    padding-top: 8px;
+  }
+
+  .lessonBreadcrumbs {
+    flex-wrap: wrap;
+  }
+
+  .lessonHeroMain {
+    grid-template-columns: 1fr;
+  }
+
+  .lessonNumber {
+    display: none;
+  }
+
+  .lessonProgressRow {
+    grid-template-columns: 1fr auto;
+  }
+
+  .lessonProgressRow > div {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .learningPanel,
+  .exercisePanel {
+    padding: 9px;
+  }
+
+  .topicGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .recordingControls,
+  .aiHandoff,
+  .timerChallenge {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .recordingControls .secondaryButton,
+  .aiHandoff a {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}

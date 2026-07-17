@@ -63,10 +63,10 @@ describe("StarLesson", () => {
       await screen.findByRole("progressbar", {
         name: /interview foundations progress/i,
       }),
-    ).toHaveAttribute("aria-valuenow", "100");
-    expect(screen.getByText("1/1")).toBeVisible();
+    ).toHaveAttribute("aria-valuenow", "6");
+    expect(screen.getByText("1 / 17")).toBeVisible();
     expect(
-      screen.getByRole("link", { name: /review star method lesson/i }),
+      screen.getByRole("link", { name: /review star introduction lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");
   });
 });

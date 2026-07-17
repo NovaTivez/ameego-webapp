@@ -1,35 +1,18 @@
-import { CharacterPortrait } from "@/components/CharacterPortrait";
-import { PixelIcon } from "@/components/PixelIcon";
-import { PixelRoomBackground } from "@/components/PixelRoomBackground";
+import Image from "next/image";
 
 export function FeedbackRoomScene() {
   return (
-    <PixelRoomBackground
-      variant="library"
-      label="Pixel-art reflection room after interview completion"
+    <section
       className="feedback-room-scene"
+      aria-label="Panoramic Interview Center room after interview completion"
     >
-      <div className="feedback-results-board" aria-hidden="true">
-        <PixelIcon name="progress" size="large" />
-        <span>REFLECT · LEARN · RETRY</span>
-        <i />
-        <i />
-        <i />
-        <i />
-      </div>
-      <div className="feedback-scene-character">
-        <CharacterPortrait
-          variant="student"
-          name="Ari, reviewing the interview"
-          compact
-        />
-      </div>
-      <div className="feedback-trophy-shelf" aria-hidden="true">
-        <span />
-        <i />
-        <i />
-        <i />
-      </div>
-    </PixelRoomBackground>
+      <Image
+        className="feedback-complete-coach"
+        src="/images/interview/mode-coach-desk.png"
+        width={551}
+        height={453}
+        alt="Ameego interview coach seated behind a wooden desk"
+      />
+    </section>
   );
 }

@@ -1145,3 +1145,176 @@ color and copy preserve action hierarchy.
 Consequences: Learners must confirm before leaving the active interview. Cancel
 or Escape returns focus to End Interview. Confirming still preserves the scenario
 and confirmed responses exactly as the original handler did.
+
+---
+
+## Decision 032 - Extend the Existing Course Progress Record for Academy Quests
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The Courses Building needs sequential phase unlocking, lesson totals,
+earned course XP, and a current-lesson recommendation. The application already
+stores completed lesson IDs in a validated version-1 local record, while the
+published STAR lesson relies on that same record.
+
+Decision: Represent every academy quest with a stable lesson ID and continue to
+record completion through the existing `completeLesson` helper. Calculate the
+Courses dashboard from those completed IDs and keep the storage schema, key,
+and validation unchanged. Continue to route STAR through its existing lesson
+and exercise pages.
+
+Alternatives considered: Creating a second academy progress store, changing the
+version-1 storage schema, hard-coding visual completion, replacing the STAR
+route with an inline copy, or unlocking every phase at once.
+
+Reason: One existing completion record prevents conflicting progress states and
+keeps historical STAR completion readable. Stable IDs support deterministic
+phase unlocking without touching APIs, authentication, or global application
+state.
+
+Consequences: New quests and the existing STAR lesson contribute to one course
+dashboard. Phases unlock only when preceding lesson IDs are complete, while a
+previously completed STAR lesson remains directly reviewable. Course XP shown
+on this page is a transparent sum of completed quest rewards and does not alter
+the global HUD or introduce a separate XP persistence system.
+
+---
+
+## Decision 033 - Keep Lesson AI Feedback Behind the Validated Interview Center
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: Several requested lessons mention AI evaluation of speech clarity,
+confidence, common questions, STAR structure, and final delivery. The existing
+validated GPT pipeline evaluates confirmed interview transcripts using a rubric,
+while browser speech recognition produces only a draft transcript and the
+camera system provides only neutral local framing indicators.
+
+Decision: Provide real local lesson checkpoints and neutral practice indicators
+on dedicated pages, then route exercises requiring GPT evaluation to the existing
+Interview Center. Do not label deterministic word counts, timing, filler scans,
+or camera observations as AI judgments. Do not infer confidence, emotion,
+pronunciation quality, personality, or employability.
+
+Alternatives considered: Displaying simulated AI scores, adding new unvalidated
+API behavior inside the lesson UI, treating transcript timing as confidence,
+sending raw lesson camera or audio data to progress storage, or omitting AI
+practice guidance entirely.
+
+Reason: The existing simulator is the product's validated evidence-based AI
+boundary. Reusing it preserves backend functionality and avoids unsupported or
+unsafe claims while still giving each lesson a clear path to intelligent
+feedback.
+
+Consequences: Dedicated lessons remain functional with text fallbacks and local
+practice tools. Learners seeking AI feedback continue through the established
+question, response, transcript confirmation, evaluation, and report flow. The
+course can expand without duplicating prompt, rubric, API, or persistence logic.
+
+---
+
+## Decision 034 - Make the Main Building a Read-Only Academy Aggregation Layer
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The campus Main Building linked back to the campus itself, while the
+requested home base needs profile, learning, interview, achievement, mission,
+streak, certificate, and rank summaries. Existing records have course IDs,
+attempt timestamps, evaluation scores, and profile data, but do not store lesson
+completion dates, practice duration, a communication rubric, or certificate
+files.
+
+Decision: Keep `/academy` as the fullscreen campus and route Main Building to a
+new normally scrolling `/academy/home` dashboard. Derive every supported value
+from the existing validated storage records without writing a new store. Mark
+unsupported metrics as not tracked or not scored, and render certificate actions
+only when an actual certificate is available.
+
+Alternatives considered: Replacing the campus at `/academy`, adding a second
+dashboard progress schema, fabricating dates or practice duration, treating STAR
+scores as a separate communication rubric, or rendering nonfunctional download
+buttons.
+
+Reason: A separate destination preserves the game-world navigation metaphor and
+all established routes while providing a useful central summary. Read-only
+aggregation prevents conflicting XP or progress sources, and explicit missing-
+data states keep the learning record trustworthy.
+
+Consequences: Main Building now opens a full Academy home base; the Back control
+returns to the campus. Hub XP and ranks are transparent derivations of academy
+lesson rewards and the existing exercise/interview XP constants. Daily lesson
+missions cannot claim completion until lesson records gain timestamps, practice
+duration remains unavailable, and certificate files require a future issuance
+feature before View or Download actions can appear.
+
+---
+
+## Decision 035 - Keep Progress Library Redesign Inside the Existing Data Boundary
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The Progress Library already reads validated lesson, exercise, attempt,
+evaluation, XP, streak, activity, recommendation, and comparison data, but its
+compact panels compress the hierarchy and saved simulation metadata. The task
+requires a modern full-page experience without changing that behavior.
+
+Decision: Retain the ProgressDashboard state, storage readers, calculateProgress
+snapshot, selected-attempt handler, and compareAttempts workflow. Restructure
+only the rendered sections and CSS module, adding semantic metadata fields and
+responsive pixel-art cards around the established values.
+
+Alternatives considered: Replacing the progress calculator, adding a new
+dashboard snapshot, migrating saved attempt records, removing comparison to
+simplify the page, or introducing internal scroll containers to constrain long
+history.
+
+Reason: Presentation-only composition delivers the requested readability and
+scannability while protecting stored learner evidence and every existing
+interaction. Normal document flow also lets long attempts and comparison reports
+use the browser scrollbar without competing scroll regions.
+
+Consequences: `/progress` now occupies the full page and can grow naturally with
+stored activity. Simulation cards are easier to scan, while opening attempts and
+comparing compatible evaluations continue through their original handlers and
+data contracts. Horizontal overflow protection remains available only for the
+comparison table on very narrow screens; no nested vertical scrollbar is added.
+
+---
+
+## Decision 036 - Let the Campus Header Own Its Experience Controls
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The campus header positioned XP and Level absolutely, Settings as a
+fixed button, and the root ExperienceControls as a separate fixed group. Their
+independent offsets overlapped inside a 48px strip and became increasingly
+fragile as labels or viewport widths changed.
+
+Decision: Render the existing ExperienceControls component inside the campus
+header next to XP, Level, and Settings. Keep one flex container responsible for
+alignment, widths, heights, and gaps. Suppress only the root-level duplicate on
+`/academy`, while retaining it on the fullscreen title route.
+
+Alternatives considered: Increasing only the header height, recalculating three
+sets of fixed right offsets, hiding controls at laptop widths, or creating new
+campus-specific music and connectivity implementations.
+
+Reason: One layout owner guarantees containment and responsive alignment without
+duplicating state or behavior. Reusing ExperienceControls preserves the trusted
+audio and connectivity boundary, and equal sizing gives the requested premium
+pixel HUD rhythm.
+
+Consequences: The desktop campus HUD is 72px tall and all five right-side
+controls share 84px width, 42px height, and 8px spacing. Breakpoints reduce those
+dimensions together, the offline notice begins below the new header, and the
+title screen continues to use its established standalone controls.

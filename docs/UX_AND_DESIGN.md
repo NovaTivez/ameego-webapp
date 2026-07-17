@@ -257,8 +257,8 @@ screen rather than a conventional marketing layout.
 ### Academy Hub Map
 
 The `/academy` route is a dense top-down campus map built from the supplied
-nighttime campus background and five supplied transparent building PNGs. It is
-a navigation scene rather than a dashboard.
+updated nighttime campus background and five supplied transparent building
+PNGs. It is a navigation scene rather than a dashboard.
 
 - A compact top HUD contains back navigation, Ameego Academy identity, zeroed
   XP, and level 01 without claiming unstored progress.
@@ -268,20 +268,27 @@ a navigation scene rather than a dashboard.
   building with a Coming Soon label and no navigation or dialog.
 - Progress Library occupies the lower-left plot and links to `/progress`;
   Courses Building occupies the lower-right plot and links to `/learn`.
-- The bottom navigation retains the real Courses, Progress, and Settings routes.
+- The map fills the viewport behind an overlay HUD. Building links are the only
+  Courses and Progress entry points, while the existing `/settings` route is
+  exposed as a gear-only control at the top right.
 - Building overlays retain their original aspect ratios and use restrained
   contact shadows, brightness matching, window-toned glow, and hard pixel focus
   outlines to integrate with the supplied map without altering the artwork.
-- The complete `1672 / 941` campus composition remains visible at desktop,
-  tablet, and mobile sizes; touch devices keep compact location labels visible.
-- Final proportional placement is Main `50% / 77.5% / 24%`, Interview
-  `24.5% / 31.5% / 21%`, Speech `75.5% / 31.5% / 21%`, Progress
-  `24% / 63.5% / 19%`, and Courses `76% / 63.5% / 19%`, expressed as
+- The updated `1672 / 941` campus and every building share one proportional
+  cover coordinate system. Desktop, laptop, and tablet viewports are filled
+  without stretching or layer drift; only nonessential outer vegetation may be
+  trimmed when the viewport aspect ratio differs from the source artwork.
+- Automated geometry checks keep every building and its attached label inside
+  the visible map area at 16:9, 16:10, and 4:3 viewports. Touch devices keep
+  compact location labels visible.
+- Final proportional placement is Main `50% / 75.5% / 24%`, Interview
+  `25% / 29.5% / 21%`, Speech `75% / 29.5% / 21%`, Progress
+  `25% / 61.5% / 19%`, and Courses `75% / 61.5% / 19%`, expressed as
   `left / top / width`.
 - The shared site header, footer, and backdrop are hidden only while the hub is
   mounted; other pages keep their existing composition.
-- Interactive buildings and bottom-navigation links have visible keyboard
-  focus states and descriptive accessible names.
+- Interactive buildings and the top-right Settings control have visible
+  keyboard focus states and descriptive accessible names.
 
 ### Courses Game Menu
 
@@ -452,3 +459,22 @@ The implemented reference screens now use a single dense frame specification:
 - Reduced-motion settings continue to disable visual animation; audio remains
   under explicit Music and Sound Effects controls rather than being inferred
   from motion preference.
+
+## Full-Viewport Interview Session
+
+- Active interview and transcript-confirmation states occupy the complete
+  viewport and temporarily hide the shared page frame; exiting the active
+  session restores the normal Interview Center shell.
+- The supplied panoramic office fills the interview stage and the supplied
+  combined coach-and-desk PNG is centered near the lower stage edge.
+- The current question appears in a compact cream pixel speech bubble with a
+  category label, strong dark text, balanced padding, and responsive maximum
+  height for longer questions.
+- The response dock keeps the editable transcript, microphone control, and
+  actions together beneath the room. Microphone off is red and labeled;
+  microphone active is green and labeled.
+- Next is the first and visually dominant action. End Interview follows as a
+  smaller secondary danger action.
+- Camera preview and neutral on-device face/orientation labels remain in a
+  right-side tool rail on desktop. Tablet and phone layouts stack the tool rail
+  inside the simulator without changing DOM or keyboard order.

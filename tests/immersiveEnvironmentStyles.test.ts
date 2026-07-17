@@ -6,12 +6,16 @@ const styles = readFileSync("src/app/globals.css", "utf8");
 const immersive = styles.slice(styles.indexOf("/* Immersive environmental art pass */"));
 
 describe("immersive environment style contract", () => {
-  it("contains layered world, campus, classroom, lobby, and reflection scenes", () => {
+  it("contains layered world, campus, classroom, and supplied interview scenes", () => {
     expect(immersive).toMatch(/\.game-world-backdrop\s*{[\s\S]*?position:\s*fixed/);
     expect(immersive).toMatch(/\.academy-map\s*{[\s\S]*?min-height:\s*760px/);
     expect(immersive).toMatch(/\.learning-blackboard\s*{[\s\S]*?background:/);
     expect(immersive).toMatch(/\.practice-lobby-scene\s*{[\s\S]*?min-height:/);
-    expect(immersive).toMatch(/\.feedback-results-board\s*{[\s\S]*?position:\s*absolute/);
+    expect(styles).toMatch(
+      /\.interview-complete-hero \.feedback-room-scene\s*{[\s\S]*?url\("\/images\/interview\/header-panorama\.png"\)/,
+    );
+    expect(styles).toMatch(/\.feedback-complete-coach\s*{[\s\S]*?position:\s*absolute/);
+    expect(styles).not.toMatch(/feedback-(?:results-board|scene-character|trophy-shelf)/);
   });
 
   it("uses restrained stepped animation and retains reduced-motion protection", () => {

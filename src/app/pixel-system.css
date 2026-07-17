@@ -98,11 +98,11 @@ body {
   top: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 44px;
+  min-height: 68px;
   align-items: center;
-  gap: var(--game-space-2);
+  gap: var(--game-space-4);
   width: 100%;
-  padding: 5px 190px 5px 8px;
+  padding: 0 clamp(24px, 2.5vw, 32px);
   border: 0;
   border-bottom: 2px solid var(--game-border);
   background: var(--game-panel-900);
@@ -123,13 +123,20 @@ body {
   font-family: var(--game-font-ui);
 }
 
+.hud-control-group .experience-controls {
+  position: static;
+  z-index: auto;
+}
+
 .music-toggle,
 .connection-status {
   display: flex;
-  min-height: 30px;
+  width: 88px;
+  min-height: 36px;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 4px 7px;
+  padding: 5px 8px;
   border: 2px solid var(--game-border);
   color: var(--game-text);
   background: var(--game-panel-900);
@@ -149,6 +156,10 @@ body {
 .music-toggle:focus-visible {
   color: var(--game-yellow);
   background: var(--game-panel-800);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    4px 4px 0 var(--game-border);
 }
 
 .music-toggle[aria-pressed="false"] {
@@ -201,6 +212,7 @@ body {
 }
 
 .hud-identity,
+.hud-control-group,
 .hud-player-status,
 .pixel-hud-stat {
   display: flex;
@@ -214,8 +226,8 @@ body {
 
 .hud-back-link {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
   border: 2px solid var(--game-border);
@@ -236,7 +248,7 @@ body {
   gap: var(--game-space-2);
   min-width: 0;
   color: var(--game-text);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 0.05em;
   white-space: nowrap;
 }
@@ -293,21 +305,20 @@ body {
 }
 
 .hud-player-status {
-  justify-self: end;
-  gap: 14px;
+  gap: 8px;
 }
 
 .pixel-hud-stat {
-  min-height: 28px;
+  min-height: 36px;
   gap: 5px;
-  padding: 2px 0;
-  border: 0;
-  background: transparent;
+  padding: 4px 8px;
+  border: 2px solid var(--game-border);
+  background: #101e34;
   color: var(--game-yellow);
   font-family: var(--game-font-ui);
   font-size: 0.64rem;
   letter-spacing: 0.03em;
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px var(--game-line-highlight);
 }
 
 .pixel-hud-stat > span {
@@ -317,6 +328,37 @@ body {
 .pixel-hud-stat strong {
   color: var(--game-yellow);
   font-weight: 900;
+}
+
+.hud-control-group {
+  min-width: 0;
+  justify-self: end;
+  gap: 8px;
+}
+
+.hud-settings-link {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border: 2px solid var(--game-border);
+  color: var(--game-text-muted);
+  background: var(--game-panel-900);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    3px 3px 0 var(--game-border);
+}
+
+.hud-settings-link:hover,
+.hud-settings-link:focus-visible,
+.hud-settings-link[aria-current="page"] {
+  color: var(--game-yellow);
+  background: var(--game-panel-800);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    4px 4px 0 var(--game-border);
 }
 
 .pixel-icon {
@@ -859,6 +901,41 @@ select {
 @media (max-width: 900px) {
   .site-header {
     grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding-inline: 20px;
+  }
+
+  .hud-control-group,
+  .hud-player-status {
+    gap: 6px;
+  }
+
+  .music-toggle,
+  .connection-status {
+    width: 76px;
+  }
+}
+
+@media (max-width: 700px) {
+  .music-toggle,
+  .connection-status {
+    width: 36px;
+    padding-inline: 5px;
+  }
+
+  .music-toggle > span,
+  .connection-status strong {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+
+  .brand > span:last-child {
+    overflow: hidden;
+    max-width: 118px;
+    text-overflow: ellipsis;
   }
 }
 
@@ -875,21 +952,13 @@ select {
   }
 
   .site-header {
-    padding-right: 104px;
+    min-height: 64px;
+    padding-inline: 12px;
   }
 
   .experience-controls {
     top: 16px;
     right: 16px;
-  }
-
-  .music-toggle > span,
-  .connection-status strong {
-    position: absolute;
-    overflow: hidden;
-    width: 1px;
-    height: 1px;
-    clip-path: inset(50%);
   }
 
   .offline-mode-notice {
@@ -898,13 +967,13 @@ select {
   }
 
   .brand > span:last-child {
-    overflow: hidden;
-    max-width: 96px;
-    text-overflow: ellipsis;
+    display: none;
   }
 
   .pixel-hud-stat {
-    padding: 4px 5px;
+    width: 36px;
+    justify-content: center;
+    padding: 4px;
   }
 
   .pixel-hud-stat .pixel-icon,
