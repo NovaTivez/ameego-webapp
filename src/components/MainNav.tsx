@@ -8,7 +8,7 @@ import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
 
 const navItems = [
-  { href: "/", label: "Academy" },
+  { href: "/academy", label: "Academy" },
   { href: "/learn", label: "Learn" },
   { href: "/practice", label: "Interview Center" },
   { href: "/progress", label: "Progress Library" },
@@ -16,6 +16,9 @@ const navItems = [
 ];
 
 function getBackDestination(pathname: string) {
+  if (pathname === "/academy") {
+    return { href: "/", label: "Back to title screen" };
+  }
   if (pathname === "/academy/home") {
     return { href: "/academy", label: "Back to Academy campus" };
   }
@@ -29,20 +32,24 @@ function getBackDestination(pathname: string) {
     return { href: "/learn", label: "Back to Interview Foundations" };
   }
   if (pathname === "/learn") {
-    return { href: "/academy", label: "Back to Academy Hub" };
+    return { href: "/academy", label: "Back to Academy campus" };
   }
   if (pathname === "/settings") {
-    return { href: "/academy", label: "Back to Academy Hub" };
+    return { href: "/academy", label: "Back to Academy campus" };
   }
   if (pathname !== "/") {
-    return { href: "/", label: "Back to Academy" };
+    return { href: "/academy", label: "Back to Academy campus" };
   }
-  return { href: "/", label: "Academy home" };
+  return { href: "/", label: "Back to title screen" };
 }
 
 export function MainNav() {
   const pathname = usePathname();
   const backDestination = getBackDestination(pathname);
+  const brandDestination =
+    pathname === "/"
+      ? { href: "/", label: "Ameego title screen" }
+      : { href: "/academy", label: "Ameego Academy campus" };
   const usesFullscreenWorld = pathname === "/" || pathname === "/academy";
   const usesStandaloneExperienceControls = pathname === "/";
 
@@ -57,7 +64,11 @@ export function MainNav() {
           >
             <PixelIcon name="back" size="small" />
           </Link>
-          <Link className="brand" href="/" aria-label="Ameego home">
+          <Link
+            className="brand"
+            href={brandDestination.href}
+            aria-label={brandDestination.label}
+          >
             <span className="brand-mark" aria-hidden="true">
               <span />
               <span />
@@ -71,8 +82,8 @@ export function MainNav() {
           <ul className="nav-list">
             {navItems.map((item) => {
               const isCurrent =
-                item.href === "/"
-                  ? pathname === item.href || pathname === "/academy/home"
+                item.href === "/academy"
+                  ? pathname === "/academy" || pathname.startsWith("/academy/")
                   : pathname.startsWith(item.href);
 
               return (

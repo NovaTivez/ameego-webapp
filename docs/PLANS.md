@@ -1720,6 +1720,30 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Academy Campus Header Navigation
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Repointed the global Academy navigation item and in-app brand link to the
+  `/academy` campus hub.
+- Made building-level header back controls return to `/academy`, including
+  Interview Center, Progress Library, Main Building, and Courses.
+- Kept `/` as the separate title screen with explicit title-screen labels.
+- Preserved contextual nested-lesson back paths and Academy header ownership.
+- Added regression coverage for all affected building routes and title-screen
+  separation.
+
+## Validation
+
+- All 15 focused MainNav tests pass; changed files pass focused ESLint, strict
+  TypeScript, Prettier, and diff integrity.
+- The production build passes and statically generates `/academy` plus all
+  33 application routes.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.

@@ -1812,3 +1812,26 @@ are fully visible and at least 47.5px tall; desktop target measurements remained
 inside a 1280px-wide viewport. Repository lint retains the pre-existing
 InterviewSimulator effect-rule error, and the full test suite exceeded the
 120-second command limit twice.
+
+## Contribution 045 - Academy Campus Header Navigation
+
+Feature: Return learners from campus buildings to the Academy map rather than
+the title screen.
+
+Codex inspected: The global MainNav back-destination helper, brand link,
+Academy nav item, route-aware control visibility, and the existing unit tests
+that encoded the incorrect `/practice` fallback.
+
+Codex implemented: Changed the Academy nav item and in-app brand target to
+`/academy`, made the top-level fallback return to the campus, retained the title
+screen as `/`, and updated contextual labels. The test suite now explicitly
+covers `/practice`, `/progress`, `/academy/home`, `/learn`, brand behavior, and
+the separate title-screen route.
+
+Scope protection: The Academy map, title-screen design, routes, audio controls,
+settings destination, nested lesson back behavior, and state management remain
+unchanged.
+
+Validation result: All 15 MainNav tests pass. The changed files pass focused
+ESLint, strict TypeScript, Prettier, diff integrity, and the production build
+with 33 generated routes.

@@ -1410,3 +1410,28 @@ Consequences: Narrow portrait screens show the complete campus in a letterboxed
 stage instead of cropping it. Desktop uses the same composition when it fits,
 and touch users retain adequately sized controls without a second navigation
 implementation.
+
+---
+
+## Decision 040 - Treat the Academy Campus as the In-App Home
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The global header labelled its fallback route as â€œBack to Academyâ€
+but linked to the separate title screen. The header brand and Academy nav item
+also linked there, so leaving a campus building unexpectedly exited the Academy
+loop.
+
+Decision: Use `/academy` as the header back, brand, and Academy navigation
+destination everywhere inside the Academy experience. Keep `/` as the distinct
+title screen; its own header controls retain title-screen labels and routes.
+
+Reason: The campus map is the learnerâ€™s navigable hub. A consistent return path
+keeps building exploration in the educational flow and makes the title screen a
+deliberate destination rather than an accidental back action.
+
+Consequences: Building-level routes return to `/academy`, while nested lesson
+routes retain their closer contextual back destinations. Accessible labels now
+describe the actual Academy campus destination.

@@ -29,7 +29,10 @@ describe("MainNav", () => {
     render(<MainNav />);
 
     expect(screen.getByRole("navigation", { name: /main navigation/i })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Academy" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Academy" })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
     expect(screen.getByRole("link", { name: "Learn" })).toHaveAttribute("href", "/learn");
     expect(screen.getByRole("link", { name: "Interview Center" })).toHaveAttribute(
       "href",
@@ -57,9 +60,9 @@ describe("MainNav", () => {
   it("renders the consistent back, XP, and level HUD", () => {
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
       "href",
-      "/",
+      "/academy",
     );
     const status = screen.getByLabelText(/academy player status/i);
     expect(status).toHaveTextContent("XP0000");
@@ -116,7 +119,7 @@ describe("MainNav", () => {
     navigation.pathname = "/learn";
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
       "href",
       "/academy",
     );
@@ -135,7 +138,37 @@ describe("MainNav", () => {
     navigation.pathname = "/settings";
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
+  });
+
+  it.each(["/practice", "/progress", "/academy/home", "/learn"])(
+    "returns from %s to the Academy campus",
+    (pathname) => {
+      navigation.pathname = pathname;
+      render(<MainNav />);
+
+      expect(
+        screen.getByRole("link", { name: /back to academy campus/i }),
+      ).toHaveAttribute("href", "/academy");
+      expect(screen.getByRole("link", { name: "Ameego Academy campus" })).toHaveAttribute(
+        "href",
+        "/academy",
+      );
+    },
+  );
+
+  it("keeps the title screen separate from the Academy campus", () => {
+    navigation.pathname = "/";
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: "Ameego title screen" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("link", { name: "Academy" })).toHaveAttribute(
       "href",
       "/academy",
     );
