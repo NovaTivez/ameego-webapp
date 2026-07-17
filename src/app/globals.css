@@ -156,7 +156,6 @@ select {
   grid-template-columns: repeat(2, 7px);
   grid-template-rows: repeat(2, 7px);
   gap: 2px;
-  transform: rotate(45deg);
 }
 
 .brand-mark span:nth-child(1),
