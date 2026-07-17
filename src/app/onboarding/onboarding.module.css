@@ -1,0 +1,163 @@
+.page {
+  width: min(calc(100% - 24px), 920px);
+  margin: 0 auto;
+  padding: 24px 0 36px;
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 4px solid #03070e;
+  background: #101f35;
+  box-shadow:
+    inset 0 0 0 2px #3d5371,
+    7px 7px 0 #03070e;
+}
+
+.kicker,
+.panel h1,
+.intro {
+  margin: 0;
+}
+
+.kicker {
+  color: #f2c44f;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 3vw, 1.7rem);
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.intro {
+  max-width: 65ch;
+  color: #bdc9d9;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.form :global(.pixel-button) {
+  justify-self: end;
+}
+
+.choiceGroup {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  margin: 0;
+  border: 3px solid #03070e;
+  background: #091426;
+  box-shadow: inset 0 0 0 1px #3c5271;
+}
+
+.choiceGroup legend {
+  padding: 0 5px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.choiceGroup > p {
+  margin: 0;
+  color: #aebbd0;
+  font-size: 0.78rem;
+}
+
+.choiceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.choiceGrid label {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 3px 8px;
+  align-items: start;
+  min-height: 76px;
+  padding: 10px;
+  border: 2px solid #03070e;
+  background: #14243d;
+  box-shadow: inset 0 1px 0 #465d7d;
+  cursor: pointer;
+}
+
+.choiceGrid label[data-selected="true"] {
+  background: #173126;
+  box-shadow:
+    inset 0 -3px 0 #4cae49,
+    inset 0 1px 0 #5e836f;
+}
+
+.choiceGrid input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+
+.choiceGrid label > span {
+  display: block;
+  grid-row: span 2;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 2px solid #03070e;
+  background: #071120;
+}
+
+.choiceGrid input:checked + span {
+  border-color: #d7e898;
+  background: #74b83c;
+  box-shadow: inset 0 0 0 3px #183523;
+}
+
+.choiceGrid input:focus-visible + span {
+  outline: 3px solid #f2c44f;
+  outline-offset: 3px;
+}
+
+.choiceGrid strong {
+  color: #edf4ff;
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.choiceGrid small {
+  grid-column: 2;
+  color: #aebbd0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.formError,
+.error {
+  margin: 0;
+  color: #ffbcb8;
+}
+
+@media (max-width: 620px) {
+  .page {
+    width: min(calc(100% - 16px), 920px);
+    padding-top: 12px;
+  }
+
+  .choiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .form :global(.pixel-button) {
+    justify-self: stretch;
+  }
+}

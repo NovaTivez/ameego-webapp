@@ -1,9 +1,10 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { InterviewSimulator } from "@/components/InterviewSimulator";
 import { INTERVIEW_ATTEMPTS_STORAGE_KEY } from "@/lib/interview/attempts";
+import { saveOnboardingPreferences } from "@/lib/onboarding";
 
 const generatedQuestions = [
   {
@@ -121,6 +122,36 @@ describe("InterviewSimulator", () => {
     expect(within(summary).getByText("5")).toBeVisible();
     expect(screen.getByRole("button", { name: /continue to resume/i })).toHaveClass(
       "pixel-button-primary",
+    );
+  });
+
+  it("prefills the early interview experience from completed onboarding", async () => {
+    const user = userEvent.setup();
+    saveOnboardingPreferences(window.localStorage, {
+      learningGoal: "interview_skills",
+      experienceLevel: "some_practice",
+      practiceMode: "microphone",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<InterviewSimulator />);
+
+    await waitFor(() => expect(screen.getByLabelText("Intermediate")).toBeChecked());
+    expect(
+      screen.getByRole("textbox", { name: /practice goals.*optional/i }),
+    ).toHaveValue("Build clear STAR stories for interviews.");
+
+    await reachModeWithoutResume(user);
+    expect(screen.getByRole("button", { name: /microphone response/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
     );
   });
 

@@ -1,13 +1,30 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AcademyHubPage from "@/app/academy/page";
+import { saveOnboardingPreferences } from "@/lib/onboarding";
+
+const router = vi.hoisted(() => ({ replace: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => router,
+}));
 
 describe("Academy Hub", () => {
-  it("renders the compact academy HUD and all campus locations", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    router.replace.mockReset();
+    saveOnboardingPreferences(window.localStorage, {
+      learningGoal: "interview_skills",
+      experienceLevel: "new_to_practice",
+      practiceMode: "text",
+    });
+  });
+
+  it("renders the compact academy HUD and all campus locations", async () => {
     render(<AcademyHubPage />);
 
-    expect(screen.getByRole("heading", { name: "Ameego Academy" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Ameego Academy" })).toBeVisible();
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("XP0000");
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("LV01");
     const controls = screen.getByLabelText("Academy campus controls");
@@ -26,8 +43,10 @@ describe("Academy Hub", () => {
     expect(screen.getAllByText("Coming Soon")).toHaveLength(1);
   });
 
-  it("connects every available map destination to its real route", () => {
+  it("connects every available map destination to its real route", async () => {
     render(<AcademyHubPage />);
+
+    await screen.findByRole("heading", { name: "Ameego Academy" });
 
     expect(
       screen.getByRole("link", { name: "Open Main Building, Academy home" }),
@@ -60,8 +79,10 @@ describe("Academy Hub", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses the uploaded Academy artwork with the correct paths and alt text", () => {
+  it("uses the uploaded Academy artwork with the correct paths and alt text", async () => {
     render(<AcademyHubPage />);
+
+    await screen.findByRole("heading", { name: "Ameego Academy" });
 
     const assets = [
       ["/images/academy/campus-map-v3.png", ""],
@@ -79,8 +100,10 @@ describe("Academy Hub", () => {
     }
   });
 
-  it("keeps Speech Hall locked without navigation or a dialog", () => {
+  it("keeps Speech Hall locked without navigation or a dialog", async () => {
     render(<AcademyHubPage />);
+
+    await screen.findByRole("heading", { name: "Ameego Academy" });
 
     expect(
       screen.getByRole("button", { name: "Speech Hall, locked, coming soon" }),

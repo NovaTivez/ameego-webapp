@@ -1735,6 +1735,42 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Required Learner Onboarding
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Added a short `/onboarding` route with required choices for the learner's main
+  learning goal, experience level, and preferred response mode.
+- Changed the landing page primary action to start onboarding rather than enter
+  the Academy directly.
+- Added a client-side Academy gate that routes learners with no saved onboarding
+  record back to `/onboarding`, including direct `/academy` visits.
+- Stored validated onboarding preferences in a dedicated local version-1 record.
+- Applied the choices to the first Interview Center setup: the learning goal
+  prepopulates the practice-goals field, experience level sets difficulty, and
+  response mode is preselected after question generation.
+- Added the onboarding route to the offline application shell and incremented
+  its cache version so existing installs receive the new route.
+
+## Scope
+
+- Onboarding does not create a second learner profile, alter interview attempts,
+  or claim that microphone access has been granted. Learners still select and
+  can change every setup option before practice begins.
+
+## Validation
+
+- Focused onboarding, landing, offline-shell, and interview-prefill coverage
+  passes. The full suite passes: 55 files and 242 tests.
+- Strict TypeScript and focused ESLint pass. Production build passes and
+  statically generates `/onboarding` among 33 routes.
+- Live browser verification confirmed the CTA destination, required-choice
+  behavior, Academy navigation after save, and no console warnings or errors.
+
+---
+
 # Milestone Update - Full-Page Progress Library Dashboard
 
 Status: Implemented and validated on 2026-07-17.

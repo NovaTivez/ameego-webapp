@@ -19,10 +19,10 @@ export default function HomePage() {
           <div className={styles.enterAction}>
             <Link
               className={styles.enterButton}
-              href="/academy"
-              aria-label="Start Learning: Enter Academy"
+              href="/onboarding"
+              aria-label="Start Learning: Set up your learning path"
             >
-              <span>Enter Academy</span>
+              <span>Start Learning</span>
             </Link>
           </div>
         </div>

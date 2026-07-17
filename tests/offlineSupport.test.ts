@@ -28,6 +28,7 @@ describe("offline app shell", () => {
   it("pre-caches every public learning route and both audio assets", () => {
     const worker = readFileSync(path.join(projectRoot, "public/sw.js"), "utf8");
     for (const asset of [
+      '"/onboarding"',
       '"/academy"',
       '"/learn"',
       '"/learn/star-method"',

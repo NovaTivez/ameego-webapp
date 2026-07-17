@@ -1,6 +1,7 @@
-const CACHE_NAME = "ameego-academy-v1";
+const CACHE_NAME = "ameego-academy-v2";
 const APP_SHELL = [
   "/",
+  "/onboarding",
   "/academy",
   "/learn",
   "/learn/star-method",

@@ -57,6 +57,10 @@ import {
 } from "@/lib/interview/product-messages";
 import { RESUME_ACCEPT, RESUME_MAX_BYTES } from "@/lib/interview/resume";
 import {
+  getOnboardingInterviewPrefill,
+  readOnboardingPreferences,
+} from "@/lib/onboarding";
+import {
   parseQuestionSet,
   parseResumeProfile,
   validateInterviewSetup,
@@ -240,6 +244,7 @@ export function InterviewSimulator() {
   const interviewerSpeechTokenRef = useRef(0);
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const cameraDialogRef = useRef<HTMLElement | null>(null);
+  const onboardingPracticeModeRef = useRef<InputMode | null>(null);
   const isActiveSession = step === "interview" || step === "confirm";
   const {
     attachVideo: attachCameraVideo,
@@ -251,6 +256,25 @@ export function InterviewSimulator() {
     enabled: cameraIntent,
     active: isActiveSession || cameraPreviewOpen,
   });
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      try {
+        const preferences = readOnboardingPreferences(window.localStorage);
+        if (!preferences) return;
+        const prefill = getOnboardingInterviewPrefill(preferences);
+        setSetup((current) =>
+          current.role || current.organization || current.description || current.goals
+            ? current
+            : { ...current, ...prefill },
+        );
+        onboardingPracticeModeRef.current = preferences.practiceMode;
+        setSelectedInputMode(preferences.practiceMode);
+      } catch {
+        // Onboarding remains optional when browser storage is unavailable.
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!cameraPreviewOpen) return;
@@ -347,7 +371,9 @@ export function InterviewSimulator() {
     interviewerSpeechTokenRef.current = token;
     interviewerSpeechRef.current?.cancel();
     setIsInterviewerSpeaking(true);
-    setAnnouncement("Interviewer is speaking. Your turn starts when the question finishes.");
+    setAnnouncement(
+      "Interviewer is speaking. Your turn starts when the question finishes.",
+    );
 
     const handle = speakInterviewQuestion(questionText);
     interviewerSpeechRef.current = handle;
@@ -501,7 +527,7 @@ export function InterviewSimulator() {
       setQuestionSet(parsed);
       setQuestionStatus("idle");
       setCameraPreviewOpen(false);
-      setSelectedInputMode(null);
+      setSelectedInputMode(onboardingPracticeModeRef.current);
       setStep("mode");
       setAnnouncement("Personalized questions are ready. Choose an input mode.");
     } catch {
@@ -514,7 +540,7 @@ export function InterviewSimulator() {
     setQuestionSet(createGeneralQuestionFallback(confirmedContext));
     setQuestionStatus("idle");
     setCameraPreviewOpen(false);
-    setSelectedInputMode(null);
+    setSelectedInputMode(onboardingPracticeModeRef.current);
     setStep("mode");
     setAnnouncement("Standard interview questions selected. Your practice can continue.");
   };
@@ -595,7 +621,9 @@ export function InterviewSimulator() {
 
   const startListening = () => {
     if (isInterviewerSpeaking) {
-      setSpeechError("Wait for the interviewer to finish speaking before using the microphone.");
+      setSpeechError(
+        "Wait for the interviewer to finish speaking before using the microphone.",
+      );
       return;
     }
     const Recognition = getSpeechRecognitionConstructor();

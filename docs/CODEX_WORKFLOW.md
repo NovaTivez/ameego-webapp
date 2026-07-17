@@ -1759,3 +1759,30 @@ not a weakened assertion or a simulated network success.
 Validation result: Prettier, focused ESLint, strict TypeScript, and the two
 resume extraction tests pass. The complete suite now passes: 52 files and 235
 tests.
+
+## Contribution 043 - Required Learner Onboarding
+
+Date: 2026-07-18
+
+Feature: Add the required first-time onboarding journey before Academy entry.
+
+Codex inspected: The MVP specification, landing CTA, Academy route, existing
+local profile storage, interview setup state machine, response-mode selection,
+offline shell, and surrounding component tests.
+
+Codex implemented: A local, validated onboarding record; the `/onboarding`
+route and accessible three-choice form; landing-page routing into onboarding;
+an Academy-entry gate for direct first-time visits; interview goal, difficulty,
+and mode prefills; offline cache registration; and focused persistence, UI,
+landing, Academy, and simulation integration tests.
+
+Scope protection: Onboarding preferences remain separate from learner profiles
+and saved attempts. It does not request microphone permission, launch a
+simulation, lock any setup value, or present public speaking as an implemented
+secondary track.
+
+Validation result: Focused onboarding and interview-prefill tests pass; strict
+TypeScript and focused ESLint pass; the complete suite passes with 55 files and
+242 tests; the production build creates `/onboarding` among 33 routes; and a
+live browser check confirmed the CTA, required form choices, Academy navigation,
+and clean console.

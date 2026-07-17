@@ -1350,3 +1350,33 @@ not trigger a device prompt; learners request access only when they select an
 appropriate practice feature. Exported records can contain saved transcripts,
 feedback, and confirmed resume summaries, so the UI explains that before the
 download action.
+
+---
+
+## Decision 038 - Keep Onboarding Preferences Separate from the Learner Profile
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The MVP requires a short onboarding flow that captures a learning goal,
+experience level, and preferred practice mode. The existing learner profile only
+stores a display name and focus string, while the interview setup and saved
+attempt contracts must remain stable.
+
+Decision: Store onboarding choices in a separate validated version-1 local
+record. Use them only to prefill the first Interview Center setup and keep every
+prefilled value editable before the learner starts a simulation.
+
+Alternatives considered: Extending the learner profile schema, writing the
+choices into every attempt before the learner reviews them, requesting device
+permissions during onboarding, or making public-speaking selections behave as
+unsupported functional routes.
+
+Reason: A dedicated preference record avoids a migration to the existing profile
+and keeps learner intent distinct from saved interview evidence. Prefilling is
+useful personalization without locking learners into an assumption.
+
+Consequences: Onboarding is brief, persistent, and safe to re-run after local
+data reset. Preference storage does not request microphone access, modify stored
+attempts, or fabricate a secondary learning-track experience.

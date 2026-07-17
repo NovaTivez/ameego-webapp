@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import HomePage from "@/app/page";
 
 describe("landing title screen", () => {
-  it("renders the Ameego game title, compact tagline, and preserved learning action", () => {
+  it("renders the Ameego game title, compact tagline, and onboarding learning action", () => {
     render(<HomePage />);
 
     expect(screen.getByRole("heading", { name: "Ameego" })).toBeVisible();
@@ -12,11 +12,11 @@ describe("landing title screen", () => {
     expect(screen.getByText("Level up your communication.")).toBeVisible();
     expect(screen.getByText("Ace every interview.")).toBeVisible();
     expect(screen.getByText("Unlock your future.")).toBeVisible();
-    const enterAcademy = screen.getByRole("link", {
-      name: /start learning.*enter academy/i,
+    const startLearning = screen.getByRole("link", {
+      name: /start learning.*set up your learning path/i,
     });
-    expect(enterAcademy).toHaveAttribute("href", "/academy");
-    expect(within(enterAcademy).getAllByText("Enter Academy")).toHaveLength(1);
+    expect(startLearning).toHaveAttribute("href", "/onboarding");
+    expect(within(startLearning).getAllByText("Start Learning")).toHaveLength(1);
   });
 
   it("does not render the academy hub directory on the title screen", () => {
