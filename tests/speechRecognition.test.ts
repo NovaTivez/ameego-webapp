@@ -3,11 +3,33 @@ import { describe, expect, it } from "vitest";
 import {
   appendTranscriptSegment,
   extractRecognitionUpdate,
+  getMicrophoneModeAvailability,
   RECOVERABLE_SPEECH_ERRORS,
   speechErrorMessage,
 } from "@/lib/audio/speech-recognition";
 
 describe("speech recognition helpers", () => {
+  it("requires both recognition and microphone capture before microphone mode is available", () => {
+    expect(
+      getMicrophoneModeAvailability({
+        speechRecognitionAvailable: true,
+        microphoneCaptureAvailable: true,
+      }),
+    ).toBe("available");
+    expect(
+      getMicrophoneModeAvailability({
+        speechRecognitionAvailable: false,
+        microphoneCaptureAvailable: true,
+      }),
+    ).toBe("speech_recognition_unavailable");
+    expect(
+      getMicrophoneModeAvailability({
+        speechRecognitionAvailable: true,
+        microphoneCaptureAvailable: false,
+      }),
+    ).toBe("microphone_capture_unavailable");
+  });
+
   it("appends final segments without duplicating spaces", () => {
     expect(appendTranscriptSegment("", "Hello")).toBe("Hello");
     expect(appendTranscriptSegment("Hello", " world ")).toBe("Hello world");

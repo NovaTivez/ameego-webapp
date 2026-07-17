@@ -1342,6 +1342,19 @@
   transform: translateY(1px);
 }
 
+.responseModeCard:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.responseModeCard:disabled:hover,
+.responseModeCard:disabled:active {
+  border-color: var(--game-border);
+  background: var(--game-panel-800);
+  filter: none;
+  transform: none;
+}
+
 .responseModeCard:focus-visible {
   outline: 4px solid var(--game-yellow);
   outline-offset: 3px;

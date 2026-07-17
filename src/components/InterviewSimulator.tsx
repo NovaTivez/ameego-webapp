@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+} from "react";
 
 import { EvaluationFeedback } from "@/components/EvaluationFeedback";
 import { FeedbackRoomScene } from "@/components/FeedbackRoomScene";
@@ -18,6 +24,7 @@ import {
   appendTranscriptSegment,
   extractRecognitionUpdate,
   getSpeechRecognitionConstructor,
+  getMicrophoneModeAvailability,
   RECOVERABLE_SPEECH_ERRORS,
   speechErrorMessage,
   type SpeechRecognitionLike,
@@ -105,6 +112,34 @@ const PREPARATION_STEPS: Array<{ key: PreparationStep; label: string }> = [
 ];
 
 const MODE_SELECTION_STEPS = ["Setup", "Resume", "Review", "Mode Selection", "Interview"];
+
+const subscribeToStaticBrowserCapability = () => () => undefined;
+
+function readMicrophoneModeAvailability() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return "checking" as const;
+  }
+
+  return getMicrophoneModeAvailability({
+    speechRecognitionAvailable: Boolean(getSpeechRecognitionConstructor(window)),
+    microphoneCaptureAvailable: Boolean(navigator.mediaDevices?.getUserMedia),
+  });
+}
+
+function microphoneModeAvailabilityMessage(
+  availability: ReturnType<typeof readMicrophoneModeAvailability>,
+) {
+  switch (availability) {
+    case "speech_recognition_unavailable":
+      return "Speech recognition is unavailable in this browser. Use typing instead.";
+    case "microphone_capture_unavailable":
+      return "Microphone capture is unavailable in this browser. Use typing instead.";
+    case "checking":
+      return "Checking microphone response support…";
+    default:
+      return "Recommended for realistic interview rehearsal.";
+  }
+}
 
 function PreparationStepper({ current }: { current: PreparationStep }) {
   const currentIndex = PREPARATION_STEPS.findIndex(({ key }) => key === current);
@@ -249,6 +284,11 @@ export function InterviewSimulator() {
   const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [selectedInputMode, setSelectedInputMode] = useState<InputMode | null>(null);
   const [hasPausedSession, setHasPausedSession] = useState(false);
+  const microphoneModeAvailability = useSyncExternalStore(
+    subscribeToStaticBrowserCapability,
+    readMicrophoneModeAvailability,
+    () => "checking" as const,
+  );
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const wantListeningRef = useRef(false);
   const interviewerSpeechRef = useRef<SpeakQuestionHandle | null>(null);
@@ -274,6 +314,7 @@ export function InterviewSimulator() {
     evaluation: null,
   });
   const isActiveSession = step === "interview" || step === "confirm";
+  const microphoneModeAvailable = microphoneModeAvailability === "available";
   const {
     attachVideo: attachCameraVideo,
     status: cameraStatus,
@@ -652,6 +693,13 @@ export function InterviewSimulator() {
 
   const beginMicrophoneMode = async () => {
     setModeError("");
+    if (!getSpeechRecognitionConstructor()) {
+      setIsStartingInterview(false);
+      setModeError(
+        "Speech recognition is unavailable in this browser. Choose text response mode.",
+      );
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       setIsStartingInterview(false);
       setModeError("Microphone access is unavailable. Choose text response mode.");
@@ -685,12 +733,23 @@ export function InterviewSimulator() {
       return;
     }
 
+    if (!microphoneModeAvailable) {
+      setIsStartingInterview(false);
+      setModeError(microphoneModeAvailabilityMessage(microphoneModeAvailability));
+      return;
+    }
+
     void beginMicrophoneMode();
   };
 
   const continueWithSelectedMode = (trigger?: HTMLButtonElement) => {
     if (!selectedInputMode) {
       setModeError("Choose text or microphone response mode to continue.");
+      return;
+    }
+
+    if (selectedInputMode === "microphone" && !microphoneModeAvailable) {
+      setModeError(microphoneModeAvailabilityMessage(microphoneModeAvailability));
       return;
     }
 
@@ -1577,6 +1636,10 @@ export function InterviewSimulator() {
                   className={preparationStyles.responseModeCard}
                   data-selected={selectedInputMode === "microphone"}
                   aria-pressed={selectedInputMode === "microphone"}
+                  disabled={!microphoneModeAvailable}
+                  aria-describedby={
+                    microphoneModeAvailable ? undefined : "microphone-mode-unavailable"
+                  }
                   onClick={() => {
                     setSelectedInputMode("microphone");
                     setModeError("");
@@ -1590,7 +1653,15 @@ export function InterviewSimulator() {
                     <span>
                       Speak naturally, then review and edit the live transcript.
                     </span>
-                    <small>Recommended for realistic interview rehearsal.</small>
+                    <small
+                      id={
+                        microphoneModeAvailable
+                          ? undefined
+                          : "microphone-mode-unavailable"
+                      }
+                    >
+                      {microphoneModeAvailabilityMessage(microphoneModeAvailability)}
+                    </small>
                   </span>
                   <span className={preparationStyles.modeCardCheck} aria-hidden="true">
                     <PixelIcon name="check" size="small" />
@@ -1639,7 +1710,10 @@ export function InterviewSimulator() {
               </div>
               <PixelButton
                 onClick={(event) => continueWithSelectedMode(event.currentTarget)}
-                disabled={!selectedInputMode}
+                disabled={
+                  !selectedInputMode ||
+                  (selectedInputMode === "microphone" && !microphoneModeAvailable)
+                }
               >
                 {hasPausedSession ? "Resume Interview" : "Continue to Interview"}
               </PixelButton>

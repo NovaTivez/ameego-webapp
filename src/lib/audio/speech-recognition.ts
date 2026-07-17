@@ -27,6 +27,9 @@ export type RecognitionTranscriptUpdate = {
   interimText: string;
 };
 
+export type MicrophoneModeAvailability =
+  "available" | "speech_recognition_unavailable" | "microphone_capture_unavailable";
+
 /** Errors that should not stop the learner mid-answer; recognition often restarts. */
 export const RECOVERABLE_SPEECH_ERRORS = new Set(["no-speech", "aborted"]);
 
@@ -38,6 +41,18 @@ export function getSpeechRecognitionConstructor(
     } = window,
 ): SpeechRecognitionConstructor | null {
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
+}
+
+export function getMicrophoneModeAvailability({
+  speechRecognitionAvailable,
+  microphoneCaptureAvailable,
+}: {
+  speechRecognitionAvailable: boolean;
+  microphoneCaptureAvailable: boolean;
+}): MicrophoneModeAvailability {
+  if (!speechRecognitionAvailable) return "speech_recognition_unavailable";
+  if (!microphoneCaptureAvailable) return "microphone_capture_unavailable";
+  return "available";
 }
 
 export function appendTranscriptSegment(base: string, segment: string): string {

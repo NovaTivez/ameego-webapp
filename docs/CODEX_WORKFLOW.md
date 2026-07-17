@@ -1944,3 +1944,26 @@ Validation result: All 22 focused simulator tests and the existing camera-ref
 handoff test pass. Repository Prettier, strict TypeScript, and the 33-route
 production build pass. Repository ESLint retains only the pre-existing
 speech-effect rule error and related hook warnings in `InterviewSimulator`.
+
+## Contribution 051 - Pre-entry Microphone Capability Gate
+
+Feature: Keep learners out of microphone mode when their browser cannot provide
+speech recognition.
+
+Codex inspected: Mode selection, microphone startup, recognition construction,
+browser capability APIs, text fallback behavior, and existing simulator tests.
+
+Codex implemented: A reusable capability helper that requires both microphone
+capture and speech recognition, an unavailable/disabled microphone mode card,
+and a defensive recheck before a microphone session begins. The static browser
+capability store uses a server-safe checking snapshot and an immediate client
+snapshot, avoiding hydration drift.
+
+Scope protection: Text response, permission requests for supported browsers,
+speech transcription, camera preview, question generation, and interview
+evaluation remain unchanged.
+
+Validation result: All 28 focused simulator and speech-recognition tests pass.
+Repository Prettier, strict TypeScript, and the 33-route production build pass.
+Repository ESLint retains only the pre-existing speech-effect rule error and
+related hook warnings in `InterviewSimulator`.

@@ -137,6 +137,7 @@ describe("InterviewSimulator", () => {
 
   it("prefills the early interview experience from completed onboarding", async () => {
     const user = userEvent.setup();
+    vi.stubGlobal("SpeechRecognition", class {});
     saveOnboardingPreferences(window.localStorage, {
       learningGoal: "interview_skills",
       experienceLevel: "some_practice",
@@ -791,8 +792,47 @@ describe("InterviewSimulator", () => {
     expect(fallbackNotice).not.toHaveTextContent(/ai|gpt|model/i);
   });
 
-  it("keeps text mode available when microphone permission is unavailable", async () => {
+  it("keeps microphone mode unavailable before entry when speech recognition is unsupported", async () => {
     const user = userEvent.setup();
+    const previousMediaDevices = navigator.mediaDevices;
+    const getUserMedia = vi.fn();
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: { getUserMedia },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    try {
+      render(<InterviewSimulator />);
+      await reachModeWithoutResume(user);
+
+      expect(screen.getByRole("button", { name: /microphone response/i })).toBeDisabled();
+      expect(
+        screen.getByText(/speech recognition is unavailable in this browser/i),
+      ).toBeVisible();
+      expect(screen.getByRole("button", { name: /text response/i })).toBeEnabled();
+      expect(
+        screen.getByRole("button", { name: /continue to interview/i }),
+      ).toBeDisabled();
+      expect(getUserMedia).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(navigator, "mediaDevices", {
+        configurable: true,
+        value: previousMediaDevices,
+      });
+    }
+  });
+
+  it("keeps text mode available when microphone capture is unavailable", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("SpeechRecognition", class {});
     vi.stubGlobal(
       "fetch",
       vi.fn(
@@ -805,10 +845,10 @@ describe("InterviewSimulator", () => {
     render(<InterviewSimulator />);
     await reachModeWithoutResume(user);
 
-    await selectResponseMode(user, "microphone");
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /microphone access is unavailable/i,
-    );
+    expect(screen.getByRole("button", { name: /microphone response/i })).toBeDisabled();
+    expect(
+      screen.getByText(/microphone capture is unavailable in this browser/i),
+    ).toBeVisible();
     expect(screen.getByRole("button", { name: /text response/i })).toBeVisible();
   });
 

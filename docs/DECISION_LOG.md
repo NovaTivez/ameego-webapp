@@ -1575,3 +1575,32 @@ permission and failure flows.
 Consequences: Camera-on text and microphone starts no longer have a false
 inactive render between preview and session. Cancel, reset, and failed-start
 paths still clear the handoff state and release the camera normally.
+
+---
+
+## Decision 046 - Gate Microphone Mode on Complete Browser Support
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The response-mode chooser only checked whether microphone capture was
+available. Browsers without the Web Speech API could enter microphone mode and
+would fail only after the learner reached a question and pressed Start
+microphone.
+
+Decision: Treat microphone response as available only when both capture and a
+SpeechRecognition or webkitSpeechRecognition constructor are present. The mode
+card is disabled with a specific unavailable explanation; text response remains
+available. Recheck recognition before committing to the microphone session.
+
+Alternatives considered: Letting learners enter microphone mode and showing an
+error later, hiding the card, or requiring only microphone permission.
+
+Reason: The advertised microphone experience includes transcription. A clear
+pre-entry capability check prevents a misleading mode choice while preserving a
+keyboard-accessible text fallback.
+
+Consequences: Unsupported browsers never start a microphone interview that
+cannot transcribe. Capture permission is still requested only after a supported
+learner intentionally continues with microphone mode.

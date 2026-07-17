@@ -1718,6 +1718,30 @@ Status: Implemented on 2026-07-18.
 
 ---
 
+# Milestone Update - Microphone Response Capability Gate
+
+Status: Implemented on 2026-07-18.
+
+## Completed
+
+- Added a reusable microphone-mode capability helper that requires both
+  microphone capture and speech-recognition support.
+- Disabled the unavailable microphone card with an explicit typing fallback.
+- Prevented unsupported microphone selections from opening a camera preview or
+  entering an interview, while retaining a defensive startup check.
+- Added helper and simulator coverage for speech-recognition and
+  capture-unavailable states.
+
+## Validation
+
+- All 28 focused speech-recognition and simulator tests pass.
+- Repository Prettier and strict TypeScript pass.
+- The production build passes and generates all 33 routes.
+- Repository ESLint retains only the pre-existing `InterviewSimulator`
+  speech-effect rule error and related hook warnings.
+
+---
+
 # Milestone Update - Academy Hub Narrow-Viewport Recovery
 
 Status: Implemented and validated on 2026-07-18.
