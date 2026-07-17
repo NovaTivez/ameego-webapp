@@ -316,6 +316,48 @@ describe("InterviewSimulator", () => {
     expect(await screen.findByLabelText(/interview simulation/i)).toBeVisible();
   });
 
+  it("traps focus in the camera preview and restores the mode trigger on close", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<InterviewSimulator />);
+
+    await reachModeWithoutResume(user);
+    await user.click(screen.getByRole("button", { name: /text response/i }));
+    await user.click(screen.getByLabelText(/optional camera preview/i));
+    const continueButton = screen.getByRole("button", { name: /continue to interview/i });
+    await user.click(continueButton);
+
+    const dialog = await screen.findByRole("dialog", {
+      name: /ready for your interview/i,
+    });
+    const buttons = within(dialog)
+      .getAllByRole("button")
+      .filter((button) => !button.hasAttribute("disabled"));
+    const firstButton = buttons[0];
+    const lastButton = buttons[buttons.length - 1];
+    expect(firstButton).toHaveFocus();
+
+    lastButton.focus();
+    await user.tab();
+    expect(firstButton).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(lastButton).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: /ready for your interview/i }),
+    ).toBeNull();
+    expect(continueButton).toHaveFocus();
+  });
+
   it("shows the panel-9 learning HUD, calculated indicators, and a non-saving End action", async () => {
     const user = userEvent.setup();
     vi.stubGlobal(

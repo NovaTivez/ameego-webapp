@@ -1878,3 +1878,23 @@ Validation result: All 17 focused simulator tests pass, including new end-to-
 resume and end-to-discard flows. Strict TypeScript, Prettier, diff integrity,
 and the 33-route production build pass. Focused ESLint retains only the existing
 InterviewSimulator speech-effect rule error and related hook warnings.
+
+## Contribution 048 - Camera Preview Keyboard Modal Behavior
+
+Feature: Prevent keyboard focus from escaping the optional camera preview.
+
+Codex inspected: The camera-preview dialog lifecycle, Continue trigger, Escape
+handling, existing End Interview focus trap, camera availability states, and
+simulator test harness.
+
+Codex implemented: Initial focus now moves to Close, enabled camera-dialog
+buttons wrap in both Tab directions, and close paths return focus to Continue.
+The test deliberately handles a temporarily disabled readiness button while the
+camera is starting, matching the production focusable-control set.
+
+Scope protection: Camera permissions, preview status, retry, Camera Off,
+Iâ€™m Ready, interview start, and pointer behavior are unchanged.
+
+Validation result: All 18 focused simulator tests pass, including the keyboard
+trap and focus-restoration assertion. Strict TypeScript, Prettier, diff
+integrity, and the 33-route production build pass.

@@ -1791,6 +1791,25 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Camera Preview Keyboard Focus Trap
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Focuses the camera preview dialogâ€™s Close control when the dialog opens.
+- Traps Tab and Shift+Tab within enabled camera-preview controls.
+- Restores focus to the mode-screen Continue trigger after Escape or close.
+- Preserves Retry Camera, Camera Off, and Iâ€™m Ready interactions.
+- Adds simulator coverage for focus wrapping and restoration.
+
+## Validation
+
+- All 18 focused simulator tests pass, along with strict TypeScript, Prettier,
+  diff integrity, and the production build with 33 generated routes.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { EvaluationFeedback } from "@/components/EvaluationFeedback";
 import { FeedbackRoomScene } from "@/components/FeedbackRoomScene";
@@ -245,6 +245,8 @@ export function InterviewSimulator() {
   const interviewerSpeechTokenRef = useRef(0);
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
   const cameraDialogRef = useRef<HTMLElement | null>(null);
+  const cameraCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const cameraPreviewTriggerRef = useRef<HTMLButtonElement | null>(null);
   const onboardingPracticeModeRef = useRef<InputMode | null>(null);
   const isActiveSession = step === "interview" || step === "confirm";
   const {
@@ -280,15 +282,7 @@ export function InterviewSimulator() {
   useEffect(() => {
     if (!cameraPreviewOpen) return;
 
-    queueMicrotask(() => cameraDialogRef.current?.focus());
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setCameraPreviewOpen(false);
-      setCameraIntent(false);
-      setAnnouncement("Camera preview closed. Choose when you are ready.");
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    queueMicrotask(() => cameraCloseButtonRef.current?.focus());
   }, [cameraPreviewOpen]);
 
   useEffect(
@@ -592,13 +586,14 @@ export function InterviewSimulator() {
     void beginMicrophoneMode();
   };
 
-  const continueWithSelectedMode = () => {
+  const continueWithSelectedMode = (trigger?: HTMLButtonElement) => {
     if (!selectedInputMode) {
       setModeError("Choose text or microphone response mode to continue.");
       return;
     }
 
     if (cameraIntent) {
+      cameraPreviewTriggerRef.current = trigger ?? null;
       setCameraPreviewOpen(true);
       setAnnouncement("Camera preview opened. Confirm when you are ready.");
       return;
@@ -609,6 +604,7 @@ export function InterviewSimulator() {
 
   const confirmCameraPreview = () => {
     setCameraPreviewOpen(false);
+    cameraPreviewTriggerRef.current = null;
     setAnnouncement("Camera preview confirmed. Starting your interview.");
     startSelectedMode();
   };
@@ -617,6 +613,30 @@ export function InterviewSimulator() {
     setCameraPreviewOpen(false);
     setCameraIntent(false);
     setAnnouncement("Camera preview closed. Camera is now off.");
+    queueMicrotask(() => cameraPreviewTriggerRef.current?.focus());
+  };
+
+  const handleCameraDialogKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeCameraPreview();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const buttons = cameraDialogRef.current?.querySelectorAll<HTMLButtonElement>(
+      "button:not(:disabled)",
+    );
+    if (!buttons?.length) return;
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   };
 
   const retryCameraPreview = () => {
@@ -1496,7 +1516,7 @@ export function InterviewSimulator() {
                 )}
               </div>
               <PixelButton
-                onClick={continueWithSelectedMode}
+                onClick={(event) => continueWithSelectedMode(event.currentTarget)}
                 disabled={!selectedInputMode}
               >
                 {hasPausedSession ? "Resume Interview" : "Continue to Interview"}
@@ -1514,6 +1534,7 @@ export function InterviewSimulator() {
                 aria-labelledby="camera-preview-title"
                 aria-describedby="camera-preview-description"
                 tabIndex={-1}
+                onKeyDown={handleCameraDialogKeyDown}
               >
                 <header className={preparationStyles.cameraModalHeader}>
                   <div>
@@ -1521,6 +1542,7 @@ export function InterviewSimulator() {
                     <h2 id="camera-preview-title">Ready for your interview?</h2>
                   </div>
                   <button
+                    ref={cameraCloseButtonRef}
                     type="button"
                     onClick={closeCameraPreview}
                     aria-label="Close camera preview and turn camera off"

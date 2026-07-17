@@ -1488,3 +1488,31 @@ mistaking an unfinished session for a saved attempt.
 Consequences: An unfinished draft is discarded when ending, matching the dialog
 copy. Confirmed responses remain available only until the learner explicitly
 discards them; no partial attempt is stored in history.
+
+---
+
+## Decision 043 - Give the Camera Preview Dialog Full Keyboard Modal Behavior
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The optional camera preview exposed `role="dialog"` and `aria-modal`
+but only moved initial focus and supported Escape. Tab navigation could reach
+mode-selection controls behind the open dialog.
+
+Decision: Reuse the End Interview dialog pattern locally: focus the first
+enabled camera-dialog control, cycle Tab and Shift+Tab through enabled buttons,
+and return focus to the Continue control that opened the preview when it closes.
+
+Alternatives considered: A new shared modal primitive, disabling every sibling
+with `inert`, or leaving background controls reachable because the backdrop
+visually covers them.
+
+Reason: The camera preview has a small, stable set of controls. Matching the
+proven end-dialog behavior closes the accessibility gap with minimal scope and
+keeps its existing pointer interaction unchanged.
+
+Consequences: Keyboard focus cannot escape the modal while it is open. Escape,
+the close icon, and Camera Off all preserve a predictable return point; camera
+readiness and retry controls remain functional.
