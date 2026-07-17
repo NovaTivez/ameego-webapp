@@ -103,6 +103,22 @@ describe("Academy Hub map style contract", () => {
     );
   });
 
+  it("keeps the campus composition centered around the map axis", () => {
+    const leftFor = (selector: string) => {
+      const block = styles.match(new RegExp(`\\.${selector}\\s*\\{([\\s\\S]*?)\\}`))?.[1];
+      const value = block?.match(/left:\s*([\d.]+)%/)?.[1];
+      expect(value, `${selector}.left`).toBeDefined();
+      return Number(value);
+    };
+
+    expect(styles).toMatch(
+      /\.mapStage\s*{[\s\S]*?justify-content:\s*center;[\s\S]*?\.map\s*{[\s\S]*?margin-inline:\s*auto/,
+    );
+    expect(leftFor("mainBuilding")).toBe(50);
+    expect(leftFor("interviewCenter") + leftFor("speechHall")).toBe(100);
+    expect(leftFor("progressLibrary") + leftFor("coursesBuilding")).toBe(100);
+  });
+
   it("keeps all five proportional building regions inside the map without overlap", () => {
     const mapAspect = 1672 / 941;
     const valueFor = (selector: string, property: string) => {

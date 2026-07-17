@@ -1835,3 +1835,23 @@ unchanged.
 Validation result: All 15 MainNav tests pass. The changed files pass focused
 ESLint, strict TypeScript, Prettier, diff integrity, and the production build
 with 33 generated routes.
+
+## Contribution 046 - Academy Campus Centering Guard
+
+Feature: Preserve the horizontal center axis of the Academy campus composition.
+
+Codex inspected: The full-size campus background, transparent building artwork,
+map stage sizing, percentage-based building coordinates, responsive map fit, and
+live 1440px campus page.
+
+Codex implemented: Made the mapâ€™s automatic inline centering explicit and added
+a style contract that requires a centered stage, centered map, a 50% Main
+Building axis, and symmetric paired building positions.
+
+Scope protection: Building assets, labels, interaction targets, background art,
+responsive containment, and all route destinations are unchanged.
+
+Validation result: The 1440px browser audit measured the map and Main Building
+at the exact 720px center axis, with paired top buildings centered at symmetric
+360px and 1080px positions. Focused Academy tests, strict TypeScript, Prettier,
+diff integrity, and the 33-route production build pass.

@@ -1435,3 +1435,28 @@ deliberate destination rather than an accidental back action.
 Consequences: Building-level routes return to `/academy`, while nested lesson
 routes retain their closer contextual back destinations. Accessible labels now
 describe the actual Academy campus destination.
+
+---
+
+## Decision 041 - Preserve One Center Axis for the Academy Composition
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The Academy map combines a centered background image with independently
+positioned transparent building overlays. While the current desktop audit showed
+the Main Building and plaza at the map midpoint, that relationship was implicit
+and vulnerable to a future framing change.
+
+Decision: Keep the map centered by both the stage flex alignment and automatic
+inline margins. Preserve the Main Building at 50% and paired building positions
+at symmetric 25% / 75% offsets; test those conditions directly.
+
+Reason: One shared axis keeps the background, building artwork, labels, and hit
+areas aligned without introducing separate offsets or aspect-ratio-specific
+coordinates.
+
+Consequences: Desktop and responsive layouts share the same symmetric map
+composition. The small-screen fit-to-viewport rule remains intact, and future
+position changes that would introduce horizontal drift fail the style contract.

@@ -1744,6 +1744,29 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update - Academy Campus Centering Guard
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Audited the campus background, building overlays, labels, and interactive
+  regions at a 1440px desktop viewport.
+- Made automatic inline centering explicit on the map in addition to the
+  stageâ€™s centered flex alignment.
+- Added a style contract for the 50% Main Building center and symmetric
+  left/right building pairs.
+- Preserved the existing mobile fit and touch-target protections.
+
+## Validation
+
+- Browser measurements confirm the map and Main Building are both centered at
+  720px in a 1440px viewport, with symmetric 360px and 1080px side targets.
+- Focused Academy tests, strict TypeScript, Prettier, diff integrity, and the
+  production build with all 33 routes pass.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.
