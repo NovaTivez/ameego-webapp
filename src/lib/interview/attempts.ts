@@ -19,6 +19,19 @@ type AttemptStore = {
   attempts: CompletedInterviewAttempt[];
 };
 
+export class InterviewAttemptStoreFormatError extends Error {
+  constructor() {
+    super("Stored interview attempts have an unsupported format.");
+    this.name = "InterviewAttemptStoreFormatError";
+  }
+}
+
+export function isInterviewAttemptStoreFormatError(
+  error: unknown,
+): error is InterviewAttemptStoreFormatError {
+  return error instanceof InterviewAttemptStoreFormatError;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -151,10 +164,10 @@ export function readInterviewAttempts(storage: Storage): AttemptStore {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error("Stored interview attempts have an unsupported format.");
+    throw new InterviewAttemptStoreFormatError();
   }
   if (!isRecord(parsed) || parsed.version !== 1 || !Array.isArray(parsed.attempts)) {
-    throw new Error("Stored interview attempts have an unsupported format.");
+    throw new InterviewAttemptStoreFormatError();
   }
   // Invalid individual records are dropped instead of hiding every attempt,
   // so one stale-format entry cannot make the whole history unavailable.

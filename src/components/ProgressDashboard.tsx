@@ -10,7 +10,11 @@ import { PixelLoadingState } from "@/components/PixelLoadingState";
 import { PixelPanel } from "@/components/PixelPanel";
 import { readCourseProgress } from "@/lib/course-progress";
 import { readExerciseProgress } from "@/lib/exercise-progress";
-import { readInterviewAttempts } from "@/lib/interview/attempts";
+import {
+  clearInterviewAttempts,
+  isInterviewAttemptStoreFormatError,
+  readInterviewAttempts,
+} from "@/lib/interview/attempts";
 import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
 import {
   calculateProgress,
@@ -22,7 +26,7 @@ import styles from "./progress-dashboard.module.css";
 
 type DashboardState =
   | { status: "loading" }
-  | { status: "error" }
+  | { status: "error"; canResetInterviewHistory: boolean }
   | {
       status: "ready";
       attempts: CompletedInterviewAttempt[];
@@ -42,6 +46,8 @@ export function ProgressDashboard() {
   const [selectedAttemptId, setSelectedAttemptId] = useState("");
   const [firstComparisonId, setFirstComparisonId] = useState("");
   const [secondComparisonId, setSecondComparisonId] = useState("");
+  const [resetInterviewHistoryOpen, setResetInterviewHistoryOpen] = useState(false);
+  const [recoveryError, setRecoveryError] = useState("");
 
   const load = useCallback(() => {
     setState({ status: "loading" });
@@ -61,10 +67,29 @@ export function ProgressDashboard() {
           snapshot.completedExercises.length > 0 ||
           attempts.length > 0,
       });
-    } catch {
-      setState({ status: "error" });
+    } catch (error) {
+      setState({
+        status: "error",
+        canResetInterviewHistory: isInterviewAttemptStoreFormatError(error),
+      });
     }
   }, []);
+
+  const resetInterviewHistory = () => {
+    try {
+      clearInterviewAttempts(window.localStorage);
+      setResetInterviewHistoryOpen(false);
+      setRecoveryError("");
+      setSelectedAttemptId("");
+      setFirstComparisonId("");
+      setSecondComparisonId("");
+      load();
+    } catch {
+      setRecoveryError(
+        "Interview history could not be reset. Check browser storage and try again.",
+      );
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -100,15 +125,55 @@ export function ProgressDashboard() {
 
   if (state.status === "error") {
     return (
-      <PixelPanel tone="warning" className="progress-dashboard-error" role="alert">
-        <p className="eyebrow">Progress unavailable</p>
-        <h2>Your saved activity could not be read.</h2>
-        <p>
-          No completion or improvement is being inferred. Restore browser storage access
-          or remove invalid local records, then try again.
-        </p>
-        <PixelButton onClick={load}>Retry progress check</PixelButton>
-      </PixelPanel>
+      <>
+        <PixelPanel tone="warning" className="progress-dashboard-error" role="alert">
+          <p className="eyebrow">Progress unavailable</p>
+          <h2>Your saved activity could not be read.</h2>
+          <p>
+            {state.canResetInterviewHistory
+              ? "Saved interview history has an unsupported format. Reset only interview history to create a fresh valid store; lessons and exercises will remain saved."
+              : "No completion or improvement is being inferred. Restore browser storage access or remove invalid local records, then try again."}
+          </p>
+          <div className="button-row">
+            <PixelButton onClick={load}>Retry progress check</PixelButton>
+            {state.canResetInterviewHistory ? (
+              <PixelButton
+                variant="secondary"
+                onClick={() => setResetInterviewHistoryOpen(true)}
+              >
+                Reset Interview History
+              </PixelButton>
+            ) : null}
+          </div>
+          {recoveryError ? <p role="alert">{recoveryError}</p> : null}
+        </PixelPanel>
+        {resetInterviewHistoryOpen ? (
+          <section
+            className="progress-history-recovery-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="reset-interview-history-heading"
+            aria-describedby="reset-interview-history-description"
+          >
+            <h2 id="reset-interview-history-heading">Reset corrupt interview history?</h2>
+            <p id="reset-interview-history-description">
+              This permanently removes only saved interview attempts, transcripts, and
+              feedback from this browser. Lessons, exercises, and your profile stay saved.
+            </p>
+            <div className="button-row">
+              <PixelButton
+                variant="secondary"
+                onClick={() => setResetInterviewHistoryOpen(false)}
+              >
+                Cancel
+              </PixelButton>
+              <PixelButton onClick={resetInterviewHistory}>
+                Confirm Reset Interview History
+              </PixelButton>
+            </div>
+          </section>
+        ) : null}
+      </>
     );
   }
 

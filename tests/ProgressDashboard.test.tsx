@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ProgressDashboard } from "@/components/ProgressDashboard";
-import { saveAttemptEvaluation, saveCompletedAttempt } from "@/lib/interview/attempts";
+import {
+  INTERVIEW_ATTEMPTS_STORAGE_KEY,
+  readInterviewAttempts,
+  saveAttemptEvaluation,
+  saveCompletedAttempt,
+} from "@/lib/interview/attempts";
 import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
 import { makeProgressAttempt } from "./progressFixtures";
 
@@ -28,6 +33,47 @@ describe("ProgressDashboard", () => {
     expect(
       screen.getByRole("link", { name: /start with the STAR lesson/i }),
     ).toHaveAttribute("href", "/learn/star-method");
+  });
+
+  it("confirms corrupt interview-history recovery, then allows a new attempt to save", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(INTERVIEW_ATTEMPTS_STORAGE_KEY, "{not-json");
+    render(<ProgressDashboard />);
+
+    expect(
+      await screen.findByRole("heading", { name: /saved activity could not be read/i }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/saved interview history has an unsupported format/i),
+    ).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /reset interview history/i }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      /permanently removes only saved interview attempts/i,
+    );
+    expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBe("{not-json");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBe("{not-json");
+
+    await user.click(screen.getByRole("button", { name: /reset interview history/i }));
+    await user.click(
+      screen.getByRole("button", { name: /confirm reset interview history/i }),
+    );
+    expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+    expect(
+      await screen.findByRole("heading", {
+        name: /progress library is ready for its first record/i,
+      }),
+    ).toBeVisible();
+
+    const attempt = makeProgressAttempt({
+      id: "recovered-attempt",
+      completedAt: "2026-07-18T01:00:00.000Z",
+      evaluated: false,
+    });
+    saveCompletedAttempt(window.localStorage, attempt);
+    expect(readInterviewAttempts(window.localStorage).attempts).toEqual([attempt]);
   });
 
   it("opens one saved attempt and explains why comparison is unavailable", async () => {

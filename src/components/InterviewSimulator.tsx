@@ -52,6 +52,7 @@ import {
 } from "@/lib/evaluation/schema";
 import {
   createCompletedAttempt,
+  isInterviewAttemptStoreFormatError,
   saveAttemptEvaluation,
   saveCompletedAttempt,
 } from "@/lib/interview/attempts";
@@ -267,6 +268,7 @@ export function InterviewSimulator() {
   const [speechError, setSpeechError] = useState("");
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [saveHistoryRecoveryAvailable, setSaveHistoryRecoveryAvailable] = useState(false);
   const [completedAttempt, setCompletedAttempt] =
     useState<CompletedInterviewAttempt | null>(null);
   const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(null);
@@ -994,11 +996,16 @@ export function InterviewSimulator() {
         setCompletedAttempt(attempt);
         setResponses(nextResponses);
         setSaveError("");
+        setSaveHistoryRecoveryAvailable(false);
         setStep("complete");
         setAnnouncement("Interview attempt completed and saved on this device.");
-      } catch {
+      } catch (error) {
+        const historyIsCorrupt = isInterviewAttemptStoreFormatError(error);
+        setSaveHistoryRecoveryAvailable(historyIsCorrupt);
         setSaveError(
-          "The completed attempt could not be saved. Restore browser storage and retry.",
+          historyIsCorrupt
+            ? "Saved interview history needs recovery before this attempt can be stored. Reset the corrupt history in the Progress Library, then return here and confirm again."
+            : "The completed attempt could not be saved. Restore browser storage and retry.",
         );
       }
       return;
@@ -1845,6 +1852,7 @@ export function InterviewSimulator() {
           draft={draft}
           draftError={draftError}
           saveError={saveError}
+          saveHistoryRecoveryAvailable={saveHistoryRecoveryAvailable}
           speechError={speechError}
           isInterviewerSpeaking={isInterviewerSpeaking}
           confirmedResponses={responses}

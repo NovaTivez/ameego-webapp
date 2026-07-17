@@ -1945,6 +1945,29 @@ handoff test pass. Repository Prettier, strict TypeScript, and the 33-route
 production build pass. Repository ESLint retains only the pre-existing
 speech-effect rule error and related hook warnings in `InterviewSimulator`.
 
+## Contribution 053 - Recoverable Corrupt Interview History
+
+Feature: Let learners repair malformed local interview history without browser
+developer tools.
+
+Codex inspected: Attempt-store parsing and save behavior, Progress Library
+load errors, simulator completion errors, existing reset primitives, and
+storage-focused tests.
+
+Codex implemented: A dedicated malformed-store error, a confirmation-gated
+Progress Library reset that deletes only interview history, and an accurate
+simulator save failure link to that recovery UI. Other storage failures retain
+their existing restore-and-retry guidance.
+
+Scope protection: Valid attempt persistence, individual invalid-record
+filtering, course and exercise progress, learner profiles, feedback validation,
+and generic storage errors are unchanged.
+
+Validation result: All 37 focused progress, attempt-storage, and simulator
+tests pass. Repository Prettier, strict TypeScript, and the 33-route production
+build pass. Repository ESLint retains only the pre-existing speech-effect rule
+error and related hook warnings in `InterviewSimulator`.
+
 ## Contribution 051 - Pre-entry Microphone Capability Gate
 
 Feature: Keep learners out of microphone mode when their browser cannot provide

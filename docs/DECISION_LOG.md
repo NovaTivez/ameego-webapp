@@ -1634,3 +1634,33 @@ while secondary tooling remains available on demand.
 Consequences: Desktop retains the full two-column, fixed-viewport studio. On
 mobile, optional camera/analysis are closed initially and page scrolling is
 intentional rather than clipped.
+
+---
+
+## Decision 048 - Require Confirmed Recovery for Corrupt Interview History
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: A malformed top-level interview-attempt store prevented both the
+Progress Library and new completed-attempt saves. The storage helper could clear
+history, but no learner-facing recovery path existed.
+
+Decision: Classify unsupported top-level attempt stores with a dedicated error.
+The Progress Library offers a reset only for that error and requires an explicit
+confirmation before removing interview attempts, transcripts, and feedback.
+The simulator identifies the same condition and links its failed-save message to
+the Progress Library recovery flow.
+
+Alternatives considered: Silently replace corrupt history, make the generic
+Clear Progress action the only recovery, expose reset for every storage error,
+or retain an unrecoverable retry-only error.
+
+Reason: A learner must choose before potentially sensitive transcript history
+is removed. Restricting recovery to a known malformed store avoids suggesting a
+reset for quota, privacy, or general browser-storage failures.
+
+Consequences: Lessons, exercises, and the learner profile remain intact during
+interview-history repair. Once confirmed, the next completed attempt can create
+a new valid attempt store.

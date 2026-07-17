@@ -1718,6 +1718,31 @@ Status: Implemented on 2026-07-18.
 
 ---
 
+# Milestone Update - Corrupt Interview History Recovery
+
+Status: Implemented on 2026-07-18.
+
+## Completed
+
+- Added a dedicated error classification for unsupported top-level interview
+  history stores while retaining invalid individual-record filtering.
+- Added a confirmation-gated Progress Library action that resets only interview
+  attempts, transcripts, and feedback.
+- Added an accurate simulator failed-save message and direct recovery link for
+  the corrupt-history condition.
+- Added regression coverage for corrupt JSON, cancellation, confirmed recovery,
+  and a successful new save afterward.
+
+## Validation
+
+- All 37 focused progress, attempt-storage, and simulator tests pass.
+- Repository Prettier and strict TypeScript pass.
+- The production build passes and generates all 33 routes.
+- Repository ESLint retains only the pre-existing `InterviewSimulator`
+  speech-effect rule error and related hook warnings.
+
+---
+
 # Milestone Update - Responsive Live Interview Session
 
 Status: Implemented on 2026-07-18.

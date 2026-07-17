@@ -48,6 +48,7 @@ type InterviewSessionViewProps = {
   draft: string;
   draftError: string;
   saveError: string;
+  saveHistoryRecoveryAvailable: boolean;
   speechError: string;
   isInterviewerSpeaking: boolean;
   confirmedResponses: ConfirmedResponse[];
@@ -81,6 +82,7 @@ export function InterviewSessionView({
   draft,
   draftError,
   saveError,
+  saveHistoryRecoveryAvailable,
   speechError,
   isInterviewerSpeaking,
   confirmedResponses,
@@ -338,7 +340,12 @@ export function InterviewSessionView({
             </div>
             {saveError ? (
               <div className={styles.inlineError} role="alert">
-                {saveError}
+                <span>{saveError}</span>
+                {saveHistoryRecoveryAvailable ? (
+                  <a className={styles.historyRecoveryLink} href="/progress">
+                    Open Progress Library recovery
+                  </a>
+                ) : null}
               </div>
             ) : null}
             <div className={styles.confirmActions}>

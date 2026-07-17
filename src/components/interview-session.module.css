@@ -799,6 +799,22 @@
   border: 2px solid #c7564e;
 }
 
+.historyRecoveryLink {
+  display: inline-flex;
+  margin-top: 6px;
+  color: #fff1b0;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.historyRecoveryLink:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 3px;
+}
+
 .confirmationPanel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
