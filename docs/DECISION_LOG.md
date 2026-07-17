@@ -1318,3 +1318,35 @@ Consequences: The desktop campus HUD is 72px tall and all five right-side
 controls share 84px width, 42px height, and 8px spacing. Breakpoints reduce those
 dimensions together, the offline notice begins below the new header, and the
 title screen continues to use its established standalone controls.
+
+---
+
+## Decision 037 - Complete Settings Through Local, Honest Controls
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: Settings exposed working Profile and Audio controls but represented
+Privacy, Resume & Data, Permissions, and About as disabled “Coming soon” menu
+items. That left a visible product surface incomplete despite the existing
+local-storage data model and optional device features.
+
+Decision: Make every Settings navigation entry an anchor-linked section. Keep
+the existing destructive local-data controls, add a download-only export of the
+known local records, add non-prompting microphone and camera permission-status
+checks, and document the exact privacy and resume-data boundaries in the UI.
+
+Alternatives considered: Leaving informational entries disabled, adding an
+unvalidated import flow, requesting microphone or camera access directly from
+Settings, or claiming that resume information is never retained.
+
+Reason: These controls make the page complete without inventing settings the
+browser cannot safely grant or revoke programmatically. A download-only export
+is useful and reversible, while import needs a future migration contract.
+
+Consequences: Settings now has no work-in-progress labels. Permission checks do
+not trigger a device prompt; learners request access only when they select an
+appropriate practice feature. Exported records can contain saved transcripts,
+feedback, and confirmed resume summaries, so the UI explains that before the
+download action.

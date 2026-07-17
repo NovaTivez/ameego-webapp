@@ -11,6 +11,7 @@ import { readInterviewAttempts } from "@/lib/interview/attempts";
 import { calculateProgress, type ProgressSnapshot } from "@/lib/progress";
 import {
   clearLearningProgress,
+  createLearnerDataExport,
   DEFAULT_LEARNER_PROFILE,
   type LearnerProfile,
   readLearnerProfile,
@@ -27,7 +28,34 @@ type SettingsState =
 
 type PendingReset = "progress" | "all" | null;
 
-const settingsSections = ["Privacy", "Resume & Data", "Permissions", "About"];
+type PermissionStatus = "not-checked" | "granted" | "denied" | "prompt" | "unavailable";
+
+type DevicePermissions = {
+  microphone: PermissionStatus;
+  camera: PermissionStatus;
+};
+
+const defaultPermissions: DevicePermissions = {
+  microphone: "not-checked",
+  camera: "not-checked",
+};
+
+const permissionLabel: Record<PermissionStatus, string> = {
+  "not-checked": "Not checked",
+  granted: "Granted",
+  denied: "Denied",
+  prompt: "Ask when used",
+  unavailable: "Unavailable",
+};
+
+const settingsSections = [
+  ["Profile", "#profile-settings"],
+  ["Audio", "#audio-settings"],
+  ["Privacy", "#privacy-settings"],
+  ["Resume & Data", "#data-settings"],
+  ["Permissions", "#permission-settings"],
+  ["About", "#about-settings"],
+] as const;
 
 export function SettingsPanel() {
   const { musicEnabled, setMusicEnabled, setSoundEffectsEnabled, soundEffectsEnabled } =
@@ -38,6 +66,10 @@ export function SettingsPanel() {
   const [formError, setFormError] = useState("");
   const [pendingReset, setPendingReset] = useState<PendingReset>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [devicePermissions, setDevicePermissions] =
+    useState<DevicePermissions>(defaultPermissions);
+  const [permissionError, setPermissionError] = useState("");
+  const [dataError, setDataError] = useState("");
 
   const load = useCallback(() => {
     try {
@@ -100,6 +132,60 @@ export function SettingsPanel() {
     }
   };
 
+  const checkDevicePermissions = async () => {
+    setPermissionError("");
+    if (!navigator.permissions?.query) {
+      setDevicePermissions({ microphone: "unavailable", camera: "unavailable" });
+      setPermissionError(
+        "This browser cannot report permission status. You can still choose a response mode when practice begins.",
+      );
+      return;
+    }
+
+    try {
+      const readPermission = async (name: "microphone" | "camera") => {
+        const result = await navigator.permissions.query({
+          name,
+        } as PermissionDescriptor);
+        return result.state as PermissionStatus;
+      };
+      const [microphone, camera] = await Promise.all([
+        readPermission("microphone"),
+        readPermission("camera"),
+      ]);
+      setDevicePermissions({ microphone, camera });
+      setAnnouncement("Microphone and camera permission status checked.");
+    } catch {
+      setDevicePermissions({ microphone: "unavailable", camera: "unavailable" });
+      setPermissionError(
+        "Permission status could not be read. Your browser will ask when a feature needs access.",
+      );
+    }
+  };
+
+  const exportLearningData = () => {
+    try {
+      const content = JSON.stringify(
+        createLearnerDataExport(window.localStorage),
+        null,
+        2,
+      );
+      const blob = new Blob([content], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ameego-learning-data.json";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setDataError("");
+      setAnnouncement("A local learning-data export was prepared.");
+    } catch {
+      setDataError("Your browser could not prepare a local data export.");
+    }
+  };
+
   if (state.status === "loading") {
     return (
       <div className={styles.loading} role="status">
@@ -128,20 +214,19 @@ export function SettingsPanel() {
         {announcement}
       </p>
       <nav className={styles.settingsNav} aria-label="Settings sections">
-        <span aria-current="page">Profile</span>
-        <a href="#audio-settings">
-          Audio
-          <small>Available</small>
-        </a>
-        {settingsSections.map((section) => (
-          <span key={section} aria-disabled="true">
+        {settingsSections.map(([section, href]) => (
+          <a key={section} href={href}>
             {section}
-            <small>Coming soon</small>
-          </span>
+            <small>Open</small>
+          </a>
         ))}
       </nav>
 
-      <section className={styles.profilePanel} aria-labelledby="profile-heading">
+      <section
+        className={styles.profilePanel}
+        id="profile-settings"
+        aria-labelledby="profile-heading"
+      >
         <header className={styles.panelTitle}>
           <h2 id="profile-heading">Profile</h2>
           <span>Saved on this device</span>
@@ -274,6 +359,140 @@ export function SettingsPanel() {
               </div>
               <output>{soundEffectsEnabled ? "On" : "Off"}</output>
             </button>
+          </div>
+        </section>
+
+        <section
+          className={styles.settingSection}
+          id="privacy-settings"
+          aria-labelledby="privacy-settings-heading"
+        >
+          <header>
+            <div>
+              <h3 id="privacy-settings-heading">Privacy</h3>
+              <p>Control and understand what stays in this browser.</p>
+            </div>
+            <span>Local first</span>
+          </header>
+          <div className={styles.infoGrid}>
+            <article>
+              <strong>Stored on this device</strong>
+              <p>
+                Profile, completion records, audio choices, saved attempts, transcripts,
+                and feedback reports.
+              </p>
+            </article>
+            <article>
+              <strong>Resume handling</strong>
+              <p>
+                Original resume files are not stored. Confirmed resume summaries may be
+                included in saved interview attempts.
+              </p>
+            </article>
+            <article>
+              <strong>When data leaves the device</strong>
+              <p>
+                Only an AI action you start can send its relevant practice data to the
+                protected server route for that request.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          className={styles.settingSection}
+          id="data-settings"
+          aria-labelledby="data-settings-heading"
+        >
+          <header>
+            <div>
+              <h3 id="data-settings-heading">Resume &amp; Data</h3>
+              <p>Keep a personal copy of the learning records saved in this browser.</p>
+            </div>
+            <span>JSON export</span>
+          </header>
+          <div className={styles.dataActions}>
+            <div>
+              <strong>Export local learning data</strong>
+              <p>
+                Downloads your profile, course and exercise progress, audio choices, and
+                saved interview attempts. It may include transcripts and feedback.
+              </p>
+            </div>
+            <PixelButton type="button" variant="secondary" onClick={exportLearningData}>
+              Export Data
+            </PixelButton>
+          </div>
+          {dataError ? <p className={styles.formError}>{dataError}</p> : null}
+        </section>
+
+        <section
+          className={styles.settingSection}
+          id="permission-settings"
+          aria-labelledby="permission-settings-heading"
+        >
+          <header>
+            <div>
+              <h3 id="permission-settings-heading">Permissions</h3>
+              <p>Check access before using microphone or optional camera practice.</p>
+            </div>
+            <span>No request made</span>
+          </header>
+          <div className={styles.permissionGrid}>
+            <article>
+              <strong>Microphone</strong>
+              <output>{permissionLabel[devicePermissions.microphone]}</output>
+              <p>Used only when you select microphone response mode.</p>
+            </article>
+            <article>
+              <strong>Camera</strong>
+              <output>{permissionLabel[devicePermissions.camera]}</output>
+              <p>Optional local framing indicator; it is not part of scoring.</p>
+            </article>
+          </div>
+          <div className={styles.permissionActions}>
+            <PixelButton
+              type="button"
+              variant="secondary"
+              onClick={() => void checkDevicePermissions()}
+            >
+              Check Device Permissions
+            </PixelButton>
+            <p>To change a denied choice, use your browser&apos;s site permissions.</p>
+          </div>
+          {permissionError ? <p className={styles.formError}>{permissionError}</p> : null}
+        </section>
+
+        <section
+          className={styles.settingSection}
+          id="about-settings"
+          aria-labelledby="about-settings-heading"
+        >
+          <header>
+            <div>
+              <h3 id="about-settings-heading">About</h3>
+              <p>
+                Ameego is a practice-first learning space for clear professional
+                communication.
+              </p>
+            </div>
+            <span>Version 0.1.0</span>
+          </header>
+          <div className={styles.infoGrid}>
+            <article>
+              <strong>Learning loop</strong>
+              <p>
+                Learn a concept, practise it, review evidence-based feedback, then retry
+                with a focused goal.
+              </p>
+            </article>
+            <article>
+              <strong>Accessible by default</strong>
+              <p>
+                Text response mode, keyboard interaction, transcript review, and optional
+                device features keep practice flexible.
+              </p>
+            </article>
           </div>
         </section>
 

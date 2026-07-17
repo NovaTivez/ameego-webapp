@@ -1,4 +1,5 @@
 import { COURSE_PROGRESS_STORAGE_KEY } from "@/lib/course-progress";
+import { AUDIO_PREFERENCES_STORAGE_KEY } from "@/lib/audio/preferences";
 import { EXERCISE_PROGRESS_STORAGE_KEY } from "@/lib/exercise-progress";
 import { INTERVIEW_ATTEMPTS_STORAGE_KEY } from "@/lib/interview/attempts";
 
@@ -14,6 +15,19 @@ export const DEFAULT_LEARNER_PROFILE: LearnerProfile = {
   version: 1,
   name: "Pixel Learner",
   focus: "Interview Skills",
+};
+
+export type LearnerDataExport = {
+  format: "ameego-local-data";
+  version: 1;
+  exportedAt: string;
+  data: {
+    profile: unknown | null;
+    courseProgress: unknown | null;
+    exerciseProgress: unknown | null;
+    interviewAttempts: unknown | null;
+    audioPreferences: unknown | null;
+  };
 };
 
 function isLearnerProfile(value: unknown): value is LearnerProfile {
@@ -70,4 +84,32 @@ export function clearLearningProgress(storage: Storage): void {
 export function resetAllLearnerData(storage: Storage): void {
   clearLearningProgress(storage);
   storage.removeItem(LEARNER_PROFILE_STORAGE_KEY);
+}
+
+function readStoredJson(storage: Storage, key: string): unknown | null {
+  const raw = storage.getItem(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+export function createLearnerDataExport(
+  storage: Storage,
+  exportedAt = new Date().toISOString(),
+): LearnerDataExport {
+  return {
+    format: "ameego-local-data",
+    version: 1,
+    exportedAt,
+    data: {
+      profile: readStoredJson(storage, LEARNER_PROFILE_STORAGE_KEY),
+      courseProgress: readStoredJson(storage, COURSE_PROGRESS_STORAGE_KEY),
+      exerciseProgress: readStoredJson(storage, EXERCISE_PROGRESS_STORAGE_KEY),
+      interviewAttempts: readStoredJson(storage, INTERVIEW_ATTEMPTS_STORAGE_KEY),
+      audioPreferences: readStoredJson(storage, AUDIO_PREFERENCES_STORAGE_KEY),
+    },
+  };
 }

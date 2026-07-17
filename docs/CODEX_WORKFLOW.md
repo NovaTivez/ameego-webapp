@@ -1703,3 +1703,34 @@ repository lint, and strict TypeScript pass; the production build prerenders all
 complete suite retains the same pre-existing resume extraction mock failure.
 Browser screenshot inspection remained unavailable because no browser backend
 was exposed.
+
+## Contribution 041 - Complete Settings Center
+
+Date: 2026-07-18
+
+Feature: Replace the Settings menu work-in-progress placeholders with functional
+local-data, privacy, permissions, and about sections.
+
+Codex inspected: The Settings page and component, profile and audio-preference
+storage helpers, interview attempt persistence, resume handling, reset tests,
+the live local Settings route, and browser console output.
+
+Codex implemented: Six real anchor-linked Settings sections; clear local privacy
+and resume-retention explanations; a typed, download-only JSON export of known
+local records; and a non-prompting microphone/camera permission-status check.
+The existing Profile, Audio, Clear Progress, and Reset All Data behavior remains
+in place, and the visible “Coming soon” menu states were removed.
+
+Scope protection: No API, AI provider, evaluation, scoring, progress schema,
+attempt contract, or device-capture implementation changed. The new export does
+not import records, and permission inspection never requests microphone or
+camera access.
+
+Validation result: The changed files pass Prettier, focused ESLint, and strict
+TypeScript; all six focused Settings tests pass; a live `/settings` check
+verified profile save, music toggle, permission-status reporting, reset-dialog
+cancel behavior, all navigation sections, and no console warnings or errors;
+and the production build passes with 32 routes. The complete suite reports 234
+passing tests plus the pre-existing `tests/interviewResume.test.ts` mock-fetch
+network failure. Repository-wide lint remains blocked by the pre-existing
+`InterviewSimulator.tsx` React effect rule violation.

@@ -1691,6 +1691,49 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - Complete Settings Center
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Replaced the disabled Settings navigation entries and every “Coming soon”
+  label with six functional anchor-linked sections: Profile, Audio, Privacy,
+  Resume & Data, Permissions, and About.
+- Preserved the existing working profile save, audio-preference, Clear Progress,
+  and Reset All Data flows, including the explicit destructive-action dialog.
+- Added an on-device JSON data export containing the stored learner profile,
+  course and exercise progress, audio preferences, and saved interview records.
+- Added a non-prompting microphone and camera permission-status check. It
+  reports the browser state without requesting access and explains that denied
+  permissions are changed through the browser.
+- Added accurate privacy and resume-data explanations. Original resume files are
+  not persisted; confirmed resume summaries can be included in saved attempts.
+
+## Scope
+
+- No AI provider, API contract, scoring, course-progress schema, interview
+  storage contract, or device-capture behavior changed.
+- The data export is download-only. Import is intentionally not offered because
+  this version has no safe migration and validation workflow for restoring local
+  records.
+
+## Validation
+
+- Changed files pass Prettier, focused ESLint, strict TypeScript checking, and
+  all six SettingsPanel tests.
+- A live `/settings` browser check confirmed the six navigation links, profile
+  save announcement, music toggle state transition, non-prompting permission
+  check, reset confirmation/cancel behavior, and a clean browser console.
+- The production build passes and prerenders `/settings` among 32 routes.
+- The full suite currently reports 234 passing tests and the pre-existing
+  `tests/interviewResume.test.ts` mock-fetch network failure. Repository-wide
+  lint is still blocked by the pre-existing `InterviewSimulator.tsx`
+  `react-hooks/set-state-in-effect` error; repository-wide format checking also
+  reports unrelated pre-existing files.
+
+---
+
 # Milestone Update - Full-Page Progress Library Dashboard
 
 Status: Implemented and validated on 2026-07-17.

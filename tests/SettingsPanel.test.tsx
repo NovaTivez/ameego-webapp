@@ -12,7 +12,11 @@ import {
   INTERVIEW_ATTEMPTS_STORAGE_KEY,
   saveCompletedAttempt,
 } from "@/lib/interview/attempts";
-import { LEARNER_PROFILE_STORAGE_KEY, readLearnerProfile } from "@/lib/settings";
+import {
+  createLearnerDataExport,
+  LEARNER_PROFILE_STORAGE_KEY,
+  readLearnerProfile,
+} from "@/lib/settings";
 import { starMethodLesson } from "@/content/interview-foundations";
 import { starArrangementExercise } from "@/content/star-arrangement-exercise";
 import { makeProgressAttempt } from "./progressFixtures";
@@ -60,6 +64,43 @@ describe("SettingsPanel", () => {
     expect(readLearnerProfile(window.localStorage)).toMatchObject({
       name: "Hannah Learner",
       focus: "Behavioral Interviews",
+    });
+  });
+
+  it("exposes complete settings sections without work-in-progress placeholders", async () => {
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "PrivacyOpen" })).toHaveAttribute(
+      "href",
+      "#privacy-settings",
+    );
+    expect(screen.getByRole("heading", { name: "Resume & Data" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Permissions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Export Data" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Check Device Permissions" }),
+    ).toBeEnabled();
+  });
+
+  it("creates a portable local-data export without storing original resume files", () => {
+    seedProgress();
+    window.localStorage.setItem(
+      LEARNER_PROFILE_STORAGE_KEY,
+      JSON.stringify({ version: 1, name: "Saved Learner", focus: "STAR Practice" }),
+    );
+
+    expect(
+      createLearnerDataExport(window.localStorage, "2026-07-18T00:00:00.000Z"),
+    ).toMatchObject({
+      format: "ameego-local-data",
+      version: 1,
+      exportedAt: "2026-07-18T00:00:00.000Z",
+      data: {
+        profile: { name: "Saved Learner" },
+        interviewAttempts: { attempts: expect.any(Array) },
+      },
     });
   });
 

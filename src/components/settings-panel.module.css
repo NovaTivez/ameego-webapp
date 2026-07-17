@@ -61,7 +61,6 @@
   box-shadow: inset 0 0 0 1px #344a68;
 }
 
-.settingsNav > span,
 .settingsNav > a {
   display: flex;
   min-height: 38px;
@@ -87,18 +86,6 @@
 .settingsNav > a:focus-visible {
   color: #f2c44f;
   background: #192d49;
-}
-
-.settingsNav > span[aria-current="page"] {
-  color: #effff0;
-  background: #2f793b;
-  box-shadow:
-    inset 0 3px 0 #5ab75d,
-    inset 0 -2px 0 #1e5029;
-}
-
-.settingsNav > span[aria-disabled="true"] {
-  color: #7f8da1;
 }
 
 .settingsNav small {
@@ -316,6 +303,120 @@
   background: #091426;
   box-shadow: inset 0 0 0 1px #3c5271;
   scroll-margin-top: 70px;
+}
+
+.settingSection {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 3px solid #03070e;
+  background: #091426;
+  box-shadow: inset 0 0 0 1px #3c5271;
+  scroll-margin-top: 70px;
+}
+
+.settingSection > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settingSection h3,
+.settingSection p {
+  margin: 0;
+}
+
+.settingSection h3 {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.settingSection > header p,
+.dataActions p,
+.permissionActions p {
+  color: #9eafc5;
+  font-size: 0.68rem;
+}
+
+.settingSection > header > span {
+  color: #f2c44f;
+  font-family: var(--font-display);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+}
+
+.infoGrid,
+.permissionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.permissionGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.infoGrid article,
+.permissionGrid article,
+.dataActions {
+  min-width: 0;
+  padding: 8px;
+  border: 2px solid #03070e;
+  background: #14243d;
+  box-shadow: inset 0 1px 0 #465d7d;
+}
+
+.infoGrid strong,
+.permissionGrid strong,
+.dataActions strong {
+  color: #edf4ff;
+  font-family: var(--font-display);
+  font-size: 0.54rem;
+  text-transform: uppercase;
+}
+
+.infoGrid p,
+.permissionGrid p,
+.dataActions p {
+  margin: 4px 0 0;
+  color: #aebbd0;
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.permissionGrid output {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 3px 5px;
+  border: 2px solid #03070e;
+  color: #f2c44f;
+  background: #081221;
+  font-family: var(--font-display);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+}
+
+.dataActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dataActions :global(.pixel-button) {
+  flex: 0 0 auto;
+}
+
+.permissionActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.permissionActions p {
+  margin: 0;
 }
 
 .audioSettings > header {
@@ -605,7 +706,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .settingsNav > span {
+  .settingsNav > a {
     justify-content: center;
     text-align: center;
   }
@@ -616,6 +717,17 @@
 
   .audioToggleGrid {
     grid-template-columns: 1fr;
+  }
+
+  .infoGrid,
+  .permissionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dataActions,
+  .permissionActions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
