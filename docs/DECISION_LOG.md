@@ -1380,3 +1380,33 @@ useful personalization without locking learners into an assumption.
 Consequences: Onboarding is brief, persistent, and safe to re-run after local
 data reset. Preference storage does not request microphone access, modify stored
 attempts, or fabricate a secondary learning-track experience.
+
+---
+
+## Decision 039 - Fit the Academy Map Rather Than Crop It on Narrow Screens
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The Academy Hub sized its fixed-aspect-ratio map to the larger of the
+viewport width and a viewport-height-derived width. Portrait viewports therefore
+created an over-wide map inside an overflow-hidden stage, clipping the side
+campus destinations and their labels.
+
+Decision: Size the map to the smaller of those dimensions and cap it at the
+available width, preserving the full composition inside the stage. Keep the
+campus controls in the existing compact header, but give mobile controls and
+the smallest building targets 44px minimum hit areas.
+
+Alternatives considered: Horizontal panning, a separate mobile campus layout,
+removing side locations, or allowing the viewport to scroll the oversized map.
+
+Reason: Fitting the existing map retains all current destinations, labels, art,
+and keyboard semantics while making every location immediately visible and
+reachable on the primary navigation route.
+
+Consequences: Narrow portrait screens show the complete campus in a letterboxed
+stage instead of cropping it. Desktop uses the same composition when it fits,
+and touch users retain adequately sized controls without a second navigation
+implementation.

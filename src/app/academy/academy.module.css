@@ -199,9 +199,9 @@
 
 .map {
   position: relative;
-  width: max(100vw, calc(100svh * 1.776833));
+  width: min(100vw, calc(100svh * 1.776833));
   flex: none;
-  max-width: none;
+  max-width: 100%;
   aspect-ratio: 1672 / 941;
   overflow: hidden;
   background-color: #10233a;
@@ -440,9 +440,14 @@
   .headerControls :global(.connection-status),
   .settingsLink {
     width: 52px;
-    min-height: 38px;
-    height: 38px;
+    min-height: 44px;
+    height: 44px;
     padding-inline: 4px;
+  }
+
+  .backLink {
+    width: 44px;
+    height: 44px;
   }
 
   .playerStatus {
@@ -452,10 +457,6 @@
   :global(body):has(.screen) :global(.offline-mode-notice) {
     top: 70px;
     right: 6px;
-  }
-
-  .map {
-    width: max(100vw, calc(100svh * 1.776833));
   }
 
   .locationLabel {
@@ -475,7 +476,11 @@
   .headerControls :global(.music-toggle),
   .headerControls :global(.connection-status),
   .settingsLink {
-    width: 46px;
+    width: 44px;
+  }
+
+  .location {
+    min-width: 66px;
   }
 }
 

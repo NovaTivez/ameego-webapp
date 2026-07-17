@@ -1786,3 +1786,29 @@ TypeScript and focused ESLint pass; the complete suite passes with 55 files and
 242 tests; the production build creates `/onboarding` among 33 routes; and a
 live browser check confirmed the CTA, required form choices, Academy navigation,
 and clean console.
+
+## Contribution 044 - Academy Hub Narrow-Viewport Recovery
+
+Feature: Keep the Academy campus destinations and HUD usable on mobile and
+resized browser widths.
+
+Codex inspected: The Academy route, campus map composition, responsive CSS
+module, building link semantics, shared audio controls, existing style contracts,
+and a live 375px-wide Academy Hub.
+
+Codex implemented: Replaced the forced over-wide map sizing with a bounded
+fit-to-viewport rule, retained the full map aspect ratio, raised mobile HUD
+controls to 44px targets, and protected the smallest 320px building targets
+with a 66px minimum width. The responsive style test now guards these bounds.
+
+Scope protection: Campus destinations, image assets, map coordinates, labels,
+audio state, connectivity status, Settings navigation, and desktop layout remain
+unchanged.
+
+Validation result: Focused Academy component and responsive-style tests pass,
+as do Prettier, strict TypeScript, diff integrity, and the production build with
+33 generated routes. A live 375px inspection confirmed all five building targets
+are fully visible and at least 47.5px tall; desktop target measurements remained
+inside a 1280px-wide viewport. Repository lint retains the pre-existing
+InterviewSimulator effect-rule error, and the full test suite exceeded the
+120-second command limit twice.

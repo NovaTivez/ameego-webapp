@@ -1691,6 +1691,35 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - Academy Hub Narrow-Viewport Recovery
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Replaced the portrait-overflow map width rule with a bounded map width that
+  preserves the complete 16:9 Academy composition inside the viewport.
+- Kept every existing campus building, label, route, keyboard behavior, and
+  desktop coordinate unchanged.
+- Raised mobile HUD targets to 44px and retained compact icon-only controls.
+- Ensured the smallest 320px campus building controls retain a 66px by 44px
+  clickable area.
+- Updated responsive style contracts to prevent a return to height-driven
+  horizontal map clipping.
+
+## Validation
+
+- Focused Academy Hub tests and responsive style tests pass, along with
+  Prettier, strict TypeScript, diff integrity, and the production build.
+- Live browser inspection at 375px confirmed all five campus targets are fully
+  visible and at least 47.5px tall. Desktop measurements at 1280px remain fully
+  within the viewport.
+- Repository lint still reports the pre-existing InterviewSimulator
+  `set-state-in-effect` error. The full Vitest command did not finish within the
+  120-second command limit on two attempts.
+
+---
+
 # Milestone Update - Complete Settings Center
 
 Status: Implemented and validated on 2026-07-18.

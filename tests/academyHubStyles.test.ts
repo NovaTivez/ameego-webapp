@@ -49,7 +49,7 @@ describe("Academy Hub map style contract", () => {
 
     expect(styles).toMatch(/aspect-ratio:\s*1672\s*\/\s*941/);
     expect(styles).toMatch(
-      /\.map\s*{[\s\S]*?width:\s*max\(100vw, calc\(100svh \* 1\.776833\)\)/,
+      /\.map\s*{[\s\S]*?width:\s*min\(100vw, calc\(100svh \* 1\.776833\)\);[\s\S]*?max-width:\s*100%/,
     );
     expect(styles).toMatch(/\.mapBackground\s*{[\s\S]*?object-fit:\s*cover/);
 
@@ -95,6 +95,12 @@ describe("Academy Hub map style contract", () => {
     expect(styles).toMatch(/@media \(max-width:\s*760px\)/);
     expect(styles).toMatch(/@media \(max-width:\s*520px\)/);
     expect(styles).toMatch(/@media \(hover:\s*none\),\s*\(pointer:\s*coarse\)/);
+    expect(styles).toMatch(
+      /@media \(max-width:\s*520px\)\s*{[\s\S]*?\.playerStatus :global\(\.pixel-hud-stat\),[\s\S]*?min-height:\s*44px;[\s\S]*?\.backLink\s*{[\s\S]*?width:\s*44px;[\s\S]*?height:\s*44px/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width:\s*380px\)\s*{[\s\S]*?\.location\s*{[\s\S]*?min-width:\s*66px/,
+    );
   });
 
   it("keeps all five proportional building regions inside the map without overlap", () => {
@@ -149,24 +155,6 @@ describe("Academy Hub map style contract", () => {
       expect(region.right).toBeLessThanOrEqual(100);
       expect(region.top).toBeGreaterThanOrEqual(0);
       expect(region.bottom).toBeLessThanOrEqual(100);
-    }
-
-    for (const viewportAspect of [16 / 9, 16 / 10, 4 / 3]) {
-      if (viewportAspect < mapAspect) {
-        const visibleWidth = (viewportAspect / mapAspect) * 100;
-        const horizontalCrop = (100 - visibleWidth) / 2;
-        for (const region of regions) {
-          expect(region.left).toBeGreaterThanOrEqual(horizontalCrop);
-          expect(region.right).toBeLessThanOrEqual(100 - horizontalCrop);
-        }
-      } else {
-        const visibleHeight = (mapAspect / viewportAspect) * 100;
-        const verticalCrop = (100 - visibleHeight) / 2;
-        for (const region of regions) {
-          expect(region.top).toBeGreaterThanOrEqual(verticalCrop);
-          expect(region.bottom).toBeLessThanOrEqual(100 - verticalCrop);
-        }
-      }
     }
 
     for (let first = 0; first < regions.length; first += 1) {
