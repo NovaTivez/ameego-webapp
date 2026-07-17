@@ -14,7 +14,7 @@ describe("resume extraction boundary", () => {
     expect(validateResumeInput({ ...supported, filename: "resume.exe" })).toBeNull();
   });
 
-  it("extracts only validated structured profile data with response storage off", async () => {
+  it("uses the Groq chat contract without uploading raw resume bytes", async () => {
     const profile = {
       education: ["BS Computer Science"],
       experience: [],
@@ -23,30 +23,46 @@ describe("resume extraction boundary", () => {
       leadership: [],
       achievements: [],
     };
-    const fetcher = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+    const resume = {
+      filename: "resume.pdf",
+      mimeType: "application/pdf",
+      fileData: "data:application/pdf;base64,cmVzdW1l",
+    };
+    const fetcher = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body)) as {
-        store: boolean;
-        input: Array<{ content: Array<Record<string, unknown>> }>;
+        model: string;
+        messages: Array<{ role: string; content: string }>;
+        response_format: { type: string };
       };
-      expect(body.store).toBe(false);
-      expect(body.input[0].content[0]).toMatchObject({
-        type: "input_file",
-        filename: "resume.pdf",
+      expect(String(url)).toContain("api.groq.com/openai/v1/chat/completions");
+      expect(init?.headers).toMatchObject({ Authorization: "Bearer test-key" });
+      expect(body).toMatchObject({
+        model: "llama-3.1-8b-instant",
+        response_format: { type: "json_object" },
       });
-      return new Response(JSON.stringify({ output_text: JSON.stringify(profile) }), {
-        status: 200,
+      expect(body.messages).toHaveLength(2);
+      expect(body.messages[1]).toMatchObject({
+        role: "user",
+        content: expect.stringContaining("Resume filename: resume.pdf"),
       });
+      expect(body.messages[1].content).toContain(
+        "The resume is a binary upload and cannot be read as plain text.",
+      );
+      expect(JSON.stringify(body)).not.toContain(resume.fileData);
+      expect(JSON.stringify(body)).not.toContain("input_file");
+      return new Response(
+        JSON.stringify({ choices: [{ message: { content: JSON.stringify(profile) } }] }),
+        {
+          status: 200,
+        },
+      );
     });
 
     await expect(
-      extractResumeProfile(
-        {
-          filename: "resume.pdf",
-          mimeType: "application/pdf",
-          fileData: "data:application/pdf;base64,cmVzdW1l",
-        },
-        { apiKey: "test-key", fetcher: fetcher as typeof fetch },
-      ),
+      extractResumeProfile(resume, {
+        apiKey: "test-key",
+        fetcher: fetcher as typeof fetch,
+      }),
     ).resolves.toEqual(profile);
   });
 });

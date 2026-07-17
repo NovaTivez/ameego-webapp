@@ -1734,3 +1734,28 @@ and the production build passes with 32 routes. The complete suite reports 234
 passing tests plus the pre-existing `tests/interviewResume.test.ts` mock-fetch
 network failure. Repository-wide lint remains blocked by the pre-existing
 `InterviewSimulator.tsx` React effect rule violation.
+
+## Contribution 042 - Resume Extraction Contract Regression Fix
+
+Date: 2026-07-18
+
+Feature: Repair the stale resume-extraction boundary mock after the provider
+adapter changed from OpenAI Responses-shaped requests to Groq chat completions.
+
+Codex inspected: The failing Vitest assertion, resume extraction request builder,
+Groq adapter, existing Groq question/evaluation tests, and the production
+response parsing path.
+
+Codex implemented: Updated the resume boundary test to assert the Groq endpoint,
+authorization header, model, JSON-object response format, chat messages, and
+chat-completions response shape. The test additionally proves that the raw
+resume data URL and legacy `input_file` marker are absent from the provider
+request.
+
+Scope protection: Production request translation and resume persistence behavior
+were already correct and were not changed. The fix is a contract-test update,
+not a weakened assertion or a simulated network success.
+
+Validation result: Prettier, focused ESLint, strict TypeScript, and the two
+resume extraction tests pass. The complete suite now passes: 52 files and 235
+tests.

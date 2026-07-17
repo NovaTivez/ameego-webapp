@@ -1726,11 +1726,12 @@ Status: Implemented and validated on 2026-07-18.
   save announcement, music toggle state transition, non-prompting permission
   check, reset confirmation/cancel behavior, and a clean browser console.
 - The production build passes and prerenders `/settings` among 32 routes.
-- The full suite currently reports 234 passing tests and the pre-existing
-  `tests/interviewResume.test.ts` mock-fetch network failure. Repository-wide
-  lint is still blocked by the pre-existing `InterviewSimulator.tsx`
-  `react-hooks/set-state-in-effect` error; repository-wide format checking also
-  reports unrelated pre-existing files.
+- The full suite now reports 235 passing tests. The resume extraction boundary
+  mock was updated to assert the active Groq chat-completions contract and that
+  raw resume bytes are not included in that request.
+- Repository-wide lint is still blocked by the pre-existing
+  `InterviewSimulator.tsx` `react-hooks/set-state-in-effect` error;
+  repository-wide format checking also reports unrelated pre-existing files.
 
 ---
 
