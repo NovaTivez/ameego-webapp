@@ -55,8 +55,20 @@ async function reachModeWithoutResume(user: ReturnType<typeof userEvent.setup>) 
   await screen.findByRole("heading", { name: /how would you like to answer/i });
 }
 
+async function selectResponseMode(
+  user: ReturnType<typeof userEvent.setup>,
+  mode: "text" | "microphone",
+) {
+  await user.click(
+    screen.getByRole("button", {
+      name: mode === "text" ? /text response/i : /microphone response/i,
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: /continue to interview/i }));
+}
+
 async function completeTextInterview(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /text response/i }));
+  await selectResponseMode(user, "text");
   for (const [index] of generatedQuestions.entries()) {
     await user.type(
       await screen.findByLabelText(/your response/i),
@@ -85,20 +97,28 @@ describe("InterviewSimulator", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders compact setup controls and updates difficulty and length", async () => {
+  it("renders the RPG setup controls, progress tracker, and live summary", async () => {
     const user = userEvent.setup();
     render(<InterviewSimulator />);
 
     expect(screen.getByRole("heading", { name: "Interview Setup" })).toBeVisible();
     expect(screen.getByLabelText(/interview type/i)).toHaveValue("job");
-    expect(screen.getByText("Beginner")).toBeVisible();
-    expect(screen.getByText("3 questions")).toBeVisible();
+    expect(screen.getByLabelText("Beginner")).toBeChecked();
+    expect(screen.getByLabelText("3 questions")).toBeChecked();
+    expect(screen.getByRole("heading", { name: /session summary/i })).toBeVisible();
+    expect(
+      screen.getByRole("list", { name: /interview preparation steps/i }),
+    ).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: /next difficulty/i }));
-    await user.click(screen.getByRole("button", { name: /more interview questions/i }));
+    await user.click(screen.getByLabelText("Intermediate"));
+    await user.click(screen.getByLabelText("5 questions"));
 
-    expect(screen.getByText("Intermediate")).toBeVisible();
-    expect(screen.getByText("5 questions")).toBeVisible();
+    expect(screen.getByLabelText("Intermediate")).toBeChecked();
+    expect(screen.getByLabelText("5 questions")).toBeChecked();
+    expect(screen.getAllByText("Intermediate")).toHaveLength(2);
+    const summary = screen.getByRole("complementary", { name: /session summary/i });
+    expect(within(summary).getByText("Standard session")).toBeVisible();
+    expect(within(summary).getByText("5")).toBeVisible();
     expect(screen.getByRole("button", { name: /continue to resume/i })).toHaveClass(
       "pixel-button-primary",
     );
@@ -155,8 +175,8 @@ describe("InterviewSimulator", () => {
     expect(screen.getByRole("heading", { name: "Review Your Profile" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Interview Details" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Resume Summary" })).toBeVisible();
-    expect(screen.getByText("Frontend intern")).toBeVisible();
-    expect(screen.getByText("Northstar Labs")).toBeVisible();
+    expect(screen.getAllByText("Frontend intern")).toHaveLength(2);
+    expect(screen.getAllByText("Northstar Labs")).toHaveLength(2);
     expect(screen.getByText("Start Interview")).toBeVisible();
     expect(
       screen.getByRole("button", { name: /confirm and generate questions/i }),
@@ -179,14 +199,14 @@ describe("InterviewSimulator", () => {
     await reachModeWithoutResume(user);
     expect(screen.getByText(/your personalized interview is ready/i)).toBeVisible();
     expect(screen.getByLabelText(/optional camera/i)).toBeVisible();
-    await user.click(screen.getByRole("button", { name: /text response/i }));
+    await selectResponseMode(user, "text");
     expect(await screen.findByLabelText(/interview simulation/i)).toBeVisible();
     expect(screen.getByText(/preview off/i)).toBeVisible();
-    expect(
-      screen.getByText(/optional on-device framing reminders only/i),
-    ).toBeVisible();
+    expect(screen.getByText(/optional on-device framing reminders only/i)).toBeVisible();
     expect(screen.getByText(/^Camera$/i).parentElement).toHaveTextContent(/Off/i);
-    expect(screen.queryByText(/\bconfidence\b|\bnervousness\b|\bemployability\b/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/\bconfidence\b|\bnervousness\b|\bemployability\b/i),
+    ).not.toBeInTheDocument();
 
     for (const [index, question] of generatedQuestions.entries()) {
       expect(await screen.findByRole("heading", { name: question.text })).toBeVisible();
@@ -209,13 +229,61 @@ describe("InterviewSimulator", () => {
     expect(await screen.findByText("Attempt saved")).toBeVisible();
     expect(
       screen.getByRole("heading", {
-        name: /intelligent feedback is ready to prepare/i,
+        name: /turn your completed interview into a learning plan/i,
       }),
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: /view feedback report/i })).toHaveAttribute(
+      "href",
+      "#feedback-report",
+    );
+    expect(
+      screen.getByRole("button", { name: /start another interview/i }),
     ).toBeVisible();
     const stored = window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
     expect(stored).toContain("Confirmed answer number 3");
     expect(stored).not.toMatch(/confidence|nervousness|eye.contact/i);
   }, 15_000);
+
+  it("presents the immersive mode-selection scene before starting a response mode", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ source: "ai", questions: generatedQuestions }), {
+            status: 200,
+          }),
+      ),
+    );
+    render(<InterviewSimulator />);
+
+    await reachModeWithoutResume(user);
+
+    expect(
+      screen.getByRole("heading", { name: /welcome to your interview/i }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("img", { name: /ameego interview coach seated/i }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("list", { name: /interview preparation steps/i }),
+    ).toHaveTextContent(/setup.*resume.*review.*mode selection.*interview/i);
+
+    const continueButton = screen.getByRole("button", {
+      name: /continue to interview/i,
+    });
+    const textCard = screen.getByRole("button", { name: /text response/i });
+    expect(continueButton).toBeDisabled();
+    expect(textCard).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(textCard);
+    expect(textCard).toHaveAttribute("aria-pressed", "true");
+    expect(continueButton).toBeEnabled();
+    expect(screen.queryByLabelText(/interview simulation/i)).not.toBeInTheDocument();
+
+    await user.click(continueButton);
+    expect(await screen.findByLabelText(/interview simulation/i)).toBeVisible();
+  });
 
   it("shows the panel-9 learning HUD, calculated indicators, and a non-saving End action", async () => {
     const user = userEvent.setup();
@@ -231,7 +299,7 @@ describe("InterviewSimulator", () => {
     render(<InterviewSimulator />);
 
     await reachModeWithoutResume(user);
-    await user.click(screen.getByRole("button", { name: /text response/i }));
+    await selectResponseMode(user, "text");
 
     const simulator = await screen.findByLabelText(/interview simulation/i);
     expect(within(simulator).getByText("Question")).toBeVisible();
@@ -242,7 +310,7 @@ describe("InterviewSimulator", () => {
     expect(within(simulator).getByLabelText(/pixel interview room/i)).toBeVisible();
     expect(
       within(simulator).getByRole("img", {
-        name: /jordan.*neutral pixel-art interviewer/i,
+        name: /ameego interview coach seated behind a wooden desk/i,
       }),
     ).toBeVisible();
     expect(
@@ -264,10 +332,43 @@ describe("InterviewSimulator", () => {
     expect(within(durationRow as HTMLElement).getByText("Text mode")).toBeVisible();
     expect(within(simulator).queryByText(/confidence|nerves|employability/i)).toBeNull();
 
+    const nextAction = within(simulator).getByRole("button", {
+      name: /next: review response/i,
+    });
+    const endAction = within(simulator).getByRole("button", {
+      name: /end interview without saving a completed attempt/i,
+    });
+    const inactiveMic = within(simulator).getByRole("button", {
+      name: /microphone unavailable in text mode/i,
+    });
+    expect(inactiveMic).toHaveAttribute("data-mic-state", "off");
+    expect(within(simulator).getByText("Microphone off")).toBeVisible();
+    expect(
+      nextAction.compareDocumentPosition(endAction) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    await user.click(endAction);
+
+    const endDialog = await screen.findByRole("dialog", {
+      name: /end this interview/i,
+    });
+    expect(within(endDialog).getByText(/current draft will not be saved/i)).toBeVisible();
+    expect(
+      within(endDialog).getByRole("button", { name: /continue interview/i }),
+    ).toHaveFocus();
+    expect(within(simulator).getByText(/session analysis/i)).toBeVisible();
+
     await user.click(
-      within(simulator).getByRole("button", {
-        name: /end interview without saving a completed attempt/i,
-      }),
+      within(endDialog).getByRole("button", { name: /continue interview/i }),
+    );
+    expect(screen.queryByRole("dialog", { name: /end this interview/i })).toBeNull();
+    expect(endAction).toHaveFocus();
+
+    await user.click(endAction);
+    await user.click(
+      within(
+        await screen.findByRole("dialog", { name: /end this interview/i }),
+      ).getByRole("button", { name: /^end interview$/i }),
     );
 
     expect(
@@ -301,7 +402,18 @@ describe("InterviewSimulator", () => {
       render(<InterviewSimulator />);
       await reachModeWithoutResume(user);
       await user.click(screen.getByLabelText(/optional camera/i));
-      await user.click(screen.getByRole("button", { name: /text response/i }));
+      await selectResponseMode(user, "text");
+
+      const cameraDialog = await screen.findByRole("dialog", {
+        name: /ready for your interview/i,
+      });
+      expect(
+        within(cameraDialog).getByLabelText(/live mirrored camera readiness preview/i),
+      ).toBeInTheDocument();
+      expect(
+        await within(cameraDialog).findByText(/camera permission was denied/i),
+      ).toBeVisible();
+      await user.click(within(cameraDialog).getByRole("button", { name: /i'm ready/i }));
 
       const simulator = await screen.findByLabelText(/interview simulation/i);
       expect(
@@ -311,10 +423,7 @@ describe("InterviewSimulator", () => {
         within(simulator).getByRole("button", { name: /retry camera/i }),
       ).toBeVisible();
       expect(within(simulator).getByLabelText(/your response/i)).toBeEnabled();
-      await user.type(
-        within(simulator).getByLabelText(/your response/i),
-        "Still works.",
-      );
+      await user.type(within(simulator).getByLabelText(/your response/i), "Still works.");
       await user.click(
         within(simulator).getByRole("button", { name: /review response/i }),
       );
@@ -433,7 +542,7 @@ describe("InterviewSimulator", () => {
     render(<InterviewSimulator />);
     await reachModeWithoutResume(user);
 
-    await user.click(screen.getByRole("button", { name: /microphone response/i }));
+    await selectResponseMode(user, "microphone");
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /microphone access is unavailable/i,
     );
@@ -492,18 +601,24 @@ describe("InterviewSimulator", () => {
     try {
       render(<InterviewSimulator />);
       await reachModeWithoutResume(user);
-      await user.click(screen.getByRole("button", { name: /microphone response/i }));
+      await selectResponseMode(user, "microphone");
 
       const simulator = await screen.findByLabelText(/interview simulation/i);
       expect(within(simulator).getByText(/mic ready/i)).toBeVisible();
-      await user.click(
-        within(simulator).getByRole("button", { name: /start microphone/i }),
-      );
+      const startMic = within(simulator).getByRole("button", {
+        name: /start microphone/i,
+      });
+      expect(startMic).toHaveAttribute("data-mic-state", "off");
+      await user.click(startMic);
 
       const recognition = instances[0];
       expect(recognition).toBeDefined();
       expect(recognition.start).toHaveBeenCalled();
       expect(within(simulator).getByText(/listening/i)).toBeVisible();
+      expect(
+        within(simulator).getByRole("button", { name: /stop microphone/i }),
+      ).toHaveAttribute("data-mic-state", "active");
+      expect(within(simulator).getByText("Microphone active")).toBeVisible();
 
       recognition.onresult?.({
         resultIndex: 0,
@@ -513,9 +628,9 @@ describe("InterviewSimulator", () => {
         ],
       });
 
-      expect(
-        await within(simulator).findByLabelText(/editable transcript/i),
-      ).toHaveValue("Working on the launch.");
+      expect(await within(simulator).findByLabelText(/editable transcript/i)).toHaveValue(
+        "Working on the launch.",
+      );
       expect(within(simulator).getByText(/listening… working on/i)).toBeVisible();
     } finally {
       Object.defineProperty(navigator, "mediaDevices", {
@@ -550,8 +665,17 @@ describe("InterviewSimulator", () => {
       screen.getByRole("button", { name: /generate intelligent feedback/i }),
     );
     expect(
-      await screen.findByRole("heading", { name: /STAR communication review/i }),
+      await screen.findByRole("heading", { name: /feedback report/i }),
     ).toBeVisible();
+    expect(screen.getByRole("heading", { name: /overall score/i })).toBeVisible();
+    expect(screen.getByRole("heading", { name: /star evaluation/i })).toBeVisible();
+    expect(screen.getByRole("heading", { name: /ai feedback/i })).toBeVisible();
+    expect(screen.getByRole("heading", { name: /actionable tips/i })).toBeVisible();
+    const report = screen.getByRole("heading", { name: /feedback report/i });
+    const finalAction = screen.getByRole("button", { name: /start another interview/i });
+    expect(
+      report.compareDocumentPosition(finalAction) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toContain(
       '"evaluation"',
     );
@@ -604,7 +728,7 @@ describe("InterviewSimulator", () => {
     expect(alert).not.toHaveTextContent(/openai|rate.limit|provider|429|api|model/i);
     expect(within(alert).getByRole("button", { name: /retry feedback/i })).toBeVisible();
     expect(
-      screen.queryByRole("heading", { name: /STAR communication review/i }),
+      screen.queryByRole("heading", { name: /^feedback report$/i }),
     ).not.toBeInTheDocument();
   }, 15_000);
 });

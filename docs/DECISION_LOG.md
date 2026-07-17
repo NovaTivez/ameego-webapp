@@ -690,7 +690,31 @@ inventing unfinished functionality.
 
 Consequences: The entire campus remains visible rather than being cropped to
 fill unusual screens. Buildings and labels become smaller on narrow phones, but
-the underlying links, focus outlines, and bottom navigation remain available.
+the underlying links, focus outlines, and top-right Settings entry remain
+available.
+
+---
+
+## Decision 018 - Make Buildings the Academy's Primary Navigation
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The Academy map already provides Courses and Progress destinations,
+making the bottom shortcut bar visually redundant and reducing the space
+available to the supplied campus art.
+
+Decision: Let the fixed-aspect map occupy the complete viewport with the compact
+HUD overlaid at the top. Remove the bottom shortcut bar, retain Courses and
+Progress on their existing buildings, and keep Settings as a gear-only link to
+the existing `/settings` route. Preserve the Music/Online controls and XP/level
+status in the same top region without moving their state or event logic.
+
+Consequences: The Academy reads as a continuous RPG map and gains vertical
+space. Non-map aspect ratios use contained scaling so no campus edge or building
+is clipped; unused space may remain on unusually tall displays rather than
+distorting or cropping the supplied artwork.
 
 ---
 
@@ -747,3 +771,377 @@ supports fast JSON responses for the hackathon loop.
 Consequences: PDF resume extraction is weaker than OpenAI file inputs; text
 resumes and manual highlights remain supported. Feedback quality may be thinner
 than larger models, so validation rejects remain critical.
+
+---
+
+## Decision 020 - Scale the Updated Campus and Buildings as One Cover Scene
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The supplied updated campus retains the existing 1672-by-941 five-plot
+composition, but containing that ratio inside every viewport can leave visible
+bands. Independently covering the background would cause percentage-positioned
+building layers to drift away from their plots.
+
+Decision: Store the supplied image at a new cache-safe asset URL and render the
+fixed-aspect map wrapper itself with cover sizing. Keep all five existing
+building PNGs, labels, and interactions inside that wrapper so background and
+overlays share the same scale and centered crop. Calibrate the plot anchors as
+mirrored percentages: `25%` and `75%` for the side columns, `29.5%` and `61.5%`
+for their row centers, and `50% / 75.5%` for Main Building.
+
+Alternatives considered: Stretching the image to 100vw by 100vh, covering only
+the background image, retaining contained letterboxing, or using separate
+breakpoint-specific building coordinates.
+
+Reason: A single cover scene fills common desktop, laptop, and tablet viewports
+without distortion, empty margins, overlap, or layer drift. At 16:9, 16:10, and
+4:3, the centered crop affects only outer scenery and keeps all five building
+regions visible.
+
+Consequences: Very narrow portrait or extreme ultrawide screens may trim more
+outer campus scenery because a fixed landscape artwork cannot simultaneously
+cover every aspect ratio and show every source pixel. The map remains centered,
+undistorted, and synchronized with its building layers.
+
+---
+
+## Decision 021 - Keep One Preparation State Machine Behind a Shared Interview Office
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: Scenario, Resume, and Review already had complete validation,
+extraction, fallback, and question-generation behavior, but each state looked
+like a separate form page and duplicated the primary action inside its content.
+
+Decision: Preserve the existing state values and handlers while presenting all
+three states inside one fullscreen office shell. Use one shared three-step
+tracker and one live summary whose action delegates to the current state's
+existing handler. Keep the actual 3, 5, and 8 question options and derive labels
+and estimated time only from current form state.
+
+Alternatives considered: Splitting the preparation states into new routes,
+introducing a new wizard state library, or duplicating form values in a sidebar
+store.
+
+Reason: A presentation-only shell creates the requested continuous in-game
+office experience without risking route, API, persistence, validation, or
+interview-generation behavior.
+
+Consequences: Desktop and laptop layouts keep the summary visible beside a
+scrollable work area; tablet and mobile layouts place it after the work area.
+The summary remains derived UI and does not create a second source of truth.
+
+---
+
+## Decision 022 - Embed Experience Controls in the Header Except on Fullscreen Worlds
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: XP and Level were rendered inside the header while Music and
+Online/Offline were fixed independently over it. This produced uneven spacing
+and made the controls feel detached, but Landing and Academy intentionally hide
+the shared header and still require Music and connectivity controls.
+
+Decision: Render one grouped HUD inside MainNav on standard routes, using the
+existing ExperienceControls component and handlers. On `/` and `/academy`, keep
+that same component as the standalone control surface while omitting the hidden
+header group. Preserve the existing Academy-specific Settings and status HUD.
+
+Alternatives considered: Keeping fixed controls visually adjacent with
+hard-coded offsets, duplicating interactive controls on every route, or showing
+the full shared header over the Landing and Academy artwork.
+
+Reason: Path-aware placement creates correct visual and keyboard order on
+standard pages without removing controls or disturbing the established
+fullscreen game-world layouts.
+
+Consequences: Header pages share consistent 68px alignment and control sizing;
+fullscreen worlds retain their existing compact overlay controls. Audio,
+connectivity, navigation, Settings, XP, and Level behavior remain unchanged.
+
+---
+
+## Decision 023 - Render the Supplied Interview Panorama as the Entire Hero Scene
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The Interview Center hero was assembled from generated CSS room
+layers plus separate character, dialogue, desk, and prop components. The team
+supplied a complete panoramic room and requested that it be the only visible
+hero content for this step.
+
+Decision: Copy the supplied PNG byte-for-byte into public assets and render the
+hero as an empty semantic section with a centered, non-repeating cover
+background. Remove all scene children and their page-scoped positioning and
+animation rules while preserving the existing hero grid row heights.
+
+Alternatives considered: Keeping transparent character/dialogue overlays,
+placing the panorama behind PixelRoomBackground, or using an `<img>` with
+contained letterboxing.
+
+Reason: A single CSS background satisfies full-bleed responsive cropping and
+guarantees there are no duplicate room layers or leftover header graphics.
+
+Consequences: The header currently contains only the supplied room artwork.
+Future NPC or dialogue additions must be explicitly reintroduced in a separate
+task. Interview functionality and preparation state remain unchanged.
+
+---
+
+## Decision 024 - Keep Mode Selection in the Existing Interview State Machine
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The generated-question flow already had a `mode` state with working
+text, microphone-permission, camera-intent, and active-session transitions. The
+new design requires a more deliberate in-room choice without changing those
+services or creating another destination.
+
+Decision: Keep the existing `mode` state and start handlers, add presentation-
+only selected-mode state, and invoke the original text or microphone handler
+from one explicit Continue action. Reuse the supplied interviewer and desk PNGs
+over the existing uploaded panorama; create the speech bubble in CSS because no
+separate speech-bubble file accompanied this request.
+
+Alternatives considered: Starting the interview immediately when a card is
+clicked, adding a new route for mode selection, or changing the microphone and
+camera service contracts.
+
+Reason: An explicit confirmation step supports clear selected and focus states
+while keeping the complete interview, permission, transcript, scoring, and
+retry paths on their established state machine.
+
+Consequences: A learner now selects a card and then continues. The chosen card
+is announced through `aria-pressed`; microphone permission is still requested
+only by the existing microphone start handler, and camera intent remains
+optional and local-only.
+
+---
+
+## Decision 025 - Confirm Optional Camera Readiness Before Interview Entry
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: Camera intent was collected on Mode Selection, but the camera first
+became visible only after the active interview mounted. The combined artwork
+refinement also required replacing two independently positioned visual layers
+with one source image.
+
+Decision: Render the supplied combined coach-and-desk PNG as one responsive
+layer. When camera intent is enabled, keep the learner in the existing `mode`
+state and open a local readiness dialog before invoking the selected response
+handler. Reuse the existing camera hook and update only its video-ref attachment
+so one stream follows the currently mounted preview element.
+
+Alternatives considered: Starting the interview before showing the preview,
+requesting a second camera stream after confirmation, or creating a separate
+camera route and state machine.
+
+Reason: A preflight dialog lets the learner verify framing and permissions
+without starting timers or questions. Reattaching the same stream avoids a
+second permission prompt and keeps camera lifecycle ownership inside the
+existing hook.
+
+Consequences: Camera-enabled learners explicitly confirm `I'm Ready`; camera-
+off learners continue directly as before. Permission denial and unavailable
+states remain non-blocking, and camera information remains local and excluded
+from scoring and feedback.
+
+---
+
+## Decision 026 - Keep the Live Interview Fullscreen and Presentation-Only
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The live session was constrained by the shared page frame and drew a
+second code-native office and character despite the supplied room and combined
+coach artwork. Its microphone used red while listening, and End appeared before
+Next with comparable visual weight.
+
+Decision: Activate a viewport-only shell during interview and confirmation,
+reuse the supplied panorama and coach image inside the main scene, and preserve
+all existing handlers through the same `InterviewSessionView` prop boundary.
+Represent microphone state as red/off and green/active with visible text. Place
+Next before End Interview and reduce the danger action's size and emphasis.
+
+Alternatives considered: Rebuilding the interview state machine, moving the
+session to another route, keeping the generated room behind the supplied art,
+or using color alone for microphone state.
+
+Reason: A presentation-only replacement removes duplicate scenery and unused
+canvas without risking microphone, camera, transcript, timer, evaluation, or
+persistence behavior. Text labels keep the microphone state accessible, and
+the action hierarchy reduces accidental exits.
+
+Consequences: Desktop interview and confirmation states fill the browser
+viewport without page scrolling. Narrow layouts use internal simulator
+scrolling only when panels must stack. The shared header returns automatically
+when the learner ends or completes the active session.
+
+---
+
+## Decision 027 - Separate Interview Completion from the Long-Form Feedback Report
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The completed simulator, generation control, validated rubric output,
+evidence, recommendations, and restart action were compressed into one bounded
+panel. Long evaluations left little visual hierarchy and did not use the page's
+available vertical space.
+
+Decision: Keep the completed interview room at the top of the existing Practice
+route, then continue into a full-width, vertically scrolling Feedback Report.
+Present the existing validated result through six named learning sections and
+place Start Another Interview after every report and learning action.
+
+Alternatives considered: Opening results on a separate route, hiding the
+completed room after evaluation, keeping the compact two-column dashboard, or
+changing the evaluation response contract to fit a new UI model.
+
+Reason: A continuous page preserves the learner's sense of completing the same
+simulation while giving detailed educational feedback enough room to remain
+readable. Reusing the current evaluation object avoids risk to the trusted API
+and schema boundary.
+
+Consequences: Learners scroll from completion into feedback and can jump there
+with an in-page link. The UI displays an overall average derived from the four
+existing rubric scores, but stored scores and all backend behavior remain
+unchanged. The report can grow naturally with longer evidence and action copy.
+
+---
+
+## Decision 028 - Reuse One Verified Interview Center Asset Pair Across the Flow
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: The post-interview hero still used a generated library, student,
+results board, trophy shelf, and props. The requested replacement panorama and
+combined interviewer-and-desk PNG were supplied again for visual alignment with
+the pre-interview simulator.
+
+Decision: Remove every generated post-interview scene layer and reuse the same
+verified panorama and combined coach image already used by the pre-interview
+flow. Keep completion copy and the report link as a separate accessible HTML
+card over the scene.
+
+Alternatives considered: Adding duplicate asset filenames, retaining generated
+props behind the supplied images, creating a second post-interview room route,
+or baking the summary text into the bitmap.
+
+Reason: Hash verification showed both supplied files are byte-identical to the
+installed assets. One shared asset pair creates exact visual continuity, avoids
+cache and maintenance duplication, and keeps text responsive and accessible.
+
+Consequences: Pre- and post-interview heroes now share the same environment and
+coach composition. Completion messaging remains live HTML, the report continues
+below the hero, and no service or interview behavior is affected.
+
+---
+
+## Decision 029 - Confine Fixed-Shell Scrolling to Pre-Interview Workspaces
+
+Date: 2026-07-17
+
+Status: Superseded by Decision 030
+
+Context: Long setup forms need vertical space, but scrolling the complete page
+would move the context-setting panorama, progress tracker, and Session Summary.
+The active interview and completed report already have deliberately different
+viewport and scrolling models.
+
+Decision: Keep the existing preparation grid fixed and make only its main form
+panel scroll vertically. On Mode Selection, keep the hero, progress tracker,
+heading, and footer fixed while the central card row scrolls. Do not share these
+selectors with the active simulator or post-interview results.
+
+Alternatives considered: Enabling body scrolling across every interview state,
+making the shared header scroll away, changing the setup component hierarchy,
+or applying one global overflow rule to preparation, active, and completed
+states.
+
+Reason: Scoped internal scrolling preserves the learner's current context and
+action controls without risking the live simulator or long-form report behavior.
+CSS containment also avoids unnecessary state or component changes.
+
+Consequences: Desktop and laptop setup forms can grow beyond the available main
+row while the surrounding shell remains stable. Existing narrow-screen stacking
+continues to use its readable natural document flow. Active and completed states
+remain unchanged.
+
+---
+
+## Decision 030 - Use One Browser Scrollbar for Pre-Interview Setup
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: Even when scoped correctly, independent workspace and Session Summary
+scrollbars divide one preparation page into multiple scroll regions. The desired
+interaction is one continuous document controlled by the browser's main
+scrollbar.
+
+Decision: Let the Scenario, Resume, Review/Questions, and Mode Selection shells
+grow to their natural content height. Set the page body as the only vertical
+scroll owner and remove nested scrolling from setup content and the Session
+Summary. Keep modal overflow independent because it is outside document flow.
+
+Alternatives considered: Keeping nested setup scrollbars, applying a global
+overflow rule to all interview states, or changing component markup and layout
+structure.
+
+Reason: Natural document scrolling is simpler and more predictable while
+preserving the existing visual composition. Keeping the rule inside the
+preparation module protects the active simulator and long post-interview report.
+
+Consequences: Long pre-interview forms now extend the page and use the browser
+scrollbar from top to bottom. There are no vertical scrollbars inside the main
+setup card, Mode Selection content, or Session Summary. Active and completed
+interview states retain their separate scrolling models.
+
+---
+
+## Decision 031 - Require Explicit Confirmation Before Ending an Interview
+
+Date: 2026-07-17
+
+Status: Accepted
+
+Context: End Interview immediately returned to Mode Selection. It was visually
+smaller than Next and could be activated accidentally while a learner had an
+unfinished draft.
+
+Decision: Give Next and End Interview equal dimensions while retaining primary
+green and destructive red styling. Place the established end handler behind an
+accessible confirmation dialog whose initial action continues the interview.
+
+Alternatives considered: A browser-native confirm prompt, keeping the immediate
+end action, changing the end handler, or making the destructive action visually
+larger than Next.
+
+Reason: A themed dialog preserves the game UI and provides an explicit safety
+boundary without changing session behavior. Equal dimensions improve alignment;
+color and copy preserve action hierarchy.
+
+Consequences: Learners must confirm before leaving the active interview. Cancel
+or Escape returns focus to End Interview. Confirming still preserves the scenario
+and confirmed responses exactly as the original handler did.

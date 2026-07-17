@@ -1030,3 +1030,519 @@ aspect ratios was inspected and shows every building fully contained with clear
 gaps. Responsive coverage also comes from automated non-overlap geometry and CSS
 contracts; a final live-device screenshot pass remains the only unperformed
 visual check.
+
+## Contribution 020 - Fullscreen Academy Map Layout
+
+Date: 2026-07-17
+
+Feature: Borderless full-viewport Academy map with building-first navigation.
+
+Codex inspected: The Academy page, fixed-aspect campus composition, shared
+Music/Online controls, XP/level HUD, Settings route and panel, responsive rules,
+locked Speech Hall state, and Academy route/style tests.
+
+Codex implemented: A full-viewport map stage, overlay HUD, symmetric upper
+building positions, removal of the bottom navigation, a gear-only Settings link,
+and Academy-scoped positioning for the unchanged Music and Online controls.
+Main Building, Progress Library, Courses, all route targets, state, storage,
+audio, connectivity, and backend behavior remain unchanged.
+
+Validation: Prettier formatting, ESLint, TypeScript type checking, both focused
+Academy test files (9 tests), and the Next.js production build pass. The complete
+suite reports 185 passing tests and one pre-existing failure in
+`tests/interviewResume.test.ts`: the test mock asserts the former request and
+response shape while the current interview client uses the newer
+chat-completions shape. Codex isolated and documented the mismatch without
+changing the unrelated interview integration during this UI-only contribution.
+
+## Contribution 021 - Updated Fullscreen Campus Artwork
+
+Date: 2026-07-17
+
+Feature: Supplied updated campus background integrated with the existing
+interactive Academy building layers.
+
+Codex inspected: The uploaded 1672-by-941 PNG, current Academy asset paths,
+fixed-aspect map wrapper, five building anchors, attached labels, route and
+locked-building behavior, responsive rules, offline cache strategy, and focused
+Academy tests.
+
+Codex implemented: A byte-identical copy of the supplied artwork under a fresh
+cache-safe URL, a full-viewport aspect-ratio-preserving cover wrapper, and
+updated asset and geometry tests. The map and building overlays now scale and
+crop as one coordinate system, preventing drift while keeping every building
+visible at 16:9, 16:10, and 4:3 viewports. A follow-up alignment pass moved the
+four side buildings inward to mirrored `25%` and `75%` anchors, raised both side
+rows by `2%`, and raised Main Building to `75.5%`; labels remain inside the same
+positioned interaction regions. No route, state, storage, audio, connectivity,
+XP, API, or interaction handler changed.
+
+Validation: Prettier formatting, ESLint, TypeScript type checking, both focused
+Academy test files (9 tests), and the Next.js production build pass. The complete
+suite remains at 185 passing tests and the same one pre-existing
+`tests/interviewResume.test.ts` request-shape failure documented in Contribution
+020; no interview integration code changed.
+
+## Contribution 022 - Fullscreen Interview Center Preparation UI
+
+Date: 2026-07-17
+
+Feature: Frontend-only redesign of the Scenario, Resume, and Review preparation
+states as a cohesive pixel-art interview office.
+
+Codex inspected: `AGENTS.md`, the Interview Simulator state machine, setup form,
+resume and review panels, preparation scene primitives, shared pixel controls,
+interview constants, responsive styles, focused component tests, and the
+project plan and decision records.
+
+Codex implemented: A viewport-filling two-column preparation shell, an office
+hero using the existing scene/desk/interviewer assets, a three-state RPG
+progress tracker, card-based form sections, native difficulty and question-count
+selector cards, a live session summary, and a persistent primary action. The
+primary action calls the pre-existing setup, extraction, manual resume, skip, or
+question-generation handler according to the current state; no duplicate
+business path was introduced. A fallback correction ensures typed manual resume
+content remains selectable after a failed file extraction.
+
+Accessibility work: Native radios preserve keyboard selection semantics,
+current progress uses `aria-current`, form cards and the summary have named
+landmarks, field focus remains highly visible, status/error announcements are
+preserved, and reduced-motion rules remove nonessential movement.
+
+Validation executed: Changed-file Prettier formatting and focused Interview
+Simulator/style-contract tests during implementation, followed by the
+repository lint, strict TypeScript check, complete Vitest suite, and production
+build.
+
+Validation result: Every changed file passes Prettier, ESLint passes, strict
+TypeScript checking passes, all 18 focused tests pass, and the production build
+passes with all 15 routes generated. The complete suite reports 186 passing
+tests and the same one existing `tests/interviewResume.test.ts` request-contract
+failure documented in Contributions 020 and 021. The repository-wide formatter
+check still lists 75 baseline files outside this UI-only contribution, so Codex
+did not bulk-rewrite unrelated files.
+
+## Contribution 023 - Unified Header HUD and Interview Banner Polish
+
+Date: 2026-07-17
+
+Feature: Frontend-only alignment and visual polish for the shared header and
+Interview Center preparation banner.
+
+Codex inspected: The root layout, pathname-aware MainNav, audio/connectivity
+provider controls, shared HUD tokens, Settings route, fullscreen Landing and
+Academy exceptions, preparation hero scene, dialogue primitive, responsive
+breakpoints, and focused navigation/audio/interview style tests.
+
+Codex implemented: A single semantic header control group containing the
+existing XP, Level, Music, Online/Offline, and Settings controls. On Landing and
+Academy, the same ExperienceControls component stays standalone so those
+fullscreen compositions do not lose their audio or connectivity UI. The
+Interview Center hero now uses a left interviewer and desk, centered readable
+dialogue with a directional tail, and restrained right-side office props.
+
+Accessibility work: Existing accessible control names, pressed state, live
+connection status, Settings route, and keyboard focus behavior remain intact.
+Responsive label hiding keeps compact controls available rather than removing
+them, and reduced-motion behavior remains inherited from the shared system.
+
+Validation executed: Changed-file formatting, ESLint, strict TypeScript
+checking, focused navigation/audio/Interview Center tests, the complete Vitest
+suite, and the production build.
+
+Validation result: Every changed file passes Prettier, ESLint passes, strict
+TypeScript checking passes, and all 40 focused tests pass across six files. The
+complete suite reports 189 passing tests and the same one existing
+`tests/interviewResume.test.ts` request-contract failure documented in earlier
+contributions. The production build passes with all 15 routes generated. The
+repository-wide formatter check still lists 71 baseline files outside this
+UI-only contribution, so Codex did not bulk-rewrite unrelated files.
+
+## Contribution 024 - Supplied Interview Header Panorama
+
+Date: 2026-07-17
+
+Feature: Background-only replacement of the Interview Center preparation hero
+using the exact uploaded panoramic room artwork.
+
+Codex inspected: The supplied 2119-by-742 PNG, its SHA-256 digest, the existing
+PracticeLobbyScene component, generated room layers, hero sizing, responsive
+rules, immersive-scene tests, Interview Simulator flow tests, and style
+contracts.
+
+Codex implemented: A byte-identical public asset copy, an empty accessible hero
+section, and a centered cover background. The component no longer imports or
+renders the previous PixelRoomBackground, interviewer portrait, PixelDialog,
+desk, notice board, filing cabinet, or icons. Corresponding page-scoped
+positioning and animation rules were removed.
+
+Scope protection: No interview state, form, route, API, navigation, audio,
+connectivity, XP, persistence, or event handler changed.
+
+Validation executed: Changed-file formatting, ESLint, strict TypeScript
+checking, focused immersive-scene/style/Interview Simulator tests, the complete
+Vitest suite, and the production build.
+
+Validation result: Every changed file passes Prettier, ESLint and strict
+TypeScript checking pass, and all 22 focused tests pass across three files. The
+complete suite reports 189 passing tests and the same existing
+`tests/interviewResume.test.ts` mock-contract failure. The production build
+passes with all 15 routes generated.
+
+## Contribution 025 - Interview Mode Selection Room
+
+Date: 2026-07-17
+
+Feature: Frontend-only redesign of the post-generation Text Response versus
+Microphone Response selection state.
+
+Codex inspected: `AGENTS.md`, the attached specification, supplied transparent
+desk and interviewer assets, the Interview Simulator state machine, existing
+text/microphone and camera handlers, preparation panorama, responsive style
+system, focused interaction tests, and project records.
+
+Codex implemented: A dedicated fullscreen mode-selection shell, supplied coach
+and desk overlays, a CSS pixel speech bubble, five-step workflow tracker,
+large selectable response cards, compact optional-camera card, and persistent
+Continue action. Selection is now explicit before the same existing response
+handler runs; no interview service or destination logic was duplicated.
+
+Accessibility work: Mode cards are native buttons with `aria-pressed`, the
+current workflow item uses `aria-current`, Continue remains visible and disabled
+until a choice is made, the camera input has a stable accessible name, and all
+controls retain hard visible focus states. Reduced-motion rules remove lift and
+press transforms.
+
+Validation executed: Changed-file formatting, strict TypeScript checking, and
+22 focused Interview Simulator/preparation-style tests during implementation,
+followed by repository lint, the complete Vitest suite, and production build.
+
+Validation result: Every changed file passes Prettier, ESLint passes, strict
+TypeScript checking passes, and all 22 focused tests pass. The complete suite
+reports 192 passing tests and the same existing
+`tests/interviewResume.test.ts` mock-contract failure. The production build
+passes with all 15 routes generated.
+
+## Contribution 026 - Combined Coach Artwork and Camera Readiness
+
+Date: 2026-07-17
+
+Feature: Frontend-only refinement of the Interview Mode Selection room and its
+optional-camera entry flow.
+
+Codex inspected: The supplied 551-by-453 transparent combined artwork, current
+room composition, camera-intent state, camera hook lifecycle, session preview
+element, accessibility behavior, focused Interview Simulator tests, and style
+contracts.
+
+Codex implemented: A byte-identical public copy of the combined coach-and-desk
+artwork, replacement of the two prior visual layers, a smaller high-contrast
+speech bubble, and a themed readiness dialog with a live mirrored preview,
+status and recovery copy, camera-off control, Escape support, and `I'm Ready`
+confirmation. The camera hook now uses a callback ref so its current stream is
+reattached when React swaps the readiness video for the in-session video.
+
+Accessibility work: The readiness surface is a named modal dialog with initial
+programmatic focus, a descriptive live-preview label, status announcements,
+visible focus states, a close control, keyboard Escape behavior, and a clear
+path to continue without camera after denial or unavailability.
+
+Validation executed: Changed-file formatting, strict TypeScript checking, and
+23 focused Interview Simulator, style-contract, and camera-stream handoff tests
+during implementation, followed by repository lint, the complete Vitest suite,
+and production build.
+
+Validation result: Every changed file passes Prettier, ESLint passes, strict
+TypeScript checking passes, and all 23 focused tests pass. The complete suite
+reports 193 passing tests and the same existing
+`tests/interviewResume.test.ts` mock-contract failure. The production build
+passes with all 15 routes generated.
+
+## Contribution 027 - Full-Viewport Interview Session
+
+Date: 2026-07-17
+
+Feature: UI-only redesign of the active interview and transcript-confirmation
+states using the supplied room and combined coach artwork.
+
+Codex inspected: The active session state and handlers, timer and speech
+recognition lifecycle, camera callback-ref handoff, face-presence labels,
+question progress, confirmation flow, supplied public assets, responsive style
+contract, focused interaction tests, and overlapping working-tree changes.
+
+Codex implemented: A viewport-locked desktop shell, supplied panoramic room
+background, naturally centered coach-and-desk layer, compact accessible speech
+bubble, bottom response dock, responsive camera and live-analysis rail,
+explicit red/off and green/active microphone states, and safer Next-before-End
+action hierarchy. Tablet and phone layouts scroll only inside the simulator
+when stacking is necessary.
+
+Scope protection: Existing component props and every state transition, API
+request, speech-recognition event, camera/face tracker, timer, transcript
+validator, response persistence path, evaluation path, retry action, and
+progress calculation were preserved.
+
+Validation executed: Changed-file formatting, focused Interview Simulator and
+session-style tests, repository ESLint, strict TypeScript checking, production
+build, and an attempted in-app-browser connection.
+
+Validation result: All 18 focused tests pass, ESLint passes, strict TypeScript
+checking passes, and the production build generates all 15 routes. The full
+suite reports 194 passing tests and the pre-existing
+`tests/interviewResume.test.ts` request-contract mismatch as its single failure.
+Browser visual QA was unavailable because the session exposed no browser
+surface, so no visual inspection result is claimed.
+
+## Contribution 028 - Full-Viewport Post-Interview Feedback Report
+
+Date: 2026-07-17
+
+Feature: Frontend-only redesign of the completed interview and validated
+feedback states into a responsive, vertically scrolling learning report.
+
+Codex inspected: The Interview Simulator completion state, validated evaluation
+contract, STAR rubric registry, lesson recommendation mapping, persistence and
+retry handlers, shared pixel UI primitives, page-width constraints, responsive
+style tests, project plan, workflow record, and decision log.
+
+Codex implemented: A completed-room hero that remains at the top of the route,
+an in-page Feedback Report link, a prominent pre-report Generate Intelligent
+Feedback action, and a full-width report canvas. Existing validated data is now
+presented in Overall Score, STAR Evaluation, Strengths, Areas for Improvement,
+AI Feedback, and Actionable Tips cards. Transcript evidence, improved answer,
+recommended lesson, same-scenario retry, and learning link remain available.
+Start Another Interview is isolated as the final page action.
+
+Accessibility work: The report uses labelled semantic sections and headings,
+the score has an explicit `out of 5` accessible label, the in-page link supports
+keyboard navigation, focus indicators remain visible, content reflows to one
+column at narrow widths, and mobile primary actions fill the available width.
+
+Scope protection: The displayed overall value is derived only from the four
+existing validated rubric scores. No API, prompt, schema, scoring criterion,
+validation rule, state transition, transcript flow, persistence function,
+retry handler, or navigation destination changed.
+
+Validation executed: Changed-file formatting, repository ESLint, strict
+TypeScript checking, 25 focused component/interaction/style tests, the complete
+Vitest suite, production build, and an attempted in-app browser connection.
+
+Validation result: Changed files pass Prettier; ESLint and strict TypeScript
+checking pass; all 25 focused tests pass; and the production build generates all
+15 routes. The complete suite reports 194 passing tests and the same pre-existing
+`tests/interviewResume.test.ts` mock-contract failure. The browser skill exposed
+no browser backend, so no screenshot-based visual inspection is claimed.
+
+## Contribution 029 - Supplied-Asset Post-Interview Simulator
+
+Date: 2026-07-17
+
+Feature: Frontend-only alignment of the completed interview hero with the
+pre-interview simulator's supplied-asset composition.
+
+Codex inspected: Both supplied files, dimensions, alpha format, SHA-256 hashes,
+the installed Interview Center assets, pre-interview preparation and mode hero
+styles, the generated FeedbackRoomScene component, completion layout, report
+scroll flow, responsive breakpoints, and scene/style tests.
+
+Codex discovered: The supplied 2119-by-742 `Header.png` is byte-identical to the
+installed `header-panorama.png`. The supplied 551-by-453 transparent interviewer
+and desk PNG is byte-identical to the installed `mode-coach-desk.png`. Reusing
+those verified copies avoids duplicate public assets and cache ambiguity.
+
+Codex implemented: FeedbackRoomScene now renders only the supplied combined
+coach image over the supplied panoramic background. The generated reflection
+room, student portrait, results board, trophy shelf, and every corresponding
+responsive style were removed. The completion hero now follows the pre-interview
+banner's 230-to-300px desktop height, centered coach scale, hard border/shadow,
+warm left speech card, pixel typography, focus treatment, and responsive mobile
+stacking. The summary and View Feedback Report link remain in the hero, and the
+validated long-form report remains below it.
+
+Scope protection: No event handler, interview transition, request, evaluation
+schema, score, transcript validator, storage function, retry action, report data,
+or route destination changed.
+
+Validation executed: Asset dimension/hash verification, changed-file formatting,
+repository ESLint, strict TypeScript checking, 28 focused component and style
+tests, the complete Vitest suite, production build, and the established browser
+availability check.
+
+Validation result: All 28 focused tests pass; ESLint and strict TypeScript
+checking pass; and the production build generates all 15 routes. The complete
+suite reports 195 passing tests and the same pre-existing
+`tests/interviewResume.test.ts` mock-contract failure. The browser skill exposes
+no browser backend, so no screenshot-based result is claimed.
+
+## Contribution 030 - Scoped Pre-Interview Workspace Scrolling
+
+Date: 2026-07-17
+
+Feature: CSS-only overflow refinement for pre-interview preparation states.
+
+Codex inspected: The Scenario, Resume, Review, question-generation recovery,
+and Mode Selection render states; the preparation viewport grid; hero and step
+rows; Session Summary sizing and sticky action; Mode Selection heading/content/
+footer rows; tablet and phone stacking; active simulator styles; post-interview
+styles; and focused interaction and style tests.
+
+Codex implemented: Explicit vertical-only overflow for the primary preparation
+panel and Mode Selection content row, with horizontal clipping, contained
+overscroll, smooth programmatic scrolling, stable scrollbar space, themed thin
+scrollbars, and touch pan support. The existing grid continues to anchor the
+shared header, panorama, progress steps, Session Summary sidebar, Mode Selection
+heading, and Continue footer. Existing mobile stacking remains unchanged.
+
+Scope protection: The change is contained to the pre-interview CSS module and
+its style contract test. No active-session or completed-results selector, React
+component, state transition, API request, route, storage path, score, transcript,
+or action handler changed.
+
+Validation executed: Changed-file formatting, 32 focused preparation/simulator/
+session/feedback tests, repository ESLint, strict TypeScript checking, complete
+Vitest suite, production build, and the established browser availability check.
+
+Validation result: All 32 focused tests pass; ESLint and strict TypeScript
+checking pass; and the build generates all 15 routes. The complete suite reports
+196 passing tests and the same pre-existing `tests/interviewResume.test.ts`
+mock-contract failure. Browser screenshot QA remains unavailable.
+
+## Contribution 031 - Continuous Pre-Interview Page Scrolling
+
+Date: 2026-07-17
+
+Feature: CSS-only replacement of nested setup scrolling with one browser-owned
+pre-interview page scrollbar.
+
+Codex inspected: Every preparation height and overflow constraint, desktop grid
+row sizing, the Session Summary span and sticky alignment, Mode Selection's
+workspace rows, narrow-screen overrides, camera modal boundary, active session
+module, post-interview styles, and the prior scoped scrolling tests.
+
+Codex implemented: Natural-height preparation and Mode Selection shells with a
+viewport minimum, body-level vertical scrolling, visible main overflow, auto-
+sized setup panels and Session Summary, and natural-height Mode workspace rows.
+Nested vertical overflow, overscroll containment, scrollbar gutters, themed
+container scrollbars, and touch-scroll ownership were removed from the setup
+cards. Camera modal overflow remains independent and unchanged.
+
+Scope protection: The change touches only pre-interview CSS and its style
+contract. No React component, active simulator selector, completed-report
+selector, state transition, API, route, storage operation, score, transcript,
+or action handler changed.
+
+Validation executed: Changed-file formatting, 32 focused preparation/simulator/
+session/feedback tests, repository ESLint, strict TypeScript checking, complete
+Vitest suite, production build, and the established local route check.
+
+Validation result: All 32 focused tests pass; ESLint and strict TypeScript
+checking pass; the build generates all 15 routes; and `/practice` responds with
+HTTP 200. The complete suite reports 196 passing tests and the same pre-existing
+`tests/interviewResume.test.ts` mock-contract failure. Browser screenshot QA is
+unavailable because no browser backend is exposed.
+
+## Contribution 032 - Full-Height Sticky Session Summary
+
+Date: 2026-07-17
+
+Feature: Layout-only alignment of the desktop pre-interview Session Summary.
+
+Codex inspected: The two-column preparation grid, the sidebar's two-row grid
+span, natural-height page scrolling rules, sticky positioning, flex layout,
+summary action placement, and narrow-screen stacked override.
+
+Codex implemented: Restored full grid-area height and stretch alignment on the
+desktop Session Summary while retaining sticky positioning and visible overflow.
+The panel now shares the main content column's bottom edge without regaining an
+internal scrollbar. Existing mobile rules still use auto height and static
+positioning when the layout stacks.
+
+Scope protection: Only the Session Summary layout declarations and their style
+contract changed. Content, React behavior, active simulator, completed report,
+API, routing, state, persistence, scoring, and navigation are unchanged.
+
+Validation result: All 23 focused preparation and Interview Simulator tests
+pass; repository lint and strict TypeScript checking pass; and the production
+build generates all 15 routes. The complete suite reports 196 passing tests and
+the same pre-existing `tests/interviewResume.test.ts` mock-contract failure.
+
+## Contribution 033 - Balanced Session Summary Rows
+
+Date: 2026-07-17
+
+Feature: Internal spacing refinement for the full-height pre-interview Session
+Summary.
+
+Codex inspected: The sidebar flex column, summary header, definition-list rows,
+label/value grid, bottom action block, full-height alignment, continuous page
+scrolling, and responsive column overrides.
+
+Codex implemented: The existing summary list now flexes into all space between
+the header and action block. Auto-generated rows share the available height with
+a consistent minimum, centered label/value alignment, balanced responsive
+padding, and the existing dividers. The action block is explicitly non-flexing
+and stays at the bottom.
+
+Scope protection: No content, component structure, handler, state, API, route,
+storage, scoring, navigation, active simulator, or completed report changed.
+
+Validation result: All 23 focused preparation and Interview Simulator tests
+pass; repository lint and strict TypeScript checking pass; and the production
+build generates all 15 routes. The complete suite reports 196 passing tests and
+the same pre-existing `tests/interviewResume.test.ts` mock-contract failure.
+
+## Contribution 034 - Session Summary Typography Hierarchy
+
+Date: 2026-07-17
+
+Feature: Typography-only readability improvement for the pre-interview Session
+Summary.
+
+Codex inspected: The summary eyebrow and title, definition-list labels and
+values, two-column width, equal-height row distribution, responsive stacking,
+and existing pixel type tokens.
+
+Codex implemented: A larger, heavier Session Summary heading; larger yellow
+pixel labels with increased tracking and line height; larger, bolder values with
+more readable leading; and a proportional increase in the label/value gap. Row
+distribution, alignment, dividers, action placement, content, and behavior are
+unchanged.
+
+Scope protection: Only Session Summary typography declarations and their style
+contract changed. No content, component, state, handler, API, route, storage,
+score, navigation, active simulator, or results behavior changed.
+
+Validation result: All 23 focused preparation and Interview Simulator tests
+pass; repository lint and strict TypeScript checking pass; and the production
+build generates all 15 routes. After rerunning past a transient sandbox path
+mapping failure, the complete suite reports 196 passing tests and the same
+pre-existing `tests/interviewResume.test.ts` mock-contract failure.
+
+## Contribution 035 - Interview End Confirmation
+
+Date: 2026-07-17
+
+Feature: Equal-width active-session actions and a safe confirmation boundary for
+ending an interview.
+
+Codex inspected: The active response action grid, desktop/tablet/mobile button
+sizing, existing `onEnd` handler, microphone shutdown behavior, preserved
+scenario and confirmed-response state, focus conventions, modal styling, and
+Interview Simulator interaction tests.
+
+Codex implemented: Equal-width Next and End Interview controls across responsive
+layouts and a pixel-art confirmation dialog. The dialog accurately describes
+what is and is not saved, focuses Continue Interview first, restores focus to the
+End trigger after cancellation, supports Escape, traps Tab focus between its
+actions, stacks safely on narrow screens, and invokes the original handler only
+after explicit destructive confirmation.
+
+Scope protection: The original end handler and all interview, microphone,
+camera, transcript, timer, persistence, API, score, route, retry, and results
+logic remain unchanged.
+
+Validation result: All 19 focused Interview Simulator and active-session style
+tests pass; repository lint and strict TypeScript checking pass; and the
+production build generates all 15 routes. The complete suite reports 197 passing
+tests and the same pre-existing `tests/interviewResume.test.ts` mock-contract
+failure.

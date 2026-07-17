@@ -4,7 +4,7 @@ import { PixelProgress } from "@/components/PixelProgress";
 import type { CameraStatus, FacePresence, HeadOrientation } from "@/lib/camera/types";
 import { cameraPresenceLabels } from "@/lib/camera/types";
 import type { ConfirmedResponse, InterviewQuestion } from "@/lib/interview/contracts";
-import type { RefObject } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type Ref } from "react";
 
 import styles from "./interview-session.module.css";
 
@@ -24,7 +24,7 @@ type InterviewSessionViewProps = {
   speechError: string;
   confirmedResponses: ConfirmedResponse[];
   fillerWordCount: number;
-  cameraVideoRef: RefObject<HTMLVideoElement | null>;
+  cameraVideoRef: Ref<HTMLVideoElement>;
   cameraStatus: CameraStatus;
   cameraPresence: FacePresence;
   cameraOrientation: HeadOrientation;
@@ -71,6 +71,10 @@ export function InterviewSessionView({
   onBack,
   onConfirm,
 }: InterviewSessionViewProps) {
+  const [endDialogOpen, setEndDialogOpen] = useState(false);
+  const endTriggerRef = useRef<HTMLButtonElement>(null);
+  const endDialogRef = useRef<HTMLElement>(null);
+  const cancelEndRef = useRef<HTMLButtonElement>(null);
   const labels = cameraPresenceLabels(cameraStatus, cameraPresence, cameraOrientation);
   const cameraActive = cameraStatus === "active" || cameraStatus === "starting";
   const showVideo = cameraStatus === "active" || cameraStatus === "starting";
@@ -78,6 +82,44 @@ export function InterviewSessionView({
     cameraStatus === "denied" ||
     cameraStatus === "unavailable" ||
     cameraStatus === "interrupted";
+
+  useEffect(() => {
+    if (!endDialogOpen) return;
+    queueMicrotask(() => cancelEndRef.current?.focus());
+  }, [endDialogOpen]);
+
+  const dismissEndDialog = () => {
+    setEndDialogOpen(false);
+    queueMicrotask(() => endTriggerRef.current?.focus());
+  };
+
+  const confirmEndInterview = () => {
+    setEndDialogOpen(false);
+    onEnd();
+  };
+
+  const handleEndDialogKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dismissEndDialog();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const buttons = endDialogRef.current?.querySelectorAll<HTMLButtonElement>(
+      "button:not(:disabled)",
+    );
+    if (!buttons?.length) return;
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   return (
     <section className={styles.sessionShell} aria-label="Interview simulation">
@@ -136,22 +178,35 @@ export function InterviewSessionView({
               </div>
             ) : null}
             <div className={styles.responseControls}>
-              <button
-                type="button"
-                className={styles.microphoneButton}
-                onClick={onMicrophoneToggle}
-                disabled={inputMode !== "microphone"}
-                data-listening={isListening}
-                aria-label={
-                  inputMode !== "microphone"
-                    ? "Microphone unavailable in text mode"
-                    : isListening
-                      ? "Stop microphone"
-                      : "Start microphone"
-                }
-              >
-                <PixelIcon name="microphone" />
-              </button>
+              <div className={styles.microphoneControl}>
+                <button
+                  type="button"
+                  className={styles.microphoneButton}
+                  onClick={onMicrophoneToggle}
+                  disabled={inputMode !== "microphone"}
+                  data-listening={isListening}
+                  data-mic-state={isListening ? "active" : "off"}
+                  aria-pressed={inputMode === "microphone" ? isListening : undefined}
+                  aria-label={
+                    inputMode !== "microphone"
+                      ? "Microphone unavailable in text mode"
+                      : isListening
+                        ? "Stop microphone"
+                        : "Start microphone"
+                  }
+                >
+                  <PixelIcon name="microphone" />
+                  <span aria-hidden="true">{isListening ? "Mic active" : "Mic off"}</span>
+                </button>
+                <span
+                  className={styles.microphoneStatus}
+                  data-mic-state={isListening ? "active" : "off"}
+                  aria-live="polite"
+                >
+                  <span aria-hidden="true" />
+                  {isListening ? "Microphone active" : "Microphone off"}
+                </span>
+              </div>
               <div className={styles.responseField}>
                 <label htmlFor="response-draft">
                   {inputMode === "microphone" ? "Editable transcript" : "Your response"}
@@ -175,19 +230,20 @@ export function InterviewSessionView({
               <div className={styles.responseActions}>
                 <button
                   type="button"
-                  className={styles.endButton}
-                  onClick={onEnd}
-                  aria-label="End interview without saving a completed attempt"
-                >
-                  End
-                </button>
-                <button
-                  type="button"
                   className={styles.nextButton}
                   onClick={onNext}
                   aria-label="Next: review response"
                 >
                   Next
+                </button>
+                <button
+                  ref={endTriggerRef}
+                  type="button"
+                  className={styles.endButton}
+                  onClick={() => setEndDialogOpen(true)}
+                  aria-label="End interview without saving a completed attempt"
+                >
+                  End Interview
                 </button>
               </div>
             </div>
@@ -248,10 +304,7 @@ export function InterviewSessionView({
               aria-hidden="true"
             />
           </h3>
-          <div
-            className={styles.cameraScreen}
-            data-active={showVideo ? "true" : "false"}
-          >
+          <div className={styles.cameraScreen} data-active={showVideo ? "true" : "false"}>
             <video
               ref={cameraVideoRef}
               className={styles.cameraVideo}
@@ -309,9 +362,9 @@ export function InterviewSessionView({
             </p>
           ) : null}
           <p className={styles.cameraNote}>
-            Optional on-device framing reminders only. No recording is stored. Face presence
-            and approximate head orientation are shown here and never sent to interview
-            feedback. No emotion, eye-contact, or hiring judgments.
+            Optional on-device framing reminders only. No recording is stored. Face
+            presence and approximate head orientation are shown here and never sent to
+            interview feedback. No emotion, eye-contact, or hiring judgments.
           </p>
         </section>
 
@@ -350,6 +403,51 @@ export function InterviewSessionView({
           </dl>
         </section>
       </aside>
+
+      {endDialogOpen ? (
+        <div className={styles.endDialogBackdrop}>
+          <section
+            ref={endDialogRef}
+            className={styles.endDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="end-dialog-heading"
+            aria-describedby="end-dialog-description"
+            onKeyDown={handleEndDialogKeyDown}
+          >
+            <header className={styles.endDialogHeader}>
+              <span aria-hidden="true">!</span>
+              <div>
+                <p>Interview in progress</p>
+                <h2 id="end-dialog-heading">End this interview?</h2>
+              </div>
+            </header>
+            <div className={styles.endDialogBody}>
+              <p id="end-dialog-description">
+                Your current draft will not be saved as a completed attempt. Your scenario
+                and confirmed responses will stay available.
+              </p>
+            </div>
+            <footer className={styles.endDialogActions}>
+              <button
+                ref={cancelEndRef}
+                type="button"
+                className={styles.cancelEndButton}
+                onClick={dismissEndDialog}
+              >
+                Continue Interview
+              </button>
+              <button
+                type="button"
+                className={styles.confirmEndButton}
+                onClick={confirmEndInterview}
+              >
+                End Interview
+              </button>
+            </footer>
+          </section>
+        </div>
+      ) : null}
     </section>
   );
 }
