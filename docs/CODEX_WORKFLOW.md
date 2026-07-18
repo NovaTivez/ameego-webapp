@@ -1734,3 +1734,30 @@ and the production build passes with 32 routes. The complete suite reports 234
 passing tests plus the pre-existing `tests/interviewResume.test.ts` mock-fetch
 network failure. Repository-wide lint remains blocked by the pre-existing
 `InterviewSimulator.tsx` React effect rule violation.
+
+## Contribution 042 - Landing Home and Browser-History Navigation
+
+Date: 2026-07-18
+
+Feature: Consistent Home and Back icon controls in the top-left application
+navigation.
+
+Codex inspected: The shared MainNav route mapping, pixel icon set, global HUD
+tokens, fullscreen campus header, responsive breakpoints, navigation tests, and
+the existing landing and Academy routes.
+
+Codex implemented: A reusable client-side navigation pair with a semantic Home
+link to `/`, a native Back button using browser history, matched filled Home and
+left-arrow glyphs on an 18px optical grid, identical button padding and effects,
+an 8px minimum gap, campus-specific size integration, responsive mobile sizing,
+and focused interaction and style tests.
+
+Scope protection: Existing route destinations, backend calls, local progress,
+interview state, evaluation behavior, audio controls, connectivity state, and
+Settings navigation were not changed.
+
+Validation result: All 16 focused tests, focused ESLint and Prettier checks,
+strict TypeScript checking, and the production build passed. The full suite
+retains the pre-existing résumé mock-contract failure, repository lint retains
+the pre-existing InterviewSimulator hook error, and live browser inspection was
+unavailable because no configured browser backend was exposed.

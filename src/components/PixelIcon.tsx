@@ -4,6 +4,7 @@ export type PixelIconName =
   | "building"
   | "camera"
   | "check"
+  | "home"
   | "lesson"
   | "lock"
   | "microphone"
@@ -29,10 +30,16 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
       <path d="M5 6h14v2H5zM8 3h8v3H8z" />
     </>
   ),
-  back: <path d="M9 3h5v4h7v4h-7v3h7v4h-7v3H9v-4H6v-3H3V9h3V6h3z" />,
+  back: <path d="M9 4h4v5h8v6h-8v5H9v-3H6v-3H3v-4h3V7h3z" />,
   building: <path d="M3 8h18v14H3zM6 3h12v5H6zm1 9h3v3H7zm7 0h3v3h-3zM10 17h4v5h-4z" />,
   camera: <path d="M2 7h14v12H2zM16 10l6-3v12l-6-3zM6 4h6v3H6zm1 7h4v4H7z" />,
   check: <path d="M2 12h5v5h4v4h5v-5h3v-5h3V6h-5v5h-3v4h-2v-3H7V9H2z" />,
+  home: (
+    <path
+      fillRule="evenodd"
+      d="M10 3h4v2h3v3h2v2h2v3h-2v8H5v-8H3v-3h2V8h2V5h3zm0 13h4v5h-4z"
+    />
+  ),
   lesson: (
     <path d="M3 3h8v18H3zM13 3h8v18h-8zM6 7h3v2H6zm0 5h3v2H6zm10-5h3v2h-3zm0 5h3v2h-3zM9 4h6v16H9z" />
   ),

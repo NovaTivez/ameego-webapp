@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MainNav } from "@/components/MainNav";
@@ -54,13 +54,14 @@ describe("MainNav", () => {
     );
   });
 
-  it("renders the consistent back, XP, and level HUD", () => {
+  it("renders consistent landing, history, XP, and level controls", () => {
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /return to landing page/i })).toHaveAttribute(
       "href",
       "/",
     );
+    expect(screen.getByRole("button", { name: /back to previous page/i })).toBeVisible();
     const status = screen.getByLabelText(/academy player status/i);
     expect(status).toHaveTextContent("XP0000");
     expect(status).toHaveTextContent("LV01");
@@ -98,46 +99,22 @@ describe("MainNav", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("returns from the Main Building dashboard to the Academy campus", () => {
+  it("marks the Academy section current from the Main Building dashboard", () => {
     navigation.pathname = "/academy/home";
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy campus/i })).toHaveAttribute(
-      "href",
-      "/academy",
-    );
     expect(screen.getByRole("link", { name: "Academy" })).toHaveAttribute(
       "aria-current",
       "page",
     );
   });
 
-  it("returns from the Courses page to the Academy Hub", () => {
-    navigation.pathname = "/learn";
+  it("returns through browser navigation history", () => {
+    const historyBack = vi.spyOn(window.history, "back").mockImplementation(() => {});
     render(<MainNav />);
 
-    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
-      "href",
-      "/academy",
-    );
-  });
+    fireEvent.click(screen.getByRole("button", { name: /back to previous page/i }));
 
-  it("returns from a dedicated lesson to the Interview Skills Academy", () => {
-    navigation.pathname = "/learn/academy/speaking-clearly";
-    render(<MainNav />);
-
-    expect(
-      screen.getByRole("link", { name: /back to interview skills academy/i }),
-    ).toHaveAttribute("href", "/learn");
-  });
-
-  it("returns from Settings to the Academy Hub", () => {
-    navigation.pathname = "/settings";
-    render(<MainNav />);
-
-    expect(screen.getByRole("link", { name: /back to academy hub/i })).toHaveAttribute(
-      "href",
-      "/academy",
-    );
+    expect(historyBack).toHaveBeenCalledOnce();
   });
 });

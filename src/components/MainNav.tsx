@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ExperienceControls } from "@/components/ExperienceControls";
 import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
+import { TopLeftNavigation } from "@/components/TopLeftNavigation";
 
 const navItems = [
   { href: "/", label: "Academy" },
@@ -15,34 +16,8 @@ const navItems = [
   { href: "/settings", label: "Settings" },
 ];
 
-function getBackDestination(pathname: string) {
-  if (pathname === "/academy/home") {
-    return { href: "/academy", label: "Back to Academy campus" };
-  }
-  if (pathname.startsWith("/learn/academy/")) {
-    return { href: "/learn", label: "Back to Interview Skills Academy" };
-  }
-  if (pathname.startsWith("/learn/star-method/exercise")) {
-    return { href: "/learn/star-method", label: "Back to STAR Method lesson" };
-  }
-  if (pathname.startsWith("/learn/star-method")) {
-    return { href: "/learn", label: "Back to Interview Foundations" };
-  }
-  if (pathname === "/learn") {
-    return { href: "/academy", label: "Back to Academy Hub" };
-  }
-  if (pathname === "/settings") {
-    return { href: "/academy", label: "Back to Academy Hub" };
-  }
-  if (pathname !== "/") {
-    return { href: "/", label: "Back to Academy" };
-  }
-  return { href: "/", label: "Academy home" };
-}
-
 export function MainNav() {
   const pathname = usePathname();
-  const backDestination = getBackDestination(pathname);
   const usesFullscreenWorld = pathname === "/" || pathname === "/academy";
   const usesStandaloneExperienceControls = pathname === "/";
 
@@ -50,13 +25,7 @@ export function MainNav() {
     <>
       <header className="site-header">
         <div className="hud-identity">
-          <Link
-            className="hud-back-link"
-            href={backDestination.href}
-            aria-label={backDestination.label}
-          >
-            <PixelIcon name="back" size="small" />
-          </Link>
+          <TopLeftNavigation />
           <Link className="brand" href="/" aria-label="Ameego home">
             <span className="brand-mark" aria-hidden="true">
               <span />

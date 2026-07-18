@@ -1734,6 +1734,44 @@ Status: Implemented and validated on 2026-07-18.
 
 ---
 
+# Milestone Update — Top-Left Navigation Controls
+
+Status: Implemented and validated on 2026-07-18.
+
+## Completed
+
+- Replaced the shared route-mapped back link with a recognizable Home icon that
+  always links directly to the Landing Page and a separate left-arrow Back
+  button that follows the learner's real browser navigation history.
+- Reused one accessible client component in the standard application HUD and
+  the fullscreen Academy campus HUD.
+- Added matching hard borders, navy fills, pixel shadows, yellow hover/focus
+  states, identical padding, an 8px control gap at every breakpoint, and
+  responsive square control sizing.
+- Balanced both filled glyphs on the same 18px optical footprint so the stepped
+  Home and left-arrow silhouettes remain crisp and equally weighted.
+- Added descriptive accessible names and native link/button semantics without
+  changing backend, persistence, course, interview, or evaluation behavior.
+
+## Validation Result
+
+- All 16 focused navigation, Academy Hub, and pixel-system tests passed.
+- Focused ESLint and Prettier checks passed.
+- TypeScript strict checking passed.
+- The production build passed and generated all 32 pages.
+- The complete suite passed 230 of 231 tests; the existing résumé extraction
+  mock-contract test remains the only failure.
+- Repository-wide ESLint remains blocked by the existing InterviewSimulator
+  state-in-effect error and three related hook warnings.
+
+## Known Limitation
+
+- Live screenshot and browser-history inspection could not run because the
+  configured in-app browser backend was unavailable; component interaction,
+  semantic, responsive style-contract, and production compiler checks passed.
+
+---
+
 # Milestone Update - Full-Page Progress Library Dashboard
 
 Status: Implemented and validated on 2026-07-17.

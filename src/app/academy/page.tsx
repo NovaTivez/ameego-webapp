@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ExperienceControls } from "@/components/ExperienceControls";
 import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
+import { TopLeftNavigation } from "@/components/TopLeftNavigation";
 
 import { AcademyCampusMap } from "./AcademyCampusMap";
 import styles from "./academy.module.css";
@@ -19,9 +20,7 @@ export default function AcademyHubPage() {
       <section className={styles.frame} aria-labelledby="academy-hub-title">
         <header className={styles.hud}>
           <div className={styles.identity}>
-            <Link className={styles.backLink} href="/" aria-label="Back to title screen">
-              <PixelIcon name="back" size="small" />
-            </Link>
+            <TopLeftNavigation className={styles.pageNavigation} />
             <h1 id="academy-hub-title">Ameego Academy</h1>
           </div>
           <div className={styles.headerControls} aria-label="Academy campus controls">

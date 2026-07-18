@@ -224,20 +224,36 @@ body {
   gap: var(--game-space-2);
 }
 
-.hud-back-link {
+.top-left-navigation {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--game-space-2);
+}
+
+.hud-navigation-button {
   display: grid;
   width: 36px;
   height: 36px;
   flex: none;
   place-items: center;
+  padding: 7px;
   border: 2px solid var(--game-border);
   background: var(--game-panel-800);
   color: var(--game-text-muted);
   box-shadow: var(--game-inset);
+  cursor: pointer;
 }
 
-.hud-back-link:hover {
+.hud-navigation-button .pixel-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.hud-navigation-button:hover,
+.hud-navigation-button:focus-visible {
   color: var(--game-yellow);
+  background: var(--game-panel-850);
   transform: translate(-1px, -1px);
   box-shadow:
     var(--game-inset),
@@ -998,7 +1014,7 @@ select {
   }
 }
 
-.hud-back-link,
+.hud-navigation-button,
 .nav-link,
 .pixel-button,
 button,

@@ -85,13 +85,14 @@
   white-space: nowrap;
 }
 
-.backLink {
-  display: grid;
+.pageNavigation {
+  gap: 8px;
+}
+
+.pageNavigation :global(.hud-navigation-button) {
   width: 42px;
   height: 42px;
-  flex: none;
-  place-items: center;
-  border: 2px solid #020713;
+  border-color: #020713;
   color: #90a5bd;
   background: #172842;
   box-shadow:
@@ -99,13 +100,13 @@
     2px 2px 0 #020713;
 }
 
-.backLink:hover,
-.backLink:focus-visible {
+.pageNavigation :global(.hud-navigation-button:hover),
+.pageNavigation :global(.hud-navigation-button:focus-visible) {
   color: #f4c84f;
   background: #213654;
 }
 
-.backLink:focus-visible {
+.pageNavigation :global(.hud-navigation-button:focus-visible) {
   outline: 3px solid #f4c84f;
   outline-offset: 2px;
 }
@@ -430,8 +431,12 @@
     gap: 4px;
   }
 
-  .backLink {
-    width: 36px;
+  .pageNavigation {
+    gap: 8px;
+  }
+
+  .pageNavigation :global(.hud-navigation-button) {
+    width: 38px;
     height: 38px;
   }
 

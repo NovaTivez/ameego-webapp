@@ -1350,3 +1350,36 @@ not trigger a device prompt; learners request access only when they select an
 appropriate practice feature. Exported records can contain saved transcripts,
 feedback, and confirmed resume summaries, so the UI explains that before the
 download action.
+
+---
+
+## Decision 038 - Separate Landing Navigation from Browser-History Navigation
+
+Date: 2026-07-18
+
+Status: Accepted
+
+Context: The shared header used one left-arrow link whose fixed destination was
+calculated from the current route. It visually suggested Back but did not follow
+the learner's actual navigation history, and there was no dedicated recognizable
+Home control for returning to the Landing Page.
+
+Decision: Render two adjacent icon controls from one reusable component. Use a
+normal Next.js link with a pixel home glyph for the stable `/` destination, and
+use a native button that calls browser history Back for the left-arrow action.
+Apply the same semantic and visual contract to the shared HUD and fullscreen
+campus HUD.
+
+Alternatives considered: Keeping route-specific parent mappings, using two
+fixed links, retaining a text Home label, or duplicating separate navigation
+handlers and markup in each header.
+
+Reason: Home and Back represent different user expectations. A fixed link is
+predictable and shareable for the Landing Page, while browser history correctly
+returns users to the page they actually visited previously, including paths
+outside the hard-coded course hierarchy.
+
+Consequences: The top-left controls are recognizable, keyboard accessible, and
+consistent across header variants. Back remains dependent on the browser's
+available session history, as expected for a standard history control; all
+application routes and backend boundaries remain unchanged.
