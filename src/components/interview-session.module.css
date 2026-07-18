@@ -214,38 +214,38 @@
   z-index: 8;
   top: clamp(12px, 2.4vh, 26px);
   left: clamp(12px, 3vw, 48px);
-  width: min(47%, 600px);
-  padding: 11px 14px 13px;
+  width: min(34%, 420px);
+  padding: 9px 11px 11px;
   color: #151c25;
   background: #f3ead3;
-  border: 4px solid #090c12;
+  border: 3px solid #090c12;
   box-shadow:
-    6px 6px 0 rgba(4, 7, 11, 0.75),
+    4px 4px 0 rgba(4, 7, 11, 0.75),
     inset 0 0 0 2px #b8a985;
 }
 
 .questionBubble::after {
   position: absolute;
   right: 19%;
-  bottom: -18px;
-  width: 20px;
-  height: 20px;
+  bottom: -14px;
+  width: 16px;
+  height: 16px;
   content: "";
   background: #f3ead3;
-  border-right: 4px solid #090c12;
-  border-bottom: 4px solid #090c12;
+  border-right: 3px solid #090c12;
+  border-bottom: 3px solid #090c12;
   transform: skewY(35deg);
 }
 
 .questionBubble span {
   display: inline-block;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
   padding: 3px 6px;
   color: #171306;
   background: var(--yellow);
   border: 2px solid #171306;
   font-family: var(--font-pixel), monospace;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   letter-spacing: 0.07em;
   line-height: 1.1;
   text-transform: uppercase;
@@ -255,19 +255,19 @@
   margin: 0;
   color: #18202a;
   font-family: var(--font-body), sans-serif;
-  font-size: clamp(0.94rem, 1.3vw, 1.22rem);
+  font-size: clamp(0.88rem, 1.05vw, 1.05rem);
   font-weight: 760;
   letter-spacing: 0;
-  line-height: 1.38;
+  line-height: 1.3;
 }
 
 .interviewer {
   position: absolute;
   z-index: 4;
   bottom: clamp(-36px, -3.5vh, -18px);
-  left: 54%;
+  left: 50%;
   display: block;
-  width: clamp(330px, 51%, 680px);
+  width: clamp(300px, 42%, 560px);
   height: auto;
   filter: drop-shadow(8px 8px 0 rgba(3, 7, 12, 0.45));
   transform: translateX(-50%);
@@ -1029,11 +1029,11 @@
   }
 
   .questionBubble {
-    width: min(50%, 540px);
+    width: min(35%, 400px);
   }
 
   .interviewer {
-    width: clamp(300px, 47%, 570px);
+    width: clamp(280px, 40%, 500px);
   }
 
   .responsePanel,
@@ -1074,12 +1074,12 @@
   }
 
   .questionBubble {
-    width: min(52%, 520px);
+    width: min(36%, 340px);
   }
 
   .interviewer {
-    left: 56%;
-    width: clamp(310px, 55%, 560px);
+    left: 50%;
+    width: clamp(290px, 46%, 500px);
   }
 
   .responseControls {
@@ -1115,11 +1115,11 @@
   }
 
   .questionBubble {
-    width: min(57%, 430px);
+    width: min(40%, 320px);
   }
 
   .interviewer {
-    width: clamp(300px, 54%, 500px);
+    width: clamp(280px, 48%, 460px);
   }
 
   .responseControls {
@@ -1147,9 +1147,8 @@
   }
 
   .questionBubble {
-    right: 10px;
     left: 10px;
-    width: auto;
+    width: min(52%, 280px);
   }
 
   .questionBubble::after {
@@ -1157,8 +1156,8 @@
   }
 
   .interviewer {
-    left: 51%;
-    width: clamp(290px, 78%, 440px);
+    left: 50%;
+    width: clamp(270px, 68%, 400px);
   }
 
   .responseControls {
