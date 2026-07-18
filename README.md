@@ -181,14 +181,6 @@ Allow 8-12 minutes for the full learning loop. Text response mode is the most re
 | 11. Settings                   | Open `/settings`, edit the learner name/focus, choose or upload an avatar, change audio/accessibility options, export data, and refresh. | Saved profile and preferences persist. Clear Progress and Reset Data remain separately labeled and require confirmation where destructive. The Back button returns to the campus map.                                                                                        |
 | 12. Permissions and resilience | Test microphone/camera denial, mute/unmute, a refresh, and temporarily remove the API key.                                               | Text input remains available, camera is optional and processed on-device, corrupt or unavailable data produces a clear recovery state, and AI failures never create a fabricated score.                                                                                      |
 
-### Fast three-minute demo path
-
-For a short judging video, use:
-
-`/academy -> /learn/star-method -> /learn/star-method/exercise -> /practice -> feedback -> /progress`
-
-The timed narration and preflight checklist are in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
-
 ## Why Ameego
 
 Many interview tools stop at question generation or a score. That leaves learners with the same underlying problem: they do not know which part of an answer failed, what evidence supports that conclusion, or what to study next.
