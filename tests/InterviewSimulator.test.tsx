@@ -229,7 +229,7 @@ describe("InterviewSimulator", () => {
     expect(await screen.findByText("Attempt saved")).toBeVisible();
     expect(
       screen.getByRole("heading", {
-        name: /turn your completed interview into a learning plan/i,
+        name: /unlock your learning report/i,
       }),
     ).toBeVisible();
     expect(screen.getByRole("link", { name: /view feedback report/i })).toHaveAttribute(
@@ -239,6 +239,25 @@ describe("InterviewSimulator", () => {
     expect(
       screen.getByRole("button", { name: /start another interview/i }),
     ).toBeVisible();
+    expect(screen.getByRole("list", { name: /feedback progress/i })).toBeVisible();
+    expect(screen.getByRole("link", { name: /progress library/i })).toHaveAttribute(
+      "href",
+      "/progress",
+    );
+    expect(screen.getByRole("link", { name: /back to academy/i })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
+    const transcriptPanel = screen
+      .getByRole("heading", { name: /confirmed transcript/i })
+      .closest("section");
+    expect(transcriptPanel).not.toBeNull();
+    expect(within(transcriptPanel!).getAllByText("Confirmed")).toHaveLength(3);
+    expect(within(transcriptPanel!).getAllByText("Interview Question")).toHaveLength(3);
+    expect(within(transcriptPanel!).getAllByText("Your Answer")).toHaveLength(3);
+    expect(within(transcriptPanel!).getAllByText("Saved")).toHaveLength(3);
+    expect(transcriptPanel!.querySelectorAll("time")).toHaveLength(3);
+    expect(within(transcriptPanel!).queryByText("3 responses")).not.toBeInTheDocument();
     const stored = window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
     expect(stored).toContain("Confirmed answer number 3");
     expect(stored).not.toMatch(/confidence|nervousness|eye.contact/i);

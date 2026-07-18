@@ -67,21 +67,79 @@ describe("SettingsPanel", () => {
     });
   });
 
+  it("persists a selected pixel avatar with the existing learner profile", async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    await user.click(screen.getByRole("button", { name: "Choose Pixel Avatar" }));
+    await user.click(screen.getByRole("button", { name: "Use Explorer pixel avatar" }));
+    await user.click(screen.getByRole("button", { name: /save profile/i }));
+
+    expect(readLearnerProfile(window.localStorage).avatar).toEqual({
+      kind: "preset",
+      preset: "explorer",
+    });
+  });
+
+  it("accepts a local image as a profile picture draft and saves it", async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    const upload = screen.getByLabelText("Change Profile Picture");
+    await user.upload(
+      upload,
+      new File([new Uint8Array([137, 80, 78, 71])], "avatar.png", {
+        type: "image/png",
+      }),
+    );
+    expect(await screen.findByRole("img", { name: /profile avatar/i })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /save profile/i }));
+
+    expect(readLearnerProfile(window.localStorage).avatar).toMatchObject({
+      kind: "upload",
+      dataUrl: expect.stringMatching(/^data:image\/png;base64,/),
+    });
+  });
+
   it("exposes complete settings sections without work-in-progress placeholders", async () => {
     render(<SettingsPanel />);
     await screen.findByRole("heading", { name: "Profile" });
 
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "PrivacyOpen" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute(
       "href",
       "#privacy-settings",
     );
-    expect(screen.getByRole("heading", { name: "Resume & Data" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Academy Progress" })).toHaveAttribute(
+      "href",
+      "#progress-settings",
+    );
+    expect(screen.getByRole("link", { name: "Accessibility" })).toHaveAttribute(
+      "href",
+      "#accessibility-settings",
+    );
+    expect(screen.getByRole("heading", { name: "Resume & Learning Data" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Permissions" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Export Data" })).toBeEnabled();
     expect(
       screen.getByRole("button", { name: "Check Device Permissions" }),
     ).toBeEnabled();
+  });
+
+  it("marks the selected sidebar category as active", async () => {
+    const user = userEvent.setup();
+    render(<SettingsPanel />);
+    await screen.findByRole("heading", { name: "Profile" });
+
+    const audioLink = screen.getByRole("link", { name: "Audio" });
+    await user.click(audioLink);
+
+    expect(audioLink).toHaveAttribute("aria-current", "location");
+    expect(screen.getByRole("link", { name: "Profile" })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 
   it("creates a portable local-data export without storing original resume files", () => {

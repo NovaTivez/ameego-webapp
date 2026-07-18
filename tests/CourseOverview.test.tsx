@@ -50,6 +50,10 @@ describe("CourseOverview", () => {
     expect(screen.getAllByText("Locked").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Research Rookie").length).toBeGreaterThan(0);
     expect(screen.getByText("Interview Master")).toBeVisible();
+    expect(screen.getByText("Current milestone")).toBeVisible();
+    expect(screen.getByText("Duration")).toBeVisible();
+    expect(screen.getByText("Difficulty")).toBeVisible();
+    expect(screen.getByText("Reward")).toBeVisible();
   });
 
   it("reflects saved completion and unlocks the next dedicated lesson", async () => {

@@ -2,8 +2,30 @@
   display: grid;
   gap: clamp(18px, 2.5vw, 30px);
   width: 100%;
+  min-width: 0;
   color: var(--game-text);
   text-align: left;
+}
+
+.report *,
+.report *::before,
+.report *::after {
+  min-width: 0;
+}
+
+.report h2,
+.report h3,
+.report h4,
+.report p,
+.report li,
+.report blockquote,
+.report figcaption,
+.report span,
+.report strong,
+.report a,
+.report button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .report :global(.pixel-button:focus-visible),
@@ -19,6 +41,10 @@
   gap: 24px;
   padding-bottom: 20px;
   border-bottom: 3px solid var(--game-line);
+}
+
+.reportHeader > div {
+  min-width: 0;
 }
 
 .reportHeader h2 {
@@ -50,6 +76,7 @@
   font-weight: 900;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: normal;
 }
 
 .disclaimer {
@@ -62,6 +89,7 @@
   background: #211d18;
   box-shadow: inset 0 0 0 1px #8b7233;
   font-size: 0.82rem;
+  overflow: hidden;
 }
 
 .disclaimer :global(.pixel-icon) {
@@ -86,6 +114,10 @@
   padding-bottom: 14px;
   margin-bottom: 18px;
   border-bottom: 2px solid var(--game-line);
+}
+
+.sectionHeading > div {
+  min-width: 0;
 }
 
 .sectionHeading :global(.pixel-icon) {
@@ -200,6 +232,10 @@
   padding-bottom: 12px;
   margin-bottom: 12px;
   border-bottom: 1px solid var(--game-line);
+}
+
+.criterionHeader > div {
+  min-width: 0;
 }
 
 .criterionHeader h4 {
@@ -375,6 +411,10 @@
   counter-increment: action-tip;
 }
 
+.actionList li > * {
+  min-width: 0;
+}
+
 .actionList li::before {
   display: grid;
   width: 28px;
@@ -479,9 +519,28 @@
   }
 }
 
+@media (max-width: 680px) {
+  .criterionHeader {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .actionList li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .actionList li span {
+    grid-column: 2;
+  }
+}
+
 @media (max-width: 560px) {
   .reportHeader {
     flex-direction: column;
+  }
+
+  .reportHeader :global(.pixel-badge) {
+    align-self: flex-start;
   }
 
   .sectionCard {

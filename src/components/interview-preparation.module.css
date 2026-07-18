@@ -1,7 +1,7 @@
 .preparationScreen {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
-  grid-template-rows: clamp(220px, 30svh, 290px) 58px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 310px);
+  grid-template-rows: clamp(180px, 24svh, 230px) 54px auto;
   grid-template-areas:
     "hero hero"
     "steps summary"
@@ -10,8 +10,8 @@
   max-width: none !important;
   height: auto;
   min-height: calc(100svh - 68px);
-  gap: 10px !important;
-  padding: 10px !important;
+  gap: 12px !important;
+  padding: 12px !important;
   overflow: visible;
   background: #07111f;
 }
@@ -36,11 +36,6 @@
   overflow: visible;
 }
 
-:global(body):has(.preparationScreen) :global(.site-header) {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-:global(body):has(.preparationScreen) :global(.site-header nav),
 :global(body):has(.preparationScreen) :global(.site-footer),
 :global(body):has(.preparationScreen) :global(.game-world-backdrop),
 .preparationScreen :global(.interview-simulator-header),
@@ -82,11 +77,8 @@
 }
 
 .preparationTitle {
-  position: sticky;
-  z-index: 8;
-  top: 0;
-  min-height: 64px;
-  padding: 10px 14px;
+  min-height: 58px;
+  padding: 9px 12px;
   border-bottom: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: inset 0 -1px 0 var(--game-line-highlight);
@@ -118,7 +110,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
   min-width: 0;
-  height: 58px;
+  height: 54px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -127,16 +119,25 @@
 .setupJourney li {
   position: relative;
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
   gap: 1px 7px;
   min-width: 0;
-  padding: 7px 8px;
+  padding: 6px 8px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-text-muted);
   background: #081221;
   box-shadow: inset 0 0 0 1px var(--game-line);
+  transition:
+    transform 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    background-color 120ms steps(2, end);
+}
+
+.setupJourney li:hover {
+  border-color: var(--game-line-highlight);
+  transform: translateY(-1px);
 }
 
 .setupJourney li[data-state="completed"] {
@@ -158,8 +159,8 @@
 .setupJourney li > span {
   grid-row: 1 / span 2;
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   place-items: center;
   border: 2px solid var(--game-border);
   border-radius: 2px;
@@ -194,11 +195,12 @@
 
 .setupForm {
   display: grid;
-  gap: 14px;
-  padding: 14px;
+  gap: 10px;
+  padding: 10px;
 }
 
 .formCard {
+  position: relative;
   min-width: 0;
   overflow: hidden;
   border: 3px solid var(--game-border);
@@ -209,12 +211,24 @@
     3px 3px 0 rgba(1, 4, 10, 0.5);
 }
 
+.formCard::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--game-yellow);
+  content: "";
+  opacity: 0.72;
+}
+
 .formSectionTitle {
   display: flex;
-  min-height: 54px;
+  min-height: 48px;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 8px;
+  padding: 7px 9px;
   border-bottom: 2px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: inset 0 -1px 0 var(--game-line-highlight);
@@ -222,8 +236,8 @@
 
 .formSectionTitle > span {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex: none;
   place-items: center;
   border: 2px solid var(--game-border);
@@ -256,15 +270,19 @@
 .formCardBody {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 12px;
+  gap: 9px;
+  padding: 10px;
+}
+
+.formCard:nth-of-type(2) .formRow:last-child {
+  grid-column: 1 / -1;
 }
 
 .formRow {
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 6px;
+  gap: 5px;
 }
 
 .formRow label,
@@ -296,8 +314,8 @@
 .resumeSummaryField textarea {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
-  padding: 9px 10px;
+  min-height: 40px;
+  padding: 8px 9px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-text);
@@ -314,7 +332,7 @@
 .formRow textarea,
 .manualResume textarea,
 .resumeSummaryField textarea {
-  min-height: 74px;
+  min-height: 68px;
   resize: vertical;
 }
 
@@ -375,14 +393,14 @@
 .selectorGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 12px;
+  gap: 9px;
+  padding: 10px;
 }
 
 .selectorCard {
   min-width: 0;
   margin: 0;
-  padding: 10px;
+  padding: 8px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   background: #081221;
@@ -403,10 +421,10 @@
   position: relative;
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr);
-  min-height: 44px;
+  min-height: 40px;
   align-items: center;
   gap: 6px;
-  padding: 7px;
+  padding: 6px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -418,6 +436,13 @@
 .selectorOptions label:hover {
   color: var(--game-text);
   background: var(--game-panel-800);
+}
+
+.selectorOptions label:has(input:disabled) {
+  color: #66758a;
+  background: #101722;
+  cursor: not-allowed;
+  filter: grayscale(0.55);
 }
 
 .selectorOptions label[data-selected="true"] {
@@ -467,9 +492,9 @@
 
 .resumeWorkspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(230px, 0.8fr);
-  gap: 12px;
-  padding: 14px 14px 0;
+  grid-template-columns: minmax(0, 1.3fr) minmax(210px, 0.7fr);
+  gap: 10px;
+  padding: 10px 10px 0;
 }
 
 .uploadColumn,
@@ -477,7 +502,7 @@
 .detailsPanel,
 .resumeSummaryPanel {
   min-width: 0;
-  padding: 12px;
+  padding: 10px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   background: #0b1627;
@@ -489,11 +514,11 @@
 .uploadZone {
   position: relative;
   display: grid;
-  min-height: 220px;
+  min-height: 158px;
   place-items: center;
   align-content: center;
-  gap: 8px;
-  padding: 20px;
+  gap: 6px;
+  padding: 14px;
   border: 3px dashed #778ba5;
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -550,8 +575,8 @@
   grid-template-columns: 24px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
-  padding: 9px;
+  margin-top: 8px;
+  padding: 8px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   background: var(--game-panel-900);
@@ -605,12 +630,12 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
+  gap: 8px;
 }
 
 .sidebarPrompt {
-  margin-top: auto;
-  padding: 9px;
+  margin-top: 2px;
+  padding: 8px;
   border: 2px solid var(--game-line-highlight);
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -623,7 +648,7 @@
 .detailsPanel h2,
 .resumeSummaryPanel h2 {
   margin: 0;
-  padding: 8px 9px;
+  padding: 7px 8px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-yellow);
@@ -638,8 +663,8 @@
 .inlineError {
   display: grid;
   gap: 5px;
-  margin: 10px 14px 0;
-  padding: 10px;
+  margin: 8px 10px 0;
+  padding: 9px;
   border: 3px solid var(--game-red);
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -665,8 +690,8 @@
 .manualResume {
   display: grid;
   gap: 7px;
-  margin: 12px 14px 14px;
-  padding: 12px;
+  margin: 10px;
+  padding: 10px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   background: #0b1627;
@@ -676,14 +701,14 @@
 }
 
 .manualResume textarea {
-  min-height: 100px;
+  min-height: 76px;
 }
 
 .reviewColumns {
   display: grid;
-  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
-  gap: 12px;
-  padding: 14px 14px 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 10px 0;
 }
 
 .reviewBadges {
@@ -708,16 +733,16 @@
 .detailsPanel dl {
   display: grid;
   gap: 0;
-  margin: 10px 0 0;
+  margin: 8px 0 0;
 }
 
 .detailsPanel dl > div {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  min-height: 40px;
+  grid-template-columns: 88px minmax(0, 1fr);
+  min-height: 36px;
   align-items: start;
   gap: 8px;
-  padding: 8px 6px;
+  padding: 7px 5px;
   border-bottom: 2px solid var(--game-line);
 }
 
@@ -756,7 +781,7 @@
   grid-template-columns: 20px minmax(0, 1fr);
   min-width: 0;
   gap: 5px;
-  padding: 8px;
+  padding: 7px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   background: var(--game-panel-900);
@@ -769,17 +794,17 @@
 
 .resumeSummaryField textarea {
   grid-column: 1 / -1;
-  min-height: 62px;
+  min-height: 58px;
   font-size: 0.69rem;
 }
 
 .noResume {
   display: grid;
-  min-height: 210px;
+  min-height: 112px;
   place-items: center;
   align-content: center;
-  gap: 10px;
-  padding: 18px;
+  gap: 7px;
+  padding: 12px;
   border: 3px dashed var(--game-line-highlight);
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -798,15 +823,15 @@
   align-items: center;
   justify-content: flex-start;
   gap: 9px;
-  margin: 12px 14px 14px;
-  padding-top: 11px;
+  margin: 10px;
+  padding-top: 9px;
   border-top: 2px solid var(--game-border);
 }
 
 .preparationSummary {
   position: sticky;
   grid-area: summary;
-  top: 0;
+  top: 78px;
   display: flex;
   height: 100%;
   min-height: 0;
@@ -822,7 +847,7 @@
 }
 
 .summaryHeader {
-  padding: 10px 12px;
+  padding: 9px 10px;
   border-bottom: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: inset 0 -1px 0 var(--game-line-highlight);
@@ -854,10 +879,10 @@
   display: grid;
   min-height: 0;
   flex: 1;
-  grid-auto-rows: minmax(48px, 1fr);
+  grid-auto-rows: minmax(44px, 1fr);
   align-content: stretch;
   margin: 0;
-  padding: 10px 12px 6px;
+  padding: 7px 10px 4px;
 }
 
 .summaryList > div {
@@ -865,8 +890,8 @@
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   min-height: 0;
   align-items: center;
-  gap: 10px;
-  padding: clamp(8px, 1.2vh, 14px) 2px;
+  gap: 8px;
+  padding: clamp(7px, 1vh, 11px) 2px;
   border-bottom: 1px solid var(--game-line);
 }
 
@@ -893,13 +918,12 @@
 }
 
 .summaryAction {
-  position: sticky;
-  bottom: 0;
+  position: static;
   display: grid;
   flex: none;
-  gap: 8px;
+  gap: 7px;
   margin-top: 0;
-  padding: 12px;
+  padding: 10px;
   border-top: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: 0 -2px 0 rgba(1, 4, 10, 0.45);
@@ -907,7 +931,7 @@
 
 .summaryAction :global(.pixel-button) {
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   justify-content: center;
   font-size: 0.64rem;
   box-shadow:
@@ -934,7 +958,7 @@
 .modeSelectionScreen {
   position: relative;
   display: grid !important;
-  grid-template-rows: clamp(230px, 32svh, 300px) 62px auto;
+  grid-template-rows: clamp(180px, 24svh, 225px) 54px auto;
   grid-template-areas:
     "mode-hero"
     "mode-steps"
@@ -943,8 +967,8 @@
   max-width: none !important;
   height: auto;
   min-height: calc(100svh - 68px);
-  gap: 9px !important;
-  padding: 9px !important;
+  gap: 10px !important;
+  padding: 10px !important;
   overflow: visible;
   background: #07111f;
 }
@@ -969,11 +993,6 @@
   overflow: visible;
 }
 
-:global(body):has(.modeSelectionScreen) :global(.site-header) {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-:global(body):has(.modeSelectionScreen) :global(.site-header nav),
 :global(body):has(.modeSelectionScreen) :global(.site-footer),
 :global(body):has(.modeSelectionScreen) :global(.game-world-backdrop),
 .modeSelectionScreen :global(.interview-simulator-header),
@@ -1018,7 +1037,7 @@
 .modeDialogue {
   position: absolute;
   z-index: 5;
-  top: 18px;
+  top: 14px;
   left: clamp(18px, 12vw, 170px);
   display: grid;
   width: min(285px, 28vw);
@@ -1073,8 +1092,8 @@
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: -66px;
-  width: clamp(255px, 25.5vw, 345px);
+  bottom: -58px;
+  width: clamp(235px, 23vw, 310px);
   height: auto;
   object-fit: contain;
   transform: translateX(-50%);
@@ -1088,7 +1107,7 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 5px;
   min-width: 0;
-  height: 62px;
+  height: 54px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1096,11 +1115,11 @@
 
 .modeJourney li {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 26px minmax(0, 1fr);
   align-items: center;
   gap: 1px 7px;
   min-width: 0;
-  padding: 7px 8px;
+  padding: 5px 7px;
   border: 2px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-text-muted);
@@ -1127,8 +1146,8 @@
 .modeJourney li > span {
   grid-row: 1 / span 2;
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   place-items: center;
   border: 2px solid var(--game-border);
   border-radius: 2px;
@@ -1181,11 +1200,11 @@
 
 .modeHeading {
   display: flex;
-  min-height: 68px;
+  min-height: 60px;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 9px 13px;
+  gap: 12px;
+  padding: 8px 11px;
   border-bottom: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: inset 0 -1px 0 var(--game-line-highlight);
@@ -1250,8 +1269,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 290px);
   min-height: 0;
-  gap: 10px;
-  padding: 10px;
+  gap: 9px;
+  padding: 9px;
   overflow: visible;
 }
 
@@ -1259,7 +1278,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-width: 0;
-  gap: 10px;
+  gap: 9px;
 }
 
 .responseModeCard {
@@ -1267,10 +1286,10 @@
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr);
   min-width: 0;
-  min-height: 142px;
+  min-height: 118px;
   align-items: center;
-  gap: 11px;
-  padding: 13px;
+  gap: 9px;
+  padding: 10px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   color: var(--game-text);
@@ -1327,7 +1346,7 @@
 .modeCardCopy {
   display: grid;
   min-width: 0;
-  gap: 7px;
+  gap: 5px;
 }
 
 .modeCardCopy strong,
@@ -1372,9 +1391,9 @@
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-  padding: 12px;
+  padding: 10px;
   border: 3px solid var(--game-border);
   border-radius: 2px;
   background: #0b1627;
@@ -1458,15 +1477,13 @@
 }
 
 .modeActions {
-  position: sticky;
-  z-index: 6;
-  bottom: 0;
+  position: static;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 60px;
+  min-height: 56px;
   align-items: center;
-  gap: 12px;
-  padding: 8px 11px;
+  gap: 10px;
+  padding: 7px 10px;
   border-top: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: 0 -2px 0 rgba(1, 4, 10, 0.45);
@@ -1799,7 +1816,7 @@
   }
 
   .modeSelectionScreen {
-    grid-template-rows: 230px 58px minmax(0, 1fr);
+    grid-template-rows: 200px 54px minmax(0, 1fr);
     gap: 7px !important;
     padding: 7px !important;
   }
@@ -1815,7 +1832,7 @@
   }
 
   .modeJourney {
-    height: 58px;
+    height: 54px;
   }
 
   .modeJourney li {
@@ -1863,7 +1880,7 @@
 
   .preparationScreen {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 230px auto auto auto;
+    grid-template-rows: 200px auto auto auto;
     grid-template-areas:
       "hero"
       "steps"
@@ -1895,7 +1912,7 @@
   }
 
   .modeSelectionScreen {
-    grid-template-rows: 220px auto auto;
+    grid-template-rows: 190px auto auto;
     height: auto;
     min-height: calc(100svh - 68px);
     overflow: visible;
@@ -1936,7 +1953,7 @@
 
 @media (max-width: 620px) {
   .preparationScreen {
-    grid-template-rows: 200px auto auto auto;
+    grid-template-rows: 170px auto auto auto;
     padding: 5px !important;
   }
 
@@ -2004,7 +2021,7 @@
   }
 
   .modeSelectionScreen {
-    grid-template-rows: 205px auto auto;
+    grid-template-rows: 175px auto auto;
     padding: 5px !important;
   }
 
@@ -2029,9 +2046,9 @@
   }
 
   .modeJourney {
-    grid-template-columns: repeat(5, minmax(44px, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     height: 52px;
-    overflow-x: auto;
+    overflow: visible;
   }
 
   .modeJourney li {

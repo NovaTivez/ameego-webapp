@@ -217,6 +217,54 @@
   user-select: none;
 }
 
+.academyGuide {
+  position: absolute;
+  z-index: 3;
+  top: 43.1%;
+  left: 52%;
+  width: 16.4%;
+  aspect-ratio: 3 / 2;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.guideShadow {
+  position: absolute;
+  z-index: 0;
+  right: 22%;
+  bottom: 5%;
+  left: 7%;
+  height: 8%;
+  background: rgba(0, 0, 0, 0.45);
+  filter: blur(3px);
+  opacity: 0.72;
+}
+
+.guideImage {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: brightness(0.96) saturate(0.94) contrast(1.04)
+    drop-shadow(0 4px 2px rgba(0, 0, 0, 0.45));
+  image-rendering: pixelated;
+  animation: academyGuideFloat 4.8s steps(8, end) infinite;
+}
+
+@keyframes academyGuideFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6%);
+  }
+}
+
 .location {
   position: absolute;
   z-index: 4;
@@ -239,33 +287,33 @@
 
 .mainBuilding {
   z-index: 8;
-  top: 75.5%;
-  left: 50%;
+  top: 73.3%;
+  left: 48.7%;
   width: 24%;
 }
 
 .interviewCenter {
-  top: 29.5%;
-  left: 25%;
+  top: 27.4%;
+  left: 27.5%;
   width: 21%;
 }
 
 .speechHall {
-  top: 29.5%;
-  left: 75%;
+  top: 27.4%;
+  left: 71.4%;
   width: 21%;
   transform-origin: center center;
 }
 
 .progressLibrary {
-  top: 61.5%;
-  left: 25%;
+  top: 61.8%;
+  left: 22%;
   width: 19%;
 }
 
 .coursesBuilding {
-  top: 61.5%;
-  left: 75%;
+  top: 60%;
+  left: 74.5%;
   width: 19%;
 }
 
@@ -485,6 +533,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .guideImage {
+    animation: none;
+  }
+
   .location,
   .buildingImage,
   .locationLabel {

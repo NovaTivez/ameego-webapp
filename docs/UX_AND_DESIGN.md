@@ -281,10 +281,12 @@ PNGs. It is a navigation scene rather than a dashboard.
 - Automated geometry checks keep every building and its attached label inside
   the visible map area at 16:9, 16:10, and 4:3 viewports. Touch devices keep
   compact location labels visible.
-- Final proportional placement is Main `50% / 75.5% / 24%`, Interview
-  `25% / 29.5% / 21%`, Speech `75% / 29.5% / 21%`, Progress
-  `25% / 61.5% / 19%`, and Courses `75% / 61.5% / 19%`, expressed as
-  `left / top / width`.
+- Final plot-centered proportional placement is Main `48.7% / 73.3% / 24%`,
+  Interview `27.5% / 27.4% / 21%`, Speech `71.4% / 27.4% / 21%`,
+  Progress `22% / 61.8% / 19%`, and Courses `74.5% / 60% / 19%`,
+  expressed as `left / top / width`. Small per-building offsets compensate for
+  each PNG's transparent canvas and the illustrated plot boundaries so the
+  visible artwork aligns with its path and grassy area.
 - The shared site header, footer, and backdrop are hidden only while the hub is
   mounted; other pages keep their existing composition.
 - Interactive buildings and the top-right Settings control have visible
@@ -293,6 +295,30 @@ PNGs. It is a navigation scene rather than a dashboard.
 ### Courses Game Menu
 
 The `/learn` route now matches the compact panel-3 course-menu composition.
+
+### Premium Courses Building Dashboard Body
+
+- The Courses Building body uses a 12px section rhythm, compact 62px overview
+  metrics, and reduced panel padding while the shared navigation remains
+  unchanged.
+- Course Overview emphasizes the course title, rank, progress percentage,
+  improved progress track, completed lessons, current lesson, XP, and estimated
+  time without changing their data sources.
+- Continue Your Quest is a featured gold-accent card that exposes the current
+  lesson's existing duration, difficulty, and XP reward beside a larger action.
+- Academy Badges use a tighter responsive shelf with separate earned, current
+  milestone, and locked states plus restrained hover feedback.
+- Phase headers are 64px compact records with count and percentage progress;
+  their reward labels render as small RPG badges.
+- Lesson cards are 116px compact widgets with aligned number, title, summary,
+  duration, difficulty, XP, and state areas. Blue, gold, green, and muted dashed
+  accents distinguish unlocked, current, completed, and locked lessons.
+- Low-opacity 6% corner ornaments, hard pixel shadows, and reduced-motion-safe
+  hover feedback add depth without gradients or rounded styling.
+- The supplied starry-night artwork is shared by the course overview, STAR
+  lesson, all academy lessons, and STAR exercise routes. A fixed centered cover
+  layer fills the viewport throughout scrolling, while a dark overlay keeps
+  every existing pixel panel readable.
 
 - A narrow title panel identifies Interview Skills Course and the real
   Interview Foundations course.
@@ -355,6 +381,8 @@ compositions.
 
 - A compact Interview Setup panel replaces the large introduction and lobby
   scene during the setup state.
+- Interview Information, Company & Practice Goals, and Session Settings use
+  tighter section cards with two-column field groups where space allows.
 - Dark navy inputs use black pixel borders, blue-gray inner highlights, yellow
   labels, and clear yellow focus outlines.
 - Interview type uses a small custom dropdown arrow.
@@ -365,8 +393,8 @@ compositions.
 
 #### Resume Upload
 
-- A large dashed upload zone accepts the existing supported file types and size
-  limit without claiming unsupported drag-and-drop behavior.
+- A compact dashed upload zone accepts the existing supported file types and
+  size limit without claiming unsupported drag-and-drop behavior.
 - Selecting a file reveals a compact uploaded-file panel with its real filename,
   calculated size, Preview, and Remove actions.
 - Preview uses a temporary local object URL and does not save the raw résumé;
@@ -383,10 +411,24 @@ compositions.
   education, experience, projects, skills, leadership, and achievements.
 - Every résumé category remains editable as newline-separated validated items,
   and résumé removal remains available.
+- The no-résumé state is a short icon-led message rather than a tall empty
+  container.
 - The green Start Interview action retains the existing confirmed-context
   question-generation behavior and failure fallback.
 - At narrow widths, upload and review columns stack without changing focus order
   or hiding editing controls.
+
+#### Pre-interview Mode Selection
+
+- Text, microphone, and optional camera choices retain their existing behavior
+  in shorter, aligned cards with clear selected, hover, focus, and disabled
+  states.
+- The shared global header is not restyled or hidden by the pre-interview body;
+  Home, Back, brand, XP, Level, audio, status, and Settings remain owned by the
+  global navigation component.
+- Preparation, summary, and mode panels use natural document height. The browser
+  remains the only page scrollbar, and narrow layouts stack without horizontal
+  overflow.
 
 ### Feedback, Progress, and Settings Panels
 
@@ -395,6 +437,16 @@ removing the product's deeper educational and history flows.
 
 #### Feedback Report
 
+- The saved-attempt reward screen uses a shorter two-column hero: completion and
+  coach context on the left, with the existing intelligent-feedback action and
+  truthful service status on the right.
+- A compact Interview Complete → Transcript Saved → AI Feedback tracker makes
+  the post-interview workflow visible before the detailed report.
+- The confirmed transcript is presented as compact evidence rows, followed by
+  quick actions for transcript review, Progress Library, another interview, and
+  the Academy map.
+- Service failures use an amber status card with a smaller Retry action, while
+  loading and ready states retain their existing handlers and validated data.
 - The first viewport prioritizes Overall Summary, Strengths, Areas to Improve,
   Rubric Score Summary, and the validated Recommended Lesson in compact panels.
 - Scores remain visually secondary to their explanations and learning guidance.
@@ -478,3 +530,197 @@ The implemented reference screens now use a single dense frame specification:
 - Camera preview and neutral on-device face/orientation labels remain in a
   right-side tool rail on desktop. Tablet and phone layouts stack the tool rail
   inside the simulator without changing DOM or keyboard order.
+
+## Full-Page Settings Center
+
+- Settings uses the full available page width and the browser scrollbar as its
+  only vertical scrolling surface.
+- A 250px sticky desktop sidebar contains all eight categories with existing
+  pixel icons, a yellow active marker, and consistent hover and focus states.
+- Profile and Academy Progress receive the strongest hierarchy: a large learner
+  portrait, aligned form fields, Level card, XP progress bar, and four real
+  activity statistics.
+- Audio and Permissions use two-column control cards; Accessibility, Privacy,
+  and About use responsive informational grids; Resume & Learning Data groups
+  export and destructive local-data actions without weakening confirmations.
+- At 820px the sidebar returns to document flow and becomes a two-column menu;
+  at 560px all content stacks with the original DOM and keyboard order intact.
+- Cards retain square pixel borders, navy surfaces, hard shadows, stepped motion,
+  readable body typography, and reduced-motion fallbacks.
+
+## Main Building Night Hero
+
+- The updated night academy scene appears only behind the Main Building Welcome
+  Back hero, never behind the remaining dashboard panels.
+- The image is centered and cover-sized without stretching. The greeting stays
+  on the darker left while Today’s Goal occupies the right, matching the supplied
+  reference hierarchy.
+- A horizontal dark overlay protects the greeting and player details; a lower
+  overlay supports the XP panel and quick actions without flattening the full
+  scene.
+- The XP panel spans the content width and four equal quick actions sit beneath
+  it on desktop. Actions reduce to two columns on laptops and one on narrow
+  screens; below 820px the hero columns stack and a stronger overlay preserves
+  readability.
+
+## Main Building Continuous Star Field
+
+- The uploaded starry-night artwork begins below the shared application header
+  and belongs only to the Main Building page container.
+- A centered fixed cover treatment keeps one continuous scene behind the hero
+  and every dashboard section through the bottom of the page, with no vertical
+  image repetition or section seams.
+- A subtle page-wide dark gradient prevents bright stars from competing with
+  content. The Welcome Back area adds a soft radial overlay that fades into the
+  scene rather than ending at the hero boundary.
+- Existing dark pixel panels, cream goal card, XP bar, and action controls retain
+  their original contrast and interaction styling over the scenery.
+- The updated academy artwork remains the Welcome Back hero’s dedicated
+  background. The star field begins visually below that hero and supports the
+  scrolling dashboard body rather than replacing the Main Building entrance.
+
+## Compact Main Building RPG Dashboard Body
+
+- The hero-to-dashboard gap uses a compact `0.6–1.25rem` responsive margin so
+  the body begins promptly without touching the hero frame.
+- Only the content below the hero uses the denser dashboard treatment. Body
+  gaps, section padding, card padding, and bottom spacing are reduced by roughly
+  15–20% while the navigation, hero, and background layers stay unchanged.
+- Every section has its own restrained color accent and a 6% pixel-grid corner
+  ornament, while cards use thinner layered borders, hard shadows, and
+  reduced-motion-safe hover elevation.
+- Continue Your Journey uses two compact quest widgets with grouped metadata;
+  Daily Missions uses aligned quest rows with XP badges and progress tracks;
+  and Learning Streak gives the seven-day calendar stronger visual weight.
+- Recent Activity and Career Journey use connected pixel timelines. Academy
+  Statistics uses compact 112px metric tiles with larger values, while
+  achievement badges use a tighter responsive grid and clearer locked states.
+- Certificates use grouped icon, description, status badge, and action areas;
+  the existing rank progression uses the same denser spacing system.
+- All displayed values, destinations, controls, state, and data contracts remain
+  unchanged.
+
+## Progress Library Night Landscape Hero
+
+- The supplied moonlit castle landscape appears only in the Progress Library
+  hero directly below the shared navigation and uses centered cover sizing.
+- A left-weighted horizontal overlay and lower overlay keep text and cards clear
+  without flattening the castle, moon, banner, bridge, or mountain silhouettes.
+- The desktop hero follows the reference's approximately 450px proportion. Its
+  centered content group contains the label, title, description, and only four
+  compact real counts: Lessons, Interviews, Evidence, and Objectives.
+- The reference-matched hero statistics use four 250×100px horizontal cards
+  with 44px icons on the left, 16px gaps, and gold, blue, purple, and green top
+  accents. Each includes one status line, a faint 7% icon silhouette, and the
+  reference's compact progress-plus-context footer.
+- Secondary lines remain factual: course completion comes from the lesson
+  catalog, latest practice comes from saved activity, evidence validation is a
+  saved-attempt ratio, and objective progress is the stored rubric average.
+- Current Goal, Next Lesson, and Current Streak retain their existing snapshot
+  values in a separate three-card row within the main content below the hero.
+- The three guidance widgets use distinct goal, lesson, and fire pixel icons;
+  gold, blue, and green accents; low-opacity decorative icon silhouettes; and
+  purpose-specific layouts. Their metadata is limited to real level progress,
+  recommendation type, recommendation status, and saved streak activity.
+- Each widget exposes a keyboard-focusable CTA to the existing recommendation
+  route or Progress Overview anchor. Hover lift and icon movement are disabled
+  when reduced motion is requested.
+- Below 900px hero statistics use two columns; below 700px the guidance row
+  stacks; and below 480px hero statistics use one column.
+
+## Compact Progress Library Body
+
+- The supplied starry-night scene fills the complete scrolling Progress Library
+  body with fixed, centered cover sizing and a restrained dark overlay. The
+  moonlit castle artwork remains the hero's independent opaque background.
+- Everything beneath the hero uses a denser dashboard rhythm with 16px panel
+  padding and roughly 20–30% less vertical separation.
+- Major body sections use a small title icon, colored pixel accent, layered
+  border, hard shadow, and a 5.5% corner pattern. The header and hero remain
+  unchanged.
+- Skill rows stack as compact progress records, Recent Activity uses 58px rows,
+  and completion cards use small progress tracks and illustrated empty states.
+- Saved simulations use 310px cards, four 54px metadata chips in a 2×2 grid, a
+  compact top-right transcript badge, and a right-aligned action.
+- Attempt comparison places both existing selectors in balanced columns with a
+  centered pixel icon, then stacks cleanly on narrow screens.
+
+## Saved Interview Delete Confirmation
+
+- Each saved simulation pairs its compact Open Attempt button with a red pixel
+  Delete action aligned at the card's lower-right edge.
+- Delete opens a centered alert dialog with a darkened backdrop, red accent,
+  record icon, exact role and organization, and a permanent-removal warning.
+- Cancel receives initial focus; Escape and Cancel close without mutation.
+  Delete Saved Attempt is the only destructive confirmation action, and storage
+  failures remain visible inside the dialog.
+
+## Responsive Post-interview Result Layout
+
+- The completion hero reserves three independent desktop zones for the saved
+  attempt summary, interviewer artwork, and intelligent-feedback action. The
+  content cards never sit underneath the decorative character.
+- At laptop widths the hero becomes two columns and removes the decorative
+  interviewer; below 820px both functional cards stack with natural height.
+- Hero buttons share the available card width, wrap long labels safely, and keep
+  consistent alignment for View Feedback Report, Generate Intelligent Feedback,
+  and Open Feedback Report.
+- The progress tracker uses three equal columns on wide screens and readable
+  full-width rows on small screens. Labels and badges are contained at every
+  breakpoint.
+- Confirmed responses form a balanced two-column evidence grid on desktop and a
+  single-column list on smaller screens. Questions, responses, status copy, and
+  generated AI content use defensive wrapping for unusually long strings.
+- Quick actions use four, two, then one column as space decreases. No result or
+  feedback panel creates an internal vertical scrollbar; the browser owns the
+  complete page scroll.
+
+## Premium Post-interview Composition
+
+- The combined coach-and-desk asset scales to 270–325px and sits in the center
+  window zone. A lower panorama crop removes excess wall while retaining one
+  cohesive interview-room scene.
+- Completion and Intelligent Review cards use equal outer columns, identical
+  stretch behavior, matched internal padding, vertically centered content, and
+  48px full-width primary actions.
+- On the completed route, the shared header gains a restrained 76px height.
+  Home, Back, Logo, XP, Level, Audio, Online, and Settings remain the same
+  controls but align on one center baseline with consistent 42px dimensions.
+- Feedback progress uses three equal 66px cards with 38px badges. The active AI
+  Feedback state uses a brighter gold border, four-pixel lower accent, and soft
+  glow without changing the step state machine.
+- Confirmed responses use equal-height desktop rows, larger internal padding,
+  a strong question/answer hierarchy, a compact green Confirmed badge, and an
+  aligned metadata grid for input mode plus the saved attempt date and time.
+
+## Compact Completed-interview Hero and Evidence Records
+
+- The room hero uses a compact 280–315px height. Equal side cards are limited to
+  390px wide and 250px tall, vertically centered around a dedicated 320–390px
+  artwork column with equal horizontal gaps.
+- The coach-and-desk PNG scales to 345–410px and remains centered on the room
+  window. Its small horizontal overhang stays inside the reserved gaps rather
+  than underneath either functional card.
+- The result-only header uses a 72px frame with 40px navigation and status
+  controls. Existing controls remain vertically centered with the same labels,
+  destinations, and behaviors.
+- Progress steps span the same maximum 1320px content grid as the report below.
+  Each is 78px tall with a 44px badge and equal one-third width.
+- Saved Evidence has no redundant response-count badge. Each desktop row places
+  number, question, answer, Confirmed status, and saved date/time in one aligned
+  horizontal record; laptops move time beneath the text, and tablets/phones
+  stack the record without horizontal scrolling.
+
+## Academy Plaza Guide
+
+- The supplied transparent owl-and-message PNG sits on the campus map's circular
+  plaza at 52% horizontally and 43.1% vertically after the latest upward visual
+  adjustment.
+- Its 16.4% map-relative width applies the latest 10% size increase while
+  keeping the complete composition clear of surrounding building plots.
+- The guide sits below every building control and ignores pointer events, so
+  map links, hover states, focus outlines, and locked locations behave exactly
+  as before.
+- A subtle contact shadow grounds the mascot while the image floats vertically
+  over 4.8 seconds using eight pixel-style steps. Reduced-motion preferences
+  disable the animation entirely.

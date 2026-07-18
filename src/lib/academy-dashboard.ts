@@ -1,16 +1,15 @@
-import { starArrangementExercise } from "@/content/star-arrangement-exercise";
 import {
-  COURSE_COMPLETION_BONUS_XP,
   getAcademyLessonHref,
   interviewAcademyLessons,
   interviewAcademyPhases,
   type AcademyLesson,
 } from "@/content/interview-foundations";
 import { readCourseProgress } from "@/lib/course-progress";
-import { getExerciseProgressEntry, readExerciseProgress } from "@/lib/exercise-progress";
+import { readExerciseProgress } from "@/lib/exercise-progress";
 import { readInterviewAttempts } from "@/lib/interview/attempts";
 import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
-import { calculateCurrentStreak, PROGRESS_XP } from "@/lib/progress";
+import { calculatePlayerProgress, PROGRESS_XP } from "@/lib/player-progress";
+import { calculateCurrentStreak } from "@/lib/progress";
 import { readLearnerProfile } from "@/lib/settings";
 
 export const ACADEMY_RANKS = [
@@ -47,6 +46,7 @@ export type AcademyDashboardSnapshot = {
   playerFocus: string;
   totalXp: number;
   level: number;
+  rankPosition: number;
   currentRank: string;
   nextRank: string | null;
   nextRankMinimumXp: number | null;
@@ -125,7 +125,7 @@ function findCurrentRank(totalXp: number) {
   const progress = next
     ? Math.min(100, Math.round(((totalXp - current.minimumXp) / range) * 100))
     : 100;
-  return { current, next, progress, level: safeIndex + 1 };
+  return { current, next, progress, position: safeIndex + 1 };
 }
 
 export function buildAcademyDashboardSnapshot(
@@ -148,15 +148,13 @@ export function buildAcademyDashboardSnapshot(
   const currentLessonHref = currentLesson
     ? getAcademyLessonHref(currentLesson)
     : "/practice";
-  const courseXp = completedLessons.reduce((sum, lesson) => sum + lesson.xpReward, 0);
-  const exercise = getExerciseProgressEntry(exerciseProgress, starArrangementExercise.id);
   const evaluatedAttempts = attempts.filter((attempt) => attempt.evaluation);
-  const totalXp =
-    courseXp +
-    (courseComplete ? COURSE_COMPLETION_BONUS_XP : 0) +
-    (exercise.completed ? PROGRESS_XP.exercise : 0) +
-    attempts.length * PROGRESS_XP.simulation +
-    evaluatedAttempts.length * PROGRESS_XP.validatedFeedback;
+  const playerProgress = calculatePlayerProgress({
+    courseProgress,
+    exerciseProgress,
+    attempts,
+  });
+  const totalXp = playerProgress.xp;
   const rank = findCurrentRank(totalXp);
   const todayKey = utcDateKey(now);
   const todayAttempts = attempts.filter(
@@ -235,7 +233,8 @@ export function buildAcademyDashboardSnapshot(
     playerName: profile.name,
     playerFocus: profile.focus,
     totalXp,
-    level: rank.level,
+    level: playerProgress.level,
+    rankPosition: rank.position,
     currentRank: rank.current.name,
     nextRank: rank.next?.name ?? null,
     nextRankMinimumXp: rank.next?.minimumXp ?? null,

@@ -1,4 +1,5 @@
 import { calculateExerciseCompletion } from "@/lib/star-exercise-validation";
+import { notifyProgressChanged } from "@/lib/progress-events";
 
 export const EXERCISE_PROGRESS_STORAGE_KEY = "ameego:exercise-progress:v1";
 
@@ -102,6 +103,7 @@ export function readExerciseProgress(storage: Storage): ExerciseProgress {
 export function clearExerciseProgress(storage: Storage): void {
   try {
     storage.removeItem(EXERCISE_PROGRESS_STORAGE_KEY);
+    notifyProgressChanged();
   } catch {
     throw new ExerciseProgressStorageError(
       "unavailable",
@@ -133,6 +135,7 @@ export function recordExerciseAttempt(
 
   try {
     storage.setItem(EXERCISE_PROGRESS_STORAGE_KEY, JSON.stringify(nextProgress));
+    notifyProgressChanged();
   } catch {
     throw new ExerciseProgressStorageError(
       "unavailable",

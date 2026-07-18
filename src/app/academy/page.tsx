@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AcademyPlayerStatus } from "@/components/AcademyPlayerStatus";
 import { ExperienceControls } from "@/components/ExperienceControls";
-import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
 import { TopLeftNavigation } from "@/components/TopLeftNavigation";
 
@@ -24,10 +24,7 @@ export default function AcademyHubPage() {
             <h1 id="academy-hub-title">Ameego Academy</h1>
           </div>
           <div className={styles.headerControls} aria-label="Academy campus controls">
-            <div className={styles.playerStatus} aria-label="Academy player status">
-              <PixelHudStat label="XP" value="0000" icon="star" />
-              <PixelHudStat label="LV" value="01" />
-            </div>
+            <AcademyPlayerStatus className={styles.playerStatus} />
             <ExperienceControls />
             <Link className={styles.settingsLink} href="/settings" aria-label="Settings">
               <PixelIcon name="settings" size="small" />

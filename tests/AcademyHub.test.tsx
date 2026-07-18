@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import AcademyHubPage from "@/app/academy/page";
 
 describe("Academy Hub", () => {
+  beforeEach(() => window.localStorage.clear());
+
   it("renders the compact academy HUD and all campus locations", () => {
     render(<AcademyHubPage />);
 
@@ -75,6 +77,10 @@ describe("Academy Hub", () => {
       ["/images/academy/speech-hall-v2.png", "Speech Hall building"],
       ["/images/academy/progress-library-v2.png", "Progress Library building"],
       ["/images/academy/courses-building-v2.png", "Courses Building"],
+      [
+        "/images/academy/academy-owl-guide.png",
+        "Academy owl guide saying One step today, confident tomorrow",
+      ],
     ];
 
     for (const [source, alt] of assets) {

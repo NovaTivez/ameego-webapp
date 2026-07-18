@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { EvaluationFeedback } from "@/components/EvaluationFeedback";
@@ -347,7 +348,9 @@ export function InterviewSimulator() {
     interviewerSpeechTokenRef.current = token;
     interviewerSpeechRef.current?.cancel();
     setIsInterviewerSpeaking(true);
-    setAnnouncement("Interviewer is speaking. Your turn starts when the question finishes.");
+    setAnnouncement(
+      "Interviewer is speaking. Your turn starts when the question finishes.",
+    );
 
     const handle = speakInterviewQuestion(questionText);
     interviewerSpeechRef.current = handle;
@@ -595,7 +598,9 @@ export function InterviewSimulator() {
 
   const startListening = () => {
     if (isInterviewerSpeaking) {
-      setSpeechError("Wait for the interviewer to finish speaking before using the microphone.");
+      setSpeechError(
+        "Wait for the interviewer to finish speaking before using the microphone.",
+      );
       return;
     }
     const Recognition = getSpeechRecognitionConstructor();
@@ -928,6 +933,19 @@ export function InterviewSimulator() {
   const preparationActionDisabled =
     (step === "resume" && resumeStatus === "extracting") ||
     (step === "review" && questionStatus === "loading");
+  const completedDateLabel = completedAttempt
+    ? new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(completedAttempt.completedAt))
+    : "Saved locally";
+  const completedTimeLabel = completedAttempt
+    ? new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date(completedAttempt.completedAt))
+    : "Just now";
 
   const continuePreparation = () => {
     if (step === "setup") {
@@ -1563,68 +1581,144 @@ export function InterviewSimulator() {
         <div className="interview-complete-layout">
           <section className="interview-complete-hero" aria-labelledby="complete-heading">
             <FeedbackRoomScene />
-            <div className="interview-complete-summary">
-              <PixelBadge tone="mint">Attempt saved</PixelBadge>
-              <h2 id="complete-heading">Interview practice complete.</h2>
-              <p>
-                {responses.length} confirmed responses were saved on this device. Scroll
-                down when you are ready to review your performance.
-              </p>
-              <a className="feedback-scroll-link" href="#feedback-report">
-                View Feedback Report
-                <span aria-hidden="true">↓</span>
-              </a>
+            <div className="interview-complete-hero-grid">
+              <div className="interview-complete-summary">
+                <PixelBadge tone="mint">Attempt saved</PixelBadge>
+                <h2 id="complete-heading">Interview practice complete.</h2>
+                <p>
+                  {responses.length} confirmed responses are safely stored on this device
+                  and ready for review.
+                </p>
+                <strong>Every interview is another level gained.</strong>
+                <a className="feedback-scroll-link" href="#feedback-report">
+                  View Feedback Report
+                  <span aria-hidden="true">↓</span>
+                </a>
+              </div>
+
+              <div
+                className={`feedback-hero-action ${evaluationStatus === "loading" ? "is-loading" : ""}`}
+                role={evaluationStatus === "loading" ? "status" : undefined}
+                aria-live="polite"
+                aria-busy={evaluationStatus === "loading"}
+              >
+                <span
+                  className="feedback-status-badge"
+                  data-status={
+                    evaluation
+                      ? "ready"
+                      : evaluationStatus === "loading"
+                        ? "processing"
+                        : evaluationStatus === "error"
+                          ? "offline"
+                          : "available"
+                  }
+                >
+                  <PixelIcon
+                    name={
+                      evaluation
+                        ? "check"
+                        : evaluationStatus === "loading"
+                          ? "timer"
+                          : "star"
+                    }
+                    size="small"
+                  />
+                  {evaluation
+                    ? "Feedback Ready"
+                    : evaluationStatus === "loading"
+                      ? "Processing"
+                      : evaluationStatus === "error"
+                        ? "Service Offline"
+                        : "Ready to Generate"}
+                </span>
+                <div>
+                  <p className="eyebrow">Intelligent Review</p>
+                  <h3>
+                    {evaluation
+                      ? "Your learning report is ready"
+                      : "Unlock your learning report"}
+                  </h3>
+                  <p>
+                    Review your confirmed transcript against the STAR communication rubric
+                    and receive a focused next step.
+                  </p>
+                </div>
+                {evaluation ? (
+                  <a className="feedback-primary-link" href="#evaluation-heading">
+                    <PixelIcon name="progress" size="small" />
+                    Open Feedback Report
+                  </a>
+                ) : (
+                  <PixelButton
+                    onClick={evaluateCompletedAttempt}
+                    disabled={evaluationStatus === "loading" || !completedAttempt}
+                  >
+                    <PixelIcon name="star" size="small" />
+                    {evaluationStatus === "loading"
+                      ? "Preparing feedback..."
+                      : "Generate Intelligent Feedback"}
+                  </PixelButton>
+                )}
+                <small>
+                  Uses only your confirmed transcript. No emotion, personality, or
+                  employability assessment.
+                </small>
+              </div>
             </div>
           </section>
+
+          <ol className="feedback-progress-tracker" aria-label="Feedback progress">
+            <li data-state="complete">
+              <span aria-hidden="true">✓</span>
+              <strong>Interview Complete</strong>
+            </li>
+            <li data-state="complete">
+              <span aria-hidden="true">✓</span>
+              <strong>Transcript Saved</strong>
+            </li>
+            <li
+              data-state={
+                evaluation
+                  ? "complete"
+                  : evaluationStatus === "loading"
+                    ? "current"
+                    : "upcoming"
+              }
+              aria-current={!evaluation ? "step" : undefined}
+            >
+              <span aria-hidden="true">
+                {evaluation ? "✓" : evaluationStatus === "loading" ? "…" : "3"}
+              </span>
+              <strong>AI Feedback</strong>
+            </li>
+          </ol>
 
           <section
             id="feedback-report"
             className="interview-feedback-report"
             aria-label="Feedback Report"
           >
-            {!evaluation ? (
-              <div
-                className={`evaluation-request ${evaluationStatus === "loading" ? "is-loading" : ""}`}
-                role={evaluationStatus === "loading" ? "status" : undefined}
-                aria-live="polite"
-                aria-busy={evaluationStatus === "loading"}
-              >
-                <div className="evaluation-request-copy">
-                  <p className="eyebrow">Feedback Report</p>
-                  <h2>
-                    {evaluationStatus === "loading"
-                      ? "Building your evidence-based learning report"
-                      : "Turn your completed interview into a learning plan"}
-                  </h2>
-                  <p>
-                    Ameego Interview Coach reviews only your confirmed transcript against
-                    the STAR rubric. It does not assess emotion, honesty, intelligence,
-                    employability, accent, confidence, nervousness, or eye contact.
-                  </p>
-                </div>
-                <PixelButton
-                  onClick={evaluateCompletedAttempt}
-                  disabled={evaluationStatus === "loading" || !completedAttempt}
-                >
-                  {evaluationStatus === "loading"
-                    ? "Preparing feedback..."
-                    : "Generate Intelligent Feedback"}
-                </PixelButton>
-              </div>
-            ) : null}
-
             {evaluationStatus === "error" ? (
               <div className="interview-inline-error evaluation-error" role="alert">
-                <strong>
-                  {evaluationFailure === "invalid_result"
-                    ? "Feedback could not be prepared."
-                    : evaluationFailure === "missing_data"
-                      ? "This attempt needs a complete transcript."
-                      : evaluationFailure === "storage_failure"
-                        ? "Validated feedback could not be saved."
-                        : "Service Temporarily Unavailable"}
-                </strong>
-                <span>{evaluationError}</span>
+                <span className="evaluation-error-icon" aria-hidden="true">
+                  <PixelIcon name="timer" />
+                </span>
+                <div>
+                  <span className="feedback-status-badge" data-status="offline">
+                    Service Offline
+                  </span>
+                  <strong>
+                    {evaluationFailure === "invalid_result"
+                      ? "Feedback could not be prepared."
+                      : evaluationFailure === "missing_data"
+                        ? "This attempt needs a complete transcript."
+                        : evaluationFailure === "storage_failure"
+                          ? "Validated feedback could not be saved."
+                          : "Service Temporarily Unavailable"}
+                  </strong>
+                  <span>{evaluationError}</span>
+                </div>
                 <PixelButton onClick={evaluateCompletedAttempt}>
                   Retry Feedback
                 </PixelButton>
@@ -1643,15 +1737,94 @@ export function InterviewSimulator() {
               />
             ) : null}
 
+            <section
+              id="saved-transcript"
+              className="feedback-transcript-panel"
+              aria-labelledby="saved-transcript-heading"
+            >
+              <header>
+                <span aria-hidden="true">
+                  <PixelIcon name="speech" />
+                </span>
+                <div>
+                  <p className="eyebrow">Saved Evidence</p>
+                  <h2 id="saved-transcript-heading">Confirmed Transcript</h2>
+                </div>
+              </header>
+              <ol>
+                {questionSet.questions.map((question, index) => (
+                  <li key={question.id}>
+                    <span className="transcript-question-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="transcript-question-heading">
+                      <small>Interview Question</small>
+                      <strong>{question.text}</strong>
+                    </div>
+                    <div className="transcript-answer-copy">
+                      <small>Your Answer</small>
+                      <p>
+                        {responses.find((response) => response.questionId === question.id)
+                          ?.transcript ?? "No confirmed response was saved."}
+                      </p>
+                    </div>
+                    <span className="transcript-confirmed-status">
+                      <PixelIcon name="check" size="small" />
+                      Confirmed
+                    </span>
+                    <time
+                      className="transcript-saved-time"
+                      dateTime={completedAttempt?.completedAt}
+                    >
+                      <small>Saved</small>
+                      <strong>{completedDateLabel}</strong>
+                      <span>{completedTimeLabel}</span>
+                    </time>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
             <footer className="interview-final-action">
-              <p className="eyebrow">Ready for a new scenario?</p>
-              <h2>Keep building your interview skills.</h2>
-              <p>
-                Your saved attempt remains in the Progress Library when you begin again.
-              </p>
-              <PixelButton onClick={restart} variant={evaluation ? "secondary" : "ghost"}>
-                Start Another Interview
-              </PixelButton>
+              <div className="final-action-heading">
+                <p className="eyebrow">Choose Your Next Move</p>
+                <h2>Keep building your interview skills.</h2>
+                <p>Your saved attempt remains available in the Progress Library.</p>
+              </div>
+              <div className="feedback-quick-actions">
+                <a href="#saved-transcript">
+                  <PixelIcon name="speech" />
+                  <span>
+                    <strong>View Transcript</strong>
+                    <small>Review every confirmed answer.</small>
+                  </span>
+                </a>
+                <Link href="/progress">
+                  <PixelIcon name="progress" />
+                  <span>
+                    <strong>Progress Library</strong>
+                    <small>Open saved attempts and evidence.</small>
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  aria-label="Start Another Interview"
+                  onClick={restart}
+                >
+                  <PixelIcon name="star" />
+                  <span>
+                    <strong>Start New Interview</strong>
+                    <small>Practice a different scenario.</small>
+                  </span>
+                </button>
+                <Link href="/academy">
+                  <PixelIcon name="academy" />
+                  <span>
+                    <strong>Back to Academy</strong>
+                    <small>Return to the campus map.</small>
+                  </span>
+                </Link>
+              </div>
             </footer>
           </section>
         </div>

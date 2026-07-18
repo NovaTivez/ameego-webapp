@@ -184,10 +184,24 @@ export function CourseOverview({ course }: CourseOverviewProps) {
               className={styles.currentQuest}
               aria-labelledby="current-quest-title"
             >
-              <div>
+              <div className={styles.currentQuestContent}>
                 <p>Continue Your Quest</p>
                 <h2 id="current-quest-title">{currentLesson.title}</h2>
                 <span>{currentLesson.objective}</span>
+                <dl className={styles.currentQuestMeta}>
+                  <div>
+                    <dt>Duration</dt>
+                    <dd>{currentLesson.durationMinutes} min</dd>
+                  </div>
+                  <div>
+                    <dt>Difficulty</dt>
+                    <dd>{currentLesson.difficulty}</dd>
+                  </div>
+                  <div>
+                    <dt>Reward</dt>
+                    <dd>+{currentLesson.xpReward} XP</dd>
+                  </div>
+                </dl>
               </div>
               <Link
                 className="pixel-button pixel-button-primary"
@@ -206,11 +220,24 @@ export function CourseOverview({ course }: CourseOverviewProps) {
             <ul>
               {interviewAcademyPhases.map((phase) => {
                 const earned = earnedBadges.includes(phase.badge);
+                const current =
+                  !earned &&
+                  !courseComplete &&
+                  phase.lessons.some((lesson) => lesson.id === currentLesson?.id);
                 return (
-                  <li className={earned ? styles.badgeEarned : ""} key={phase.badge}>
-                    <PixelIcon name={earned ? "star" : "lock"} size="small" />
+                  <li
+                    className={`${earned ? styles.badgeEarned : ""} ${current ? styles.badgeCurrent : ""}`}
+                    key={phase.badge}
+                  >
+                    <PixelIcon name={earned || current ? "star" : "lock"} size="small" />
                     <span>{phase.badge}</span>
-                    <small>{earned ? "Earned" : `Clear Phase ${phase.number}`}</small>
+                    <small>
+                      {earned
+                        ? "Earned"
+                        : current
+                          ? "Current milestone"
+                          : `Clear Phase ${phase.number}`}
+                    </small>
                   </li>
                 );
               })}
@@ -273,9 +300,22 @@ export function CourseOverview({ course }: CourseOverviewProps) {
                     </div>
                     <span className={styles.phaseState}>
                       {phaseComplete ? (
-                        <PixelIcon name="check" size="small" />
+                        <>
+                          <PixelIcon name="check" size="small" />
+                          <small>100%</small>
+                        </>
                       ) : phaseUnlocked ? (
-                        `${phaseCompletedCount}/${phase.lessons.length}`
+                        <>
+                          <strong>
+                            {phaseCompletedCount}/{phase.lessons.length}
+                          </strong>
+                          <small>
+                            {Math.round(
+                              (phaseCompletedCount / phase.lessons.length) * 100,
+                            )}
+                            %
+                          </small>
+                        </>
                       ) : (
                         <PixelIcon name="lock" size="small" />
                       )}
@@ -331,6 +371,10 @@ export function CourseOverview({ course }: CourseOverviewProps) {
                             <Link
                               className={`${styles.lessonCard} ${
                                 lessonComplete ? styles.lessonCardComplete : ""
+                              } ${
+                                lesson.id === currentLesson?.id && !lessonComplete
+                                  ? styles.lessonCardCurrent
+                                  : ""
                               }`}
                               href={getAcademyLessonHref(lesson)}
                               aria-label={`${lessonComplete ? "Review" : "Open"} ${lesson.title} lesson`}

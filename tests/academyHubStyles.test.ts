@@ -39,6 +39,8 @@ describe("Academy Hub map style contract", () => {
     for (const selector of [
       ".map",
       ".mapBackground",
+      ".academyGuide",
+      ".guideImage",
       ".mainBuilding",
       ".interviewCenter",
       ".speechHall",
@@ -56,6 +58,15 @@ describe("Academy Hub map style contract", () => {
       /\.map\s*{[\s\S]*?width:\s*max\(100vw, calc\(100svh \* 1\.776833\)\)/,
     );
     expect(styles).toMatch(/\.mapBackground\s*{[\s\S]*?object-fit:\s*cover/);
+    expect(styles).toMatch(
+      /\.academyGuide\s*{[\s\S]*?top:\s*43\.1%;[\s\S]*?left:\s*52%;[\s\S]*?width:\s*16\.4%;[\s\S]*?pointer-events:\s*none;[\s\S]*?translate\(-50%, -50%\)/,
+    );
+    expect(styles).toMatch(
+      /\.guideImage\s*{[\s\S]*?animation:\s*academyGuideFloat 4\.8s steps\(8, end\) infinite/,
+    );
+    expect(styles).toMatch(
+      /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.guideImage\s*{[\s\S]*?animation:\s*none/,
+    );
 
     for (const asset of [
       "campus-map-v3.png",
@@ -64,6 +75,7 @@ describe("Academy Hub map style contract", () => {
       "speech-hall-v2.png",
       "progress-library-v2.png",
       "courses-building-v2.png",
+      "academy-owl-guide.png",
     ]) {
       const assetPath = `public/images/academy/${asset}`;
       expect(statSync(assetPath).size).toBeGreaterThan(0);
@@ -88,6 +100,9 @@ describe("Academy Hub map style contract", () => {
     expect(styles).toMatch(/scale\(0\.98\)/);
     expect(styles).toMatch(/\.speechHall\s*{[\s\S]*?transform-origin:\s*center center/);
     expect(styles).toMatch(
+      /\.locationLabel\s*{[\s\S]*?right:\s*9%;[\s\S]*?left:\s*9%;[\s\S]*?text-align:\s*center/,
+    );
+    expect(styles).toMatch(
       /\.lockedLocation,[\s\S]*?cursor:\s*not-allowed;[\s\S]*?transform:\s*translate\(-50%, -50%\);[\s\S]*?transition:\s*none/,
     );
     expect(styles).toMatch(
@@ -104,7 +119,7 @@ describe("Academy Hub map style contract", () => {
     );
   });
 
-  it("keeps all five proportional building regions inside the map without overlap", () => {
+  it("centers all five proportional building regions in their plots without overlap", () => {
     const mapAspect = 1672 / 941;
     const valueFor = (selector: string, property: string) => {
       const block = styles.match(new RegExp(`\\.${selector}\\s*\\{([\\s\\S]*?)\\}`))?.[1];
@@ -144,11 +159,11 @@ describe("Academy Hub map style contract", () => {
         ]),
       ),
     ).toEqual({
-      mainBuilding: { left: 50, top: 75.5, width: 24 },
-      interviewCenter: { left: 25, top: 29.5, width: 21 },
-      speechHall: { left: 75, top: 29.5, width: 21 },
-      progressLibrary: { left: 25, top: 61.5, width: 19 },
-      coursesBuilding: { left: 75, top: 61.5, width: 19 },
+      mainBuilding: { left: 48.7, top: 73.3, width: 24 },
+      interviewCenter: { left: 27.5, top: 27.4, width: 21 },
+      speechHall: { left: 71.4, top: 27.4, width: 21 },
+      progressLibrary: { left: 22, top: 61.8, width: 19 },
+      coursesBuilding: { left: 74.5, top: 60, width: 19 },
     });
 
     for (const region of regions) {

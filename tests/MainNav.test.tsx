@@ -1,7 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MainNav } from "@/components/MainNav";
+import { interviewAcademyLessons } from "@/content/interview-foundations";
+import { completeLesson } from "@/lib/course-progress";
 
 const navigation = vi.hoisted(() => ({ pathname: "/practice" }));
 
@@ -23,6 +25,7 @@ vi.mock("@/components/ExperienceControls", () => ({
 describe("MainNav", () => {
   beforeEach(() => {
     navigation.pathname = "/practice";
+    window.localStorage.clear();
   });
 
   it("provides every core route", () => {
@@ -67,6 +70,27 @@ describe("MainNav", () => {
     expect(status).toHaveTextContent("LV01");
   });
 
+  it("updates XP and level immediately when stored progress changes", () => {
+    render(<MainNav />);
+
+    act(() => {
+      for (const lesson of interviewAcademyLessons) {
+        completeLesson(window.localStorage, lesson.id);
+      }
+    });
+
+    const earnedLessonXp = interviewAcademyLessons.reduce(
+      (total, lesson) => total + lesson.xpReward,
+      0,
+    );
+    const expectedXp = earnedLessonXp + 500;
+    const status = screen.getByLabelText(/academy player status/i);
+    expect(status).toHaveTextContent(`XP${String(expectedXp).padStart(4, "0")}`);
+    expect(status).toHaveTextContent(
+      `LV${String(Math.floor(expectedXp / 500) + 1).padStart(2, "0")}`,
+    );
+  });
+
   it("groups player, audio, connection, and Settings controls", () => {
     render(<MainNav />);
 
@@ -107,6 +131,19 @@ describe("MainNav", () => {
       "aria-current",
       "page",
     );
+  });
+
+  it("returns from Settings directly to the campus map", () => {
+    navigation.pathname = "/settings";
+    render(<MainNav />);
+
+    expect(screen.getByRole("link", { name: /back to campus map/i })).toHaveAttribute(
+      "href",
+      "/academy",
+    );
+    expect(
+      screen.queryByRole("button", { name: /back to previous page/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("returns through browser navigation history", () => {

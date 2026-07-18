@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { AcademyPlayerStatus } from "@/components/AcademyPlayerStatus";
 import { ExperienceControls } from "@/components/ExperienceControls";
-import { PixelHudStat } from "@/components/PixelHudStat";
 import { PixelIcon } from "@/components/PixelIcon";
 import { TopLeftNavigation } from "@/components/TopLeftNavigation";
 
@@ -25,7 +25,12 @@ export function MainNav() {
     <>
       <header className="site-header">
         <div className="hud-identity">
-          <TopLeftNavigation />
+          <TopLeftNavigation
+            backHref={pathname === "/settings" ? "/academy" : undefined}
+            backLabel={
+              pathname === "/settings" ? "Back to campus map" : "Back to previous page"
+            }
+          />
           <Link className="brand" href="/" aria-label="Ameego home">
             <span className="brand-mark" aria-hidden="true">
               <span />
@@ -60,10 +65,7 @@ export function MainNav() {
         </nav>
         {!usesFullscreenWorld ? (
           <div className="hud-control-group" aria-label="Academy header controls">
-            <div className="hud-player-status" aria-label="Academy player status">
-              <PixelHudStat label="XP" value="0000" icon="star" />
-              <PixelHudStat label="LV" value="01" />
-            </div>
+            <AcademyPlayerStatus className="hud-player-status" />
             <ExperienceControls />
             <Link
               className="hud-settings-link"

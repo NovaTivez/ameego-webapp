@@ -9,6 +9,7 @@ import {
 } from "@/lib/interview/contracts";
 import {
   createCompletedAttempt,
+  deleteInterviewAttempt,
   INTERVIEW_ATTEMPTS_STORAGE_KEY,
   readInterviewAttempts,
   saveAttemptEvaluation,
@@ -114,6 +115,27 @@ describe("completed interview attempt persistence", () => {
 
     expect(() => saveCompletedAttempt(window.localStorage, attempt)).toThrow(/invalid/i);
     expect(window.localStorage.getItem(INTERVIEW_ATTEMPTS_STORAGE_KEY)).toBeNull();
+  });
+
+  it("deletes only the requested saved attempt", () => {
+    saveCompletedAttempt(
+      window.localStorage,
+      makeAttempt("attempt-1", "2026-07-01T00:00:00.000Z"),
+    );
+    saveCompletedAttempt(
+      window.localStorage,
+      makeAttempt("attempt-2", "2026-07-02T00:00:00.000Z"),
+    );
+
+    const next = deleteInterviewAttempt(window.localStorage, "attempt-1");
+
+    expect(next.attempts.map((attempt) => attempt.id)).toEqual(["attempt-2"]);
+    expect(
+      readInterviewAttempts(window.localStorage).attempts.map((attempt) => attempt.id),
+    ).toEqual(["attempt-2"]);
+    expect(() => deleteInterviewAttempt(window.localStorage, "missing-attempt")).toThrow(
+      /could not be found/i,
+    );
   });
 
   it("keeps only the newest 20 attempts", () => {

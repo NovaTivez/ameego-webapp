@@ -89,6 +89,20 @@ export function AcademyCampusMap() {
         unoptimized
       />
 
+      <div className={styles.academyGuide}>
+        <span className={styles.guideShadow} aria-hidden="true" />
+        <Image
+          className={styles.guideImage}
+          src="/images/academy/academy-owl-guide.png"
+          alt="Academy owl guide saying One step today, confident tomorrow"
+          width={612}
+          height={408}
+          sizes="14vw"
+          priority
+          unoptimized
+        />
+      </div>
+
       <CampusBuilding
         accessibleLabel="Open Main Building, Academy home"
         alt="Main Building"

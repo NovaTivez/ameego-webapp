@@ -6,9 +6,15 @@ import { PixelIcon } from "@/components/PixelIcon";
 
 type TopLeftNavigationProps = {
   className?: string;
+  backHref?: string;
+  backLabel?: string;
 };
 
-export function TopLeftNavigation({ className }: TopLeftNavigationProps) {
+export function TopLeftNavigation({
+  className,
+  backHref,
+  backLabel = "Back to previous page",
+}: TopLeftNavigationProps) {
   const classes = ["top-left-navigation", className].filter(Boolean).join(" ");
 
   return (
@@ -21,15 +27,26 @@ export function TopLeftNavigation({ className }: TopLeftNavigationProps) {
       >
         <PixelIcon name="home" size="small" />
       </Link>
-      <button
-        className="hud-navigation-button"
-        type="button"
-        aria-label="Back to previous page"
-        title="Back"
-        onClick={() => window.history.back()}
-      >
-        <PixelIcon name="back" size="small" />
-      </button>
+      {backHref ? (
+        <Link
+          className="hud-navigation-button"
+          href={backHref}
+          aria-label={backLabel}
+          title="Back"
+        >
+          <PixelIcon name="back" size="small" />
+        </Link>
+      ) : (
+        <button
+          className="hud-navigation-button"
+          type="button"
+          aria-label={backLabel}
+          title="Back"
+          onClick={() => window.history.back()}
+        >
+          <PixelIcon name="back" size="small" />
+        </button>
+      )}
     </div>
   );
 }

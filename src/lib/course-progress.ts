@@ -1,3 +1,5 @@
+import { notifyProgressChanged } from "@/lib/progress-events";
+
 export const COURSE_PROGRESS_STORAGE_KEY = "ameego:course-progress:v1";
 
 export type CourseProgress = {
@@ -59,6 +61,7 @@ export function completeLesson(storage: Storage, lessonId: string): CourseProgre
   };
 
   storage.setItem(COURSE_PROGRESS_STORAGE_KEY, JSON.stringify(nextProgress));
+  notifyProgressChanged();
 
   return nextProgress;
 }

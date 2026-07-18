@@ -616,7 +616,7 @@ export function AcademyDashboard() {
               "Interview Master",
             ].map((rankName, index) => (
               <li
-                className={index + 1 <= dashboard.level ? styles.rankReached : ""}
+                className={index + 1 <= dashboard.rankPosition ? styles.rankReached : ""}
                 key={rankName}
               >
                 <i />

@@ -13,9 +13,9 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toMatch(/\.preparationScreen\s*{[\s\S]*?overflow:\s*visible/);
     expect(styles).toMatch(/\.preparationSummary\s*{[\s\S]*?position:\s*sticky/);
     expect(styles).toMatch(/\.preparationSummary\s*{[\s\S]*?grid-area:\s*summary/);
-    expect(styles).toMatch(/\.summaryAction\s*{[\s\S]*?bottom:\s*0/);
+    expect(styles).toMatch(/\.summaryAction\s*{[\s\S]*?position:\s*static/);
     expect(styles).toMatch(
-      /\.summaryList\s*{[\s\S]*?flex:\s*1;[\s\S]*?grid-auto-rows:\s*minmax\(48px, 1fr\);[\s\S]*?align-content:\s*stretch/,
+      /\.summaryList\s*{[\s\S]*?flex:\s*1;[\s\S]*?grid-auto-rows:\s*minmax\(44px, 1fr\);[\s\S]*?align-content:\s*stretch/,
     );
     expect(styles).toMatch(
       /\.summaryList > div\s*{[\s\S]*?align-items:\s*center;[\s\S]*?border-bottom:/,
@@ -53,6 +53,8 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toMatch(/\.modeContent\s*{[\s\S]*?overflow:\s*visible/);
     expect(styles).not.toMatch(/scrollbar-gutter|overscroll-behavior-y/);
     expect(styles).not.toMatch(/simulatorScreen|interview-results-mode/);
+    expect(styles).not.toMatch(/\.preparationScreen\)[\s\S]*?\.site-header/);
+    expect(styles).not.toMatch(/\.modeSelectionScreen\)[\s\S]*?\.site-header/);
   });
 
   it("uses only the supplied responsive panorama as the banner background", () => {
@@ -69,8 +71,8 @@ describe("Interview preparation page style contract", () => {
   });
 
   it("uses consistent dark fields, yellow labels, and native selector cards", () => {
-    expect(styles).toMatch(/\.setupForm\s*{[\s\S]*?gap:\s*14px/);
-    expect(styles).toMatch(/\.formRow input,[\s\S]*?min-height:\s*42px/);
+    expect(styles).toMatch(/\.setupForm\s*{[\s\S]*?gap:\s*10px/);
+    expect(styles).toMatch(/\.formRow input,[\s\S]*?min-height:\s*40px/);
     expect(styles).toMatch(/\.formRow input,[\s\S]*?background:\s*#081221/);
     expect(styles).toMatch(/\.formRow label,[\s\S]*?color:\s*var\(--game-yellow\)/);
     expect(styles).toContain(".selectWrap");
@@ -78,10 +80,11 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toMatch(/\.selectorOptions\s*{[\s\S]*?grid-template-columns:/);
     expect(styles).toMatch(/\.selectorOptions input\s*{[\s\S]*?position:\s*absolute/);
     expect(styles).toMatch(/\.selectorOptions label:focus-within/);
+    expect(styles).toMatch(/\.selectorOptions label:has\(input:disabled\)/);
   });
 
-  it("creates a large dashed upload zone and compact uploaded-file actions", () => {
-    expect(styles).toMatch(/\.uploadZone\s*{[\s\S]*?min-height:\s*220px/);
+  it("creates a compact dashed upload zone and compact uploaded-file actions", () => {
+    expect(styles).toMatch(/\.uploadZone\s*{[\s\S]*?min-height:\s*158px/);
     expect(styles).toMatch(/\.uploadZone\s*{[\s\S]*?border:\s*3px dashed/);
     expect(styles).toContain(".uploadedFile");
     expect(styles).toContain(".fileActions");
@@ -94,6 +97,7 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toContain(".resumeSummaryPanel");
     expect(styles).toContain(".resumeSummaryGrid");
     expect(styles).toContain(".resumeSummaryField");
+    expect(styles).toMatch(/\.noResume\s*{[\s\S]*?min-height:\s*112px/);
   });
 
   it("builds a fullscreen response-mode room from the supplied combined artwork", () => {

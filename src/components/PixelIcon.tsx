@@ -4,6 +4,7 @@ export type PixelIconName =
   | "building"
   | "camera"
   | "check"
+  | "fire"
   | "home"
   | "lesson"
   | "lock"
@@ -15,6 +16,7 @@ export type PixelIconName =
   | "settings"
   | "speech"
   | "star"
+  | "target"
   | "timer";
 
 type PixelIconProps = {
@@ -34,6 +36,9 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
   building: <path d="M3 8h18v14H3zM6 3h12v5H6zm1 9h3v3H7zm7 0h3v3h-3zM10 17h4v5h-4z" />,
   camera: <path d="M2 7h14v12H2zM16 10l6-3v12l-6-3zM6 4h6v3H6zm1 7h4v4H7z" />,
   check: <path d="M2 12h5v5h4v4h5v-5h3v-5h3V6h-5v5h-3v4h-2v-3H7V9H2z" />,
+  fire: (
+    <path d="M10 1h4v5h3v3h3v8h-2v4h-4v3H8v-3H5v-4H3v-6h3V7h4zm1 9H8v3H6v4h2v3h3v2h3v-2h2v-3h2v-5h-3v3h-2v-4h-2z" />
+  ),
   home: (
     <path
       fillRule="evenodd"
@@ -62,6 +67,12 @@ const shapes: Record<PixelIconName, React.ReactNode> = {
   ),
   speech: <path d="M2 3h20v14H9l-5 5v-5H2zM6 7h3v3H6zm5 0h3v3h-3zm5 0h3v3h-3z" />,
   star: <path d="M9 1h6v5h5v5h3v5h-6v7H7v-7H1v-5h3V6h5zM10 8h4v4h-4z" />,
+  target: (
+    <path
+      fillRule="evenodd"
+      d="M7 2h10v2h3v3h2v10h-2v3h-3v2H7v-2H4v-3H2V7h2V4h3zm0 4H6v2H4v8h2v2h2v2h8v-2h2v-2h2V8h-2V6h-2V4H8v2zm3 3h4v2h2v4h-2v2h-4v-2H8v-4h2zm1 2v4h3v-4z"
+    />
+  ),
   timer: (
     <path d="M9 1h6v3H9zM7 4h10v2h3v3h2v10h-2v3h-3v2H7v-2H4v-3H2V9h2V6h3zm4 4h3v6h4v3h-7z" />
   ),

@@ -1,5 +1,6 @@
 import type { InterviewEvaluation } from "@/lib/evaluation/contracts";
 import { parseInterviewEvaluation } from "@/lib/evaluation/schema";
+import { notifyProgressChanged } from "@/lib/progress-events";
 import {
   type CompletedInterviewAttempt,
   type ConfirmedResponse,
@@ -166,6 +167,27 @@ export function readInterviewAttempts(storage: Storage): AttemptStore {
 
 export function clearInterviewAttempts(storage: Storage): void {
   storage.removeItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
+  notifyProgressChanged();
+}
+
+export function deleteInterviewAttempt(
+  storage: Storage,
+  attemptId: string,
+): AttemptStore {
+  const current = readInterviewAttempts(storage);
+  const attempts = current.attempts.filter((attempt) => attempt.id !== attemptId);
+  if (attempts.length === current.attempts.length) {
+    throw new Error("The interview attempt could not be found for deletion.");
+  }
+
+  const next = { version: 1 as const, attempts };
+  if (attempts.length === 0) {
+    storage.removeItem(INTERVIEW_ATTEMPTS_STORAGE_KEY);
+  } else {
+    storage.setItem(INTERVIEW_ATTEMPTS_STORAGE_KEY, JSON.stringify(next));
+  }
+  notifyProgressChanged();
+  return next;
 }
 
 export function saveCompletedAttempt(
@@ -180,6 +202,7 @@ export function saveCompletedAttempt(
     attempts: [...current.attempts, validated].slice(-20),
   };
   storage.setItem(INTERVIEW_ATTEMPTS_STORAGE_KEY, JSON.stringify(next));
+  notifyProgressChanged();
   return next;
 }
 
@@ -211,6 +234,7 @@ export function saveAttemptEvaluation(
     INTERVIEW_ATTEMPTS_STORAGE_KEY,
     JSON.stringify({ version: 1, attempts }),
   );
+  notifyProgressChanged();
   return nextAttempt;
 }
 

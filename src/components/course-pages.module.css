@@ -919,28 +919,53 @@
   width: 100%;
   max-width: 1440px;
   min-height: calc(100vh - 100px);
-  gap: 16px;
-  padding: 2px 0 24px;
+  gap: 12px;
+  padding: 2px 0 18px;
 }
 
 :global(.course-page):has(.academyScreen) {
   width: min(calc(100% - 24px), 1464px);
-  padding: 14px 0 32px;
+  padding: 10px 0 24px;
 }
 
 .academyHero {
+  position: relative;
   display: grid;
+  overflow: hidden;
   grid-template-columns: 64px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
-  min-height: 116px;
-  padding: 18px 20px;
+  gap: 14px;
+  min-height: 100px;
+  padding: 14px 16px;
   border: 4px solid var(--game-border);
   color: var(--game-text);
   background: #142743;
   box-shadow:
     inset 0 0 0 2px var(--game-line-highlight),
-    6px 6px 0 var(--game-border);
+    5px 5px 0 var(--game-border);
+}
+
+.academyHero::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--game-yellow);
+  content: "";
+}
+
+.academyHero::after {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  border-right: 5px solid var(--game-yellow);
+  border-bottom: 5px solid var(--game-yellow);
+  content: "";
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .heroIcon {
@@ -985,7 +1010,7 @@
 .heroCopy h1 {
   max-width: none;
   margin: 3px 0 6px;
-  font-size: clamp(1.18rem, 2.4vw, 1.8rem);
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1017,14 +1042,26 @@
 }
 
 .dashboard {
+  position: relative;
   display: grid;
-  gap: 12px;
-  padding: 16px;
+  overflow: hidden;
+  gap: 9px;
+  padding: 12px;
   border: 4px solid var(--game-border);
   background: var(--game-panel-850);
   box-shadow:
     inset 0 0 0 2px var(--game-line-highlight),
-    6px 6px 0 var(--game-border);
+    5px 5px 0 var(--game-border);
+}
+
+.dashboard::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--game-green-highlight);
+  content: "";
 }
 
 .dashboardHeading {
@@ -1036,7 +1073,7 @@
 
 .dashboardHeading h2 {
   margin: 2px 0 0;
-  font-size: clamp(0.98rem, 1.8vw, 1.3rem);
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
   text-transform: uppercase;
 }
 
@@ -1048,8 +1085,8 @@
 }
 
 .academyProgress {
-  height: 20px;
-  padding: 3px;
+  height: 17px;
+  padding: 2px;
   border: 3px solid var(--game-border);
   background: #060d18;
   box-shadow: inset 0 0 0 1px var(--game-line);
@@ -1076,10 +1113,11 @@
   display: grid;
   min-width: 0;
   align-content: center;
-  gap: 5px;
-  min-height: 74px;
-  padding: 11px 14px;
+  gap: 4px;
+  min-height: 62px;
+  padding: 8px 11px;
   border-right: 2px solid var(--game-border);
+  border-top: 3px solid var(--game-line-highlight);
 }
 
 .dashboardStats > div:last-child {
@@ -1151,13 +1189,30 @@
 }
 
 .phaseCard {
+  position: relative;
+  overflow: hidden;
   border: 3px solid var(--game-border);
   background: #0b1627;
   box-shadow: inset 0 0 0 2px var(--game-line);
 }
 
+.phaseCard::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: #586980;
+  content: "";
+}
+
 .phaseUnlocked {
   background: var(--game-panel-900);
+}
+
+.phaseUnlocked::before {
+  background: var(--game-yellow-dark);
 }
 
 .phaseComplete {
@@ -1165,8 +1220,13 @@
   box-shadow: inset 0 0 0 2px var(--game-green);
 }
 
+.phaseComplete::before {
+  background: var(--game-green-highlight);
+}
+
 .phaseLocked {
   color: #738399;
+  border-style: dashed;
 }
 
 .phaseHeader {
@@ -1174,8 +1234,8 @@
   grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 76px;
-  padding: 10px;
+  min-height: 64px;
+  padding: 8px 9px;
   border-bottom: 3px solid var(--game-border);
 }
 
@@ -1198,11 +1258,29 @@
 }
 
 .phaseState {
-  min-width: 36px;
-  min-height: 30px;
-  padding: 4px 6px;
+  min-width: 42px;
+  min-height: 38px;
+  gap: 2px;
+  padding: 4px 7px;
   color: var(--game-green-highlight);
   font-size: 0.56rem;
+}
+
+.phaseState strong,
+.phaseState small {
+  margin: 0;
+  font-family: var(--game-font-ui);
+  line-height: 1;
+}
+
+.phaseState strong {
+  color: var(--game-text);
+  font-size: 0.55rem;
+}
+
+.phaseState small {
+  color: var(--game-green-highlight);
+  font-size: 0.47rem;
 }
 
 .phaseHeader small,
@@ -1219,9 +1297,15 @@
   text-transform: uppercase;
 }
 
+.phaseHeader .phaseState small {
+  color: var(--game-green-highlight);
+  font-size: 0.47rem;
+  letter-spacing: 0;
+}
+
 .phaseHeader h3 {
   margin: 2px 0 3px;
-  font-size: clamp(0.67rem, 1.1vw, 0.78rem);
+  font-size: clamp(0.7rem, 1.2vw, 0.84rem);
   text-transform: uppercase;
 }
 
@@ -1734,11 +1818,28 @@
 .badgeShelf,
 .masterReward,
 .curriculum {
+  position: relative;
+  overflow: hidden;
   border: 4px solid var(--game-border);
   background: var(--game-panel-850);
   box-shadow:
     inset 0 0 0 2px var(--game-line-highlight),
-    6px 6px 0 var(--game-border);
+    5px 5px 0 var(--game-border);
+}
+
+.currentQuest::after,
+.badgeShelf::after,
+.curriculum::after {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 32px;
+  height: 32px;
+  border-right: 4px solid var(--game-yellow);
+  border-bottom: 4px solid var(--game-yellow);
+  content: "";
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .currentQuest,
@@ -1746,8 +1847,17 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px;
+}
+
+.currentQuest {
+  border-color: #8b641d;
+  background: #17283c;
+  box-shadow:
+    inset 5px 0 0 var(--game-yellow),
+    inset 0 0 0 2px var(--game-line-highlight),
+    5px 5px 0 var(--game-border);
 }
 
 .currentQuest > div,
@@ -1755,6 +1865,10 @@
 .badgeShelf > div {
   display: grid;
   gap: 4px;
+}
+
+.currentQuestContent {
+  min-width: 0;
 }
 
 .currentQuest p,
@@ -1782,7 +1896,7 @@
 .currentQuest h2,
 .masterReward h2,
 .badgeShelf h2 {
-  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem);
   text-transform: uppercase;
 }
 
@@ -1793,17 +1907,56 @@
   line-height: 1.5;
 }
 
+.currentQuestMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.currentQuestMeta div {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 5px 7px;
+  border: 2px solid var(--game-border);
+  background: var(--game-panel-900);
+}
+
+.currentQuestMeta dt,
+.currentQuestMeta dd {
+  margin: 0;
+  font-family: var(--game-font-ui);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.currentQuestMeta dt {
+  color: var(--game-text-muted);
+}
+
+.currentQuestMeta dd {
+  color: var(--game-yellow);
+  font-weight: 900;
+}
+
+.currentQuest :global(.pixel-button) {
+  min-height: 50px;
+  padding-inline: 18px;
+  font-size: 0.68rem;
+}
+
 .badgeShelf {
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
   align-items: stretch;
-  gap: 12px;
-  padding: 12px;
+  gap: 9px;
+  padding: 10px;
 }
 
 .badgeShelf > div {
   align-content: center;
-  padding: 10px;
+  padding: 8px;
   border: 3px solid var(--game-border);
   background: var(--game-panel-900);
   box-shadow: inset 0 0 0 2px var(--game-line);
@@ -1812,24 +1965,37 @@
 .badgeShelf ul {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .badgeShelf li {
+  position: relative;
   display: grid;
-  min-height: 74px;
+  min-height: 66px;
   place-items: center;
   align-content: center;
   gap: 4px;
-  padding: 7px;
+  padding: 6px;
   border: 2px solid var(--game-border);
   color: #6f7e92;
   text-align: center;
   background: #0a1321;
   box-shadow: inset 0 0 0 1px var(--game-line);
+  transition:
+    transform 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    box-shadow 120ms steps(2, end);
+}
+
+.badgeShelf li:hover {
+  border-color: var(--game-yellow-dark);
+  box-shadow:
+    inset 0 0 0 1px var(--game-line-highlight),
+    3px 3px 0 var(--game-border);
+  transform: translateY(-2px);
 }
 
 .badgeShelf li > span {
@@ -1851,6 +2017,19 @@
   box-shadow: inset 0 0 0 2px var(--game-yellow-dark);
 }
 
+.badgeShelf .badgeCurrent {
+  border-color: var(--game-yellow);
+  color: var(--game-yellow);
+  background: #20283a;
+  box-shadow:
+    inset 4px 0 0 var(--game-yellow),
+    inset 0 0 0 1px var(--game-line-highlight);
+}
+
+.badgeCurrent small {
+  color: var(--game-yellow) !important;
+}
+
 .masterReward {
   grid-template-columns: 54px minmax(0, 1fr) auto;
   border-color: #1d6e31;
@@ -1868,8 +2047,8 @@
 
 .curriculum {
   display: grid;
-  gap: 12px;
-  padding: 12px;
+  gap: 9px;
+  padding: 10px;
 }
 
 .curriculum > .sectionTitle {
@@ -1879,50 +2058,89 @@
 .lessonCardGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 7px;
   margin: 0;
-  padding: 10px;
+  padding: 8px;
   list-style: none;
 }
 
 .lessonCard {
+  position: relative;
   display: grid;
-  min-height: 142px;
-  grid-template-columns: 42px minmax(0, 1fr);
+  overflow: hidden;
+  min-height: 116px;
+  grid-template-columns: 38px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 9px 11px;
-  padding: 11px;
-  border: 3px solid var(--game-border);
+  gap: 7px 9px;
+  padding: 9px;
+  border: 2px solid var(--game-border);
   color: var(--game-text);
   background: #101e33;
-  box-shadow: inset 0 0 0 2px var(--game-line);
+  box-shadow:
+    inset 3px 0 0 #4979a9,
+    inset 0 0 0 1px var(--game-line);
+  transition:
+    transform 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    box-shadow 120ms steps(2, end);
+}
+
+.lessonCard::after {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 22px;
+  height: 22px;
+  border-right: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  content: "";
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 a.lessonCard:hover,
 a.lessonCard:focus-visible {
   color: var(--game-yellow);
-  transform: translate(-2px, -2px);
+  border-color: var(--game-yellow-dark);
+  transform: translateY(-2px);
   box-shadow:
-    inset 5px 0 0 var(--game-green),
-    inset 0 0 0 2px var(--game-line-highlight),
+    inset 4px 0 0 var(--game-yellow),
+    inset 0 0 0 1px var(--game-line-highlight),
+    0 0 12px rgba(244, 199, 89, 0.16),
     4px 4px 0 var(--game-border);
 }
 
 .lessonCardComplete {
   border-color: #1d6e31;
   background: #10291f;
+  box-shadow:
+    inset 4px 0 0 var(--game-green-highlight),
+    inset 0 0 0 1px var(--game-green);
+}
+
+.lessonCardCurrent {
+  border-color: var(--game-yellow);
+  background: #18263b;
+  box-shadow:
+    inset 4px 0 0 var(--game-yellow),
+    inset 0 0 0 1px var(--game-line-highlight),
+    0 0 10px rgba(244, 199, 89, 0.12);
 }
 
 .lessonCardLocked {
   color: #738298;
   background: #09121f;
-  opacity: 0.7;
+  border-style: dashed;
+  box-shadow:
+    inset 3px 0 0 #4f5e72,
+    inset 0 0 0 1px #29384d;
+  opacity: 0.72;
 }
 
 .lessonCardNumber {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   place-items: center;
   border: 2px solid var(--game-border);
   color: var(--game-yellow);
@@ -1936,7 +2154,7 @@ a.lessonCard:focus-visible {
 .lessonCardCopy {
   display: grid;
   align-content: start;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -1949,15 +2167,15 @@ a.lessonCard:focus-visible {
 
 .lessonCardCopy > small {
   color: var(--game-text-muted);
-  font-size: 0.67rem;
-  line-height: 1.45;
+  font-size: 0.65rem;
+  line-height: 1.4;
 }
 
 .lessonCardMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 2px;
+  gap: 4px;
+  margin-top: 1px;
 }
 
 .lessonCardMeta > span {
@@ -1975,9 +2193,9 @@ a.lessonCard:focus-visible {
   grid-column: 1 / -1;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
-  padding-top: 7px;
-  border-top: 2px solid var(--game-border);
+  gap: 4px;
+  padding-top: 5px;
+  border-top: 1px solid var(--game-border);
   color: var(--game-green-highlight);
   font-family: var(--game-font-ui);
   font-size: 0.51rem;
@@ -1994,15 +2212,21 @@ a.lessonCard:focus-visible {
 
 .phaseReward {
   display: flex;
-  min-height: 38px;
+  min-height: 34px;
   align-items: center;
   justify-content: flex-end;
-  gap: 7px;
-  padding: 7px 10px;
-  border-top: 3px solid var(--game-border);
+  gap: 6px;
+  padding: 5px 8px;
+  border-top: 2px solid var(--game-border);
   color: var(--game-text-muted);
   font-size: 0.64rem;
   background: #0b1627;
+}
+
+.phaseReward span {
+  padding: 3px 6px;
+  border: 1px solid var(--game-yellow-dark);
+  background: var(--game-panel-900);
 }
 
 .phaseReward strong,
@@ -2071,5 +2295,18 @@ a.lessonCard:focus-visible {
   .lessonCardNumber {
     width: 32px;
     height: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badgeShelf li,
+  .lessonCard {
+    transition: none;
+  }
+
+  .badgeShelf li:hover,
+  a.lessonCard:hover,
+  a.lessonCard:focus-visible {
+    transform: none;
   }
 }

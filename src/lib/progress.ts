@@ -8,6 +8,9 @@ import type { EvaluationCriterionId } from "@/lib/evaluation/contracts";
 import { getLessonRecommendation, STAR_RUBRIC } from "@/lib/evaluation/rubric";
 import type { ExerciseProgress } from "@/lib/exercise-progress";
 import type { CompletedInterviewAttempt } from "@/lib/interview/contracts";
+import { calculatePlayerProgress } from "@/lib/player-progress";
+
+export { PROGRESS_XP } from "@/lib/player-progress";
 
 export type RecommendedActivity = {
   kind: "lesson" | "exercise" | "simulation" | "history";
@@ -48,14 +51,6 @@ export type ProgressSnapshot = {
   }>;
   recommendedNext: RecommendedActivity;
 };
-
-export const PROGRESS_XP = {
-  lesson: 100,
-  exercise: 75,
-  simulation: 150,
-  validatedFeedback: 25,
-  perLevel: 500,
-} as const;
 
 export type RubricChange = {
   criterion: EvaluationCriterionId;
@@ -229,11 +224,7 @@ export function calculateProgress(input: {
   const evaluatedSimulations = input.attempts.filter(
     (attempt) => attempt.evaluation,
   ).length;
-  const xp =
-    completedLessons.length * PROGRESS_XP.lesson +
-    completedExercises.length * PROGRESS_XP.exercise +
-    input.attempts.length * PROGRESS_XP.simulation +
-    evaluatedSimulations * PROGRESS_XP.validatedFeedback;
+  const playerProgress = calculatePlayerProgress(input);
   const sortedAttempts = [...input.attempts].sort(
     (a, b) => Date.parse(b.completedAt) - Date.parse(a.completedAt),
   );
@@ -267,10 +258,10 @@ export function calculateProgress(input: {
     simulationsCompleted: input.attempts.length,
     evaluatedSimulations,
     currentStreak: calculateCurrentStreak(input.attempts, input.now),
-    xp,
-    level: Math.floor(xp / PROGRESS_XP.perLevel) + 1,
-    xpIntoLevel: xp % PROGRESS_XP.perLevel,
-    xpPerLevel: PROGRESS_XP.perLevel,
+    xp: playerProgress.xp,
+    level: playerProgress.level,
+    xpIntoLevel: playerProgress.xpIntoLevel,
+    xpPerLevel: playerProgress.xpPerLevel,
     skillProgress: calculateSkillProgress(input.attempts),
     recentActivity: recentActivity.slice(0, 6),
     recommendedNext: getRecommendedNextActivity(input),
