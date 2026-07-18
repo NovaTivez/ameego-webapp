@@ -1943,3 +1943,27 @@ mascot from intercepting building interactions.
 Consequences: The owl floats subtly without drifting from the circular plaza.
 Building links, hover/focus states, paths, and routing remain untouched, and
 reduced-motion users receive a static centered guide.
+
+---
+
+## Decision 059 - Distinguish Development-model Use From Runtime AI
+
+Date: 2026-07-19
+
+Status: Accepted
+
+Context: Hackathon documentation must explain Codex and GPT-5.6 contributions,
+but the repository's current server adapter calls Groq's OpenAI-compatible chat
+endpoint and defaults to `llama-3.1-8b-instant`.
+
+Decision: Document GPT-5.6's role in the Codex-assisted development workflow
+separately from the application's deployed model path. State the current Groq
+runtime and required environment variables explicitly, and do not claim runtime
+GPT-5.6 integration until that provider migration has been implemented and
+revalidated.
+
+Reason: A reproducible and technically credible submission is stronger than a
+model claim judges cannot verify from the code or environment configuration.
+
+Consequences: Judges can follow the real setup successfully and understand both
+the recorded Codex contribution and the remaining runtime integration gap.

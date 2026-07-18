@@ -2322,3 +2322,26 @@ Status: Implemented and validated on 2026-07-18.
   the animation is disabled under `prefers-reduced-motion`.
 - All 9 focused Academy Hub component and style tests pass; formatting,
   changed-file ESLint, and strict TypeScript pass.
+
+# Milestone Update - Judge-ready Repository README
+
+Status: Implemented on 2026-07-19.
+
+- Audited the package scripts, environment template, application routes, AI
+  adapter, validation boundary, local persistence, tests, architecture notes,
+  demo script, Codex workflow, and decision log.
+- Reorganized the README so Setup Instructions, Sample Data, and the Testing
+  Guide immediately follow the product introduction.
+- Added copy-ready interview and resume examples plus a twelve-step manual
+  walkthrough covering the complete learning, simulation, feedback, retry,
+  comparison, settings, permissions, and failure-state experience.
+- Added a concrete Development with Codex & GPT-5.6 section that distinguishes
+  the Codex development workflow from the repository's current Groq Llama
+  runtime instead of overstating the deployed model integration.
+- Preserved application code, routes, state, persistence, AI behavior, and UI;
+  this milestone changes documentation only.
+- Validation: focused README and contribution-log formatting passes, strict
+  TypeScript passes, and the production build generates 32 pages. The audit
+  also surfaced two existing test failures, one lint error with three warnings,
+  and 64 existing files outside repository-wide Prettier style; the README now
+  reports that baseline explicitly.

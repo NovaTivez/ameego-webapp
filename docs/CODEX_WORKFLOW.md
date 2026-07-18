@@ -2267,3 +2267,41 @@ routing, header, storage, state, API, XP, or backend code changed.
 
 Validation result: All 9 focused Academy Hub rendering and style-contract tests,
 changed-file ESLint, formatting, and strict TypeScript pass.
+
+## Contribution 063 - Judge-ready README and Reproducibility Audit
+
+Date: 2026-07-19
+
+Feature: Make the repository entry point accurate, reproducible, and easy for
+hackathon judges to evaluate.
+
+Codex inspected: The existing README, package scripts, environment template,
+route tree, AI provider adapter and evaluation route, versioned storage keys,
+test inventory, architecture and evaluation specifications, demo script,
+implementation plan, decision log, and the recorded Codex contribution history.
+
+Codex implemented: A rewritten README whose first sections are Setup
+Instructions, Sample Data, and a complete Testing Guide; copy-ready scenario,
+resume, and STAR-answer inputs; automated and manual verification paths; a clear
+product differentiator; architecture, safety, privacy, limitations, and project
+map sections; and a concrete Development with Codex & GPT-5.6 account tied to
+recorded contributions and decisions.
+
+Problem discovered: The old README and several planning documents described
+GPT-5.6 feedback, while the checked-in adapter currently calls Groq and defaults
+to `llama-3.1-8b-instant`.
+
+How Codex helped resolve it: The README now separates GPT-5.6's role in the
+Codex development workflow from the current runtime provider and explicitly
+identifies provider migration as remaining work if runtime GPT-5.6 use is a
+submission requirement.
+
+Scope protection: No application source, route, API, state, storage, test, or UI
+behavior changed.
+
+Validation result: Focused Prettier checks for the changed documentation pass,
+strict TypeScript passes, and the production build generates all 32 pages. The
+full audit found 252 of 254 tests passing, one existing lint error and three
+warnings in `InterviewSimulator.tsx`, and 64 existing files outside the current
+repository-wide Prettier style. These results are recorded in the README rather
+than being presented as a clean baseline.
