@@ -8,6 +8,11 @@ describe("Academy Hub", () => {
     render(<AcademyHubPage />);
 
     expect(screen.getByRole("heading", { name: "Ameego Academy" })).toBeVisible();
+    expect(screen.getByRole("link", { name: /return to landing page/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByRole("button", { name: /back to previous page/i })).toBeVisible();
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("XP0000");
     expect(screen.getByLabelText("Academy player status")).toHaveTextContent("LV01");
     const controls = screen.getByLabelText("Academy campus controls");

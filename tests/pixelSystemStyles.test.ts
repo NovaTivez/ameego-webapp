@@ -34,6 +34,15 @@ describe("compact pixel-game style contract", () => {
     expect(system).toMatch(/\.music-toggle,[\s\S]*?width:\s*88px/);
     expect(system).toMatch(/\.music-toggle,[\s\S]*?min-height:\s*36px/);
     expect(system).toMatch(/\.hud-settings-link\s*{[\s\S]*?width:\s*36px/);
+    expect(system).toMatch(
+      /\.top-left-navigation\s*{[\s\S]*?gap:\s*var\(--game-space-2\)/,
+    );
+    expect(system).toMatch(/\.hud-navigation-button\s*{[\s\S]*?width:\s*36px/);
+    expect(system).toMatch(/\.hud-navigation-button\s*{[\s\S]*?height:\s*36px/);
+    expect(system).toMatch(/\.hud-navigation-button\s*{[\s\S]*?padding:\s*7px/);
+    expect(system).toMatch(
+      /\.hud-navigation-button \.pixel-icon\s*{[\s\S]*?width:\s*18px[\s\S]*?height:\s*18px/,
+    );
     expect(system).toMatch(/\.site-header nav\s*{[\s\S]*?display:\s*none/);
     expect(system).toMatch(/\.site-footer\s*{[\s\S]*?display:\s*none/);
     expect(system).toMatch(/\.pixel-hud-stat\s*{/);

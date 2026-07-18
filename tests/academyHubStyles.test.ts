@@ -13,6 +13,10 @@ describe("Academy Hub map style contract", () => {
     );
     expect(styles).toMatch(/\.hud\s*{[\s\S]*?position:\s*absolute;[\s\S]*?top:\s*0/);
     expect(styles).toMatch(/\.hud\s*{[\s\S]*?height:\s*72px/);
+    expect(styles).toMatch(/\.pageNavigation\s*{[\s\S]*?gap:\s*8px/);
+    expect(styles).toMatch(
+      /\.pageNavigation :global\(\.hud-navigation-button\)\s*{[\s\S]*?width:\s*42px;[\s\S]*?height:\s*42px/,
+    );
     expect(styles).toMatch(
       /\.headerControls\s*{[\s\S]*?margin-left:\s*auto;[\s\S]*?gap:\s*8px/,
     );
@@ -95,6 +99,9 @@ describe("Academy Hub map style contract", () => {
     expect(styles).toMatch(/@media \(max-width:\s*760px\)/);
     expect(styles).toMatch(/@media \(max-width:\s*520px\)/);
     expect(styles).toMatch(/@media \(hover:\s*none\),\s*\(pointer:\s*coarse\)/);
+    expect(styles).toMatch(
+      /@media \(max-width:\s*520px\)[\s\S]*?\.pageNavigation\s*{[\s\S]*?gap:\s*8px/,
+    );
   });
 
   it("keeps all five proportional building regions inside the map without overlap", () => {
