@@ -1,12 +1,14 @@
 # Ameego
 
-**A pixel-art communication academy where learners study interview skills, practise them in a simulator, receive evidence-based feedback, and retry with a focused learning goal.**
+**A pixel-art communication academy where learners study interview skills, practice them in a simulator, receive evidence-based feedback, and retry with a focused learning goal.**
 
 Ameego is built for students, internship applicants, fresh graduates, and first-time job seekers who need more than a list of interview questions. The product connects instruction, practice, feedback, and measurable follow-up in one experience:
 
-**Learn -> Practise -> Interview -> Confirm transcript -> Receive rubric feedback -> Open the recommended lesson -> Retry -> Compare attempts**
+**Learn -> Practice -> Interview -> Confirm transcript -> Receive rubric feedback -> Open the recommended lesson -> Retry -> Compare attempts**
 
 The academy setting makes repeated practice approachable, but the game layer serves the learning experience. Feedback is grounded in the learner's confirmed words, progress comes from completed activities, and the application does not make hiring or personality judgments.
+
+Ameego supports learning both online and offline so more people can build career-ready communication skills regardless of connectivity. After an initial online visit, cached academy lessons and locally saved progress remain available offline; learners can reconnect when they are ready to use live AI features. This flexible access helps give every learner a fairer opportunity to prepare for their education and career.
 
 ## Setup Instructions
 
@@ -188,7 +190,7 @@ Many interview tools stop at question generation or a score. That leaves learner
 Ameego's differentiator is a closed educational loop:
 
 1. Teach a reusable communication concept.
-2. Practise it in a small, low-risk exercise.
+2. Practice it in a small, low-risk exercise.
 3. Apply it in a realistic interview.
 4. Confirm the transcript before evaluation.
 5. Evaluate against a predefined rubric.
@@ -218,7 +220,7 @@ This makes the AI output actionable rather than decorative. The product teaches 
 
 Codex worked as a repository-aware development partner, not as a one-shot code generator. For each milestone it inspected the existing implementation and project documentation, identified reusable code and constraints, proposed a scoped plan, implemented the change, ran focused and repository-level checks, diagnosed failures, and recorded the result. The detailed evidence trail is maintained in [`docs/CODEX_WORKFLOW.md`](docs/CODEX_WORKFLOW.md), with product-owner decisions in [`docs/DECISION_LOG.md`](docs/DECISION_LOG.md).
 
-GPT-5.6 informed the project's education-first evaluation design and was used through the Codex development workflow for architecture review, implementation, debugging, UI refinement, test design, and documentation. The final code reflects that work in its prompt boundaries, structured response contracts, validation rules, safe failure states, and full learn-practise-feedback-retry loop.
+GPT-5.6 informed the project's education-first evaluation design and was used through the Codex development workflow for architecture review, implementation, debugging, UI refinement, test design, and documentation. The final code reflects that work in its prompt boundaries, structured response contracts, validation rules, safe failure states, and full learn-practice-feedback-retry loop.
 
 There is an important runtime distinction: **the checked-in application currently sends live model requests to Groq's OpenAI-compatible chat endpoint and defaults to `llama-3.1-8b-instant`.** The repository does not claim that its current production feedback requests are served by GPT-5.6. The AI adapter is isolated under `src/lib/interview/openai.ts`, so a provider migration can be made without rewriting the learning, storage, or presentation layers, but that migration must be implemented and revalidated before it is claimed.
 
