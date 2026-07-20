@@ -358,7 +358,3 @@ public/                  Pixel-art environments, buildings, characters, and back
 - [`docs/DECISION_LOG.md`](docs/DECISION_LOG.md) - accepted product and engineering decisions
 - [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) - under-three-minute video walkthrough
 - [`docs/SUBMISSION_CHECKLIST.md`](docs/SUBMISSION_CHECKLIST.md) - final submission checks
-
-## License
-
-The repository does not yet contain a selected software license. Add the team's chosen license before public distribution.
