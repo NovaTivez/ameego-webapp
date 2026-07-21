@@ -41,7 +41,6 @@ const loadPdfDocument: LoadPdfDocument = async (data) => {
       // Prefer main-thread parsing in Node/Next so the worker import path
       // does not need to survive the Turbopack rewrite of node_modules URLs.
       useWorkerFetch: false,
-      isEvalSupported: false,
       useSystemFonts: true,
     });
     const document = await task.promise;
