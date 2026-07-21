@@ -1,10 +1,5 @@
 export type CameraStatus =
-  | "off"
-  | "starting"
-  | "active"
-  | "denied"
-  | "unavailable"
-  | "interrupted";
+  "off" | "starting" | "active" | "denied" | "unavailable" | "interrupted";
 
 export type FacePresence = "unknown" | "in_frame" | "out_of_frame" | "not_detected";
 
@@ -22,6 +17,18 @@ export type FaceObservation = {
   centerY: number;
   /** Approximate yaw in normalized face space: 0 = left, 0.5 = center, 1 = right. */
   yawRatio: number | null;
+  /** Approximate pitch in normalized face space; larger values can indicate looking down. */
+  pitchRatio?: number | null;
+};
+
+export type CameraConfidenceInsights = {
+  observedDurationMs: number;
+  facePresencePercent: number;
+  facingScreenPercent: number;
+  lookAwayCount: number;
+  longDownOrSideCount: number;
+  downDurationMs: number;
+  sideDurationMs: number;
 };
 
 export type PresenceDebounceState = {

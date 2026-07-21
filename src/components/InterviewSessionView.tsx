@@ -392,8 +392,9 @@ export function InterviewSessionView({
           ) : null}
           <p className={styles.cameraNote}>
             Optional on-device framing reminders only. No recording is stored. Face
-            presence and approximate head orientation are shown here and never sent to
-            interview feedback. No emotion, eye-contact, or hiring judgments.
+            presence and approximate head direction can inform practice-only feedback, but
+            never leave this page or affect your interview score. No emotion, appearance,
+            eye-contact, or hiring judgments.
           </p>
         </section>
 

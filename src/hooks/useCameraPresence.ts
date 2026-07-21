@@ -7,11 +7,21 @@ import {
   reducePresenceObservation,
 } from "@/lib/camera/geometry";
 import {
+  createCameraCueTracker,
+  recordCameraCue,
+  summarizeCameraCues,
+} from "@/lib/camera/confidence";
+import {
   createMediaPipeFaceDetector,
   type CreateFaceDetector,
   type FaceDetector,
 } from "@/lib/camera/mediapipe";
-import type { CameraStatus, FacePresence, HeadOrientation } from "@/lib/camera/types";
+import type {
+  CameraConfidenceInsights,
+  CameraStatus,
+  FacePresence,
+  HeadOrientation,
+} from "@/lib/camera/types";
 
 const DETECT_INTERVAL_MS = 125;
 
@@ -22,6 +32,8 @@ type UseCameraPresenceOptions = {
   enabled: boolean;
   /** True while interview/confirm steps are mounted. */
   active: boolean;
+  /** Collect only during the interview, never during the readiness preview. */
+  collectInsights?: boolean;
   createDetector?: CreateFaceDetector;
 };
 
@@ -31,6 +43,8 @@ export type UseCameraPresenceResult = {
   presence: FacePresence;
   orientation: HeadOrientation;
   errorMessage: string;
+  getConfidenceInsights: () => CameraConfidenceInsights | null;
+  resetConfidenceInsights: () => void;
 };
 
 function permissionDenied(error: unknown): boolean {
@@ -43,6 +57,7 @@ function permissionDenied(error: unknown): boolean {
 export function useCameraPresence({
   enabled,
   active,
+  collectInsights = false,
   createDetector = createMediaPipeFaceDetector,
 }: UseCameraPresenceOptions): UseCameraPresenceResult {
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
@@ -52,6 +67,8 @@ export function useCameraPresence({
   const debounceRef = useRef(createPresenceDebounceState());
   const generationRef = useRef(0);
   const createDetectorRef = useRef(createDetector);
+  const cueTrackerRef = useRef(createCameraCueTracker());
+  const collectingRef = useRef(false);
 
   const setVideoRef = useCallback((video: HTMLVideoElement | null) => {
     videoElementRef.current = video;
@@ -71,6 +88,21 @@ export function useCameraPresence({
   useEffect(() => {
     createDetectorRef.current = createDetector;
   }, [createDetector]);
+
+  useEffect(() => {
+    if (collectInsights && !collectingRef.current) {
+      cueTrackerRef.current = createCameraCueTracker();
+    }
+    collectingRef.current = collectInsights;
+  }, [collectInsights]);
+
+  const getConfidenceInsights = useCallback(
+    () => summarizeCameraCues(cueTrackerRef.current),
+    [],
+  );
+  const resetConfidenceInsights = useCallback(() => {
+    cueTrackerRef.current = createCameraCueTracker();
+  }, []);
 
   const shouldRun = enabled && active;
   const status: CameraStatus = shouldRun
@@ -132,6 +164,13 @@ export function useCameraPresence({
 
         try {
           const observation = detector.detect(video, performance.now());
+          if (collectingRef.current) {
+            cueTrackerRef.current = recordCameraCue(
+              cueTrackerRef.current,
+              observation,
+              performance.now(),
+            );
+          }
           const next = reducePresenceObservation(
             debounceRef.current,
             observation,
@@ -228,5 +267,7 @@ export function useCameraPresence({
     presence: shouldRun ? presence : "unknown",
     orientation: shouldRun ? orientation : "unknown",
     errorMessage: shouldRun ? errorMessage : "",
+    getConfidenceInsights,
+    resetConfidenceInsights,
   };
 }

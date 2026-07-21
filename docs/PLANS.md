@@ -1691,6 +1691,45 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - On-Device Camera Confidence Insights
+
+Status: Implemented and validated on 2026-07-21.
+
+## Completed
+
+- Extended the existing optional MediaPipe camera path with an in-memory cue
+  aggregator for face presence, approximate head direction, shifts away from
+  the screen, and sustained down-or-side periods.
+- Limited collection to active interview and transcript-confirmation steps, so
+  the readiness preview does not affect the final observations.
+- Kept all processing on device and retained no raw frames, recordings, images,
+  or camera-derived attempt data.
+- Added a Camera Confidence Insights section to validated final feedback using
+  the existing feedback card, heading, list, icon, color, spacing, and type
+  primitives.
+- Added explicit practice-only and approximation language and excluded emotion,
+  appearance, eye-contact, employability, and hiring judgments.
+- Kept camera observations separate from GPT evaluation, STAR scoring, API
+  requests, local attempt storage, progress calculations, and comparisons.
+- Added deterministic aggregation and feedback-copy tests plus component
+  coverage showing that camera insights do not change the STAR score.
+
+## Validation
+
+- The 28 focused camera, feedback, hook, and simulator tests pass.
+- Strict TypeScript checking and the production build pass.
+- The full suite reports 257 passing tests and two unrelated existing failures:
+  the duplicate star-background style assertion and the resume fetch-mock
+  contract.
+- Repository lint retains one unrelated existing effect-state error and three
+  warnings in `InterviewSimulator.tsx`; the changed camera logic adds none.
+- Repository-wide formatting retains 63 existing unformatted files; every file
+  changed for this milestone passes focused Prettier formatting.
+- Browser screenshot and console inspection could not run because the in-app
+  browser service exposed no browser backend.
+
+---
+
 # Milestone Update - Full-Page Progress Library Dashboard
 
 Status: Implemented and validated on 2026-07-17.

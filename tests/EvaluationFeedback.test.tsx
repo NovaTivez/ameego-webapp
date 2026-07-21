@@ -82,6 +82,34 @@ describe("EvaluationFeedback", () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
+  it("adds approximate, practice-only camera insights without changing the score", () => {
+    render(
+      <EvaluationFeedback
+        evaluation={evaluation}
+        session={session}
+        cameraInsights={{
+          observedDurationMs: 30_000,
+          facePresencePercent: 92,
+          facingScreenPercent: 74,
+          lookAwayCount: 3,
+          longDownOrSideCount: 1,
+          downDurationMs: 4_000,
+          sideDurationMs: 2_000,
+        }}
+        onRetry={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Camera Confidence Insights" }),
+    ).toBeVisible();
+    expect(screen.getByText(/results are approximate/i)).toBeVisible();
+    expect(screen.getByText(/video was not recorded or stored/i)).toBeVisible();
+    expect(screen.getByText(/did not affect your score/i)).toBeVisible();
+    expect(screen.getByText(/3 shifts away from the screen/i)).toBeVisible();
+    expect(screen.getByLabelText("3.5 out of 5")).toBeVisible();
+  });
+
   it("does not render a report with an invalid lesson recommendation", () => {
     const invalid = { ...evaluation, recommendedLessonId: "invented.lesson" };
     const { container } = render(

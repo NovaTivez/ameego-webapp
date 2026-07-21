@@ -1703,3 +1703,33 @@ repository lint, and strict TypeScript pass; the production build prerenders all
 complete suite retains the same pre-existing resume extraction mock failure.
 Browser screenshot inspection remained unavailable because no browser backend
 was exposed.
+
+## Contribution 041 - On-Device Camera Confidence Insights
+
+Date: 2026-07-21
+
+Feature: Practice-only visual cue observations in final interview feedback.
+
+Codex inspected: The existing MediaPipe landmark detector, camera lifecycle
+hook, live presence labels, simulation completion path, validated feedback
+report, local attempt contract, safety language, tests, and Phase 9 plan.
+
+Codex implemented: An ephemeral camera cue tracker for face-presence coverage,
+approximate toward-screen head direction, look-away transitions, and sustained
+down-or-side periods; vertical nose-position estimation; supportive deterministic
+comments and tips; and a Camera Confidence Insights report section composed from
+the existing visual primitives.
+
+Scope protection: Raw video and landmarks are not recorded, persisted, or sent
+to the backend. Camera aggregates remain in page memory, do not enter GPT
+requests or saved attempts, and cannot alter scores, lessons, progress, retries,
+controls, layout styles, or hiring-related output. The wording explicitly avoids
+emotion, appearance, eye-contact, and confidence detection claims.
+
+Validation result: All 28 focused tests pass, strict TypeScript and production
+build pass, and 257 of 259 full-suite tests pass. The two full-suite failures are
+unchanged areas: a star-background occurrence assertion and the established
+resume request mock contract. Repository lint retains its existing interview
+speech-effect finding, and the formatting check retains existing unrelated
+files. The browser skill was followed, but no browser backend was exposed for
+screenshots or console inspection.

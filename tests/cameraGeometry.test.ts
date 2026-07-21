@@ -35,6 +35,16 @@ describe("camera geometry", () => {
     expect(observation.detected).toBe(true);
     expect(observation.centerX).toBeCloseTo(0.4);
     expect(observation.yawRatio).toBeCloseTo(0.75);
+    expect(observation.pitchRatio).toBeNull();
+  });
+
+  it("derives an approximate vertical nose position for down cues", () => {
+    const landmarks = [
+      { x: 0.2, y: 0.2 },
+      { x: 0.5, y: 0.75 },
+      { x: 0.8, y: 0.8 },
+    ];
+    expect(observationFromLandmarks(landmarks).pitchRatio).toBeCloseTo(0.92, 1);
   });
 
   it("requires a short streak before reporting in frame", () => {

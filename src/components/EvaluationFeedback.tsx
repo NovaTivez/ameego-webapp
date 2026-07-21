@@ -2,6 +2,8 @@ import { PixelBadge } from "@/components/PixelBadge";
 import { PixelButton } from "@/components/PixelButton";
 import { PixelIcon } from "@/components/PixelIcon";
 import type { InterviewEvaluation } from "@/lib/evaluation/contracts";
+import { cameraConfidenceCopy } from "@/lib/camera/confidence";
+import type { CameraConfidenceInsights } from "@/lib/camera/types";
 import { getLessonRecommendation, STAR_RUBRIC } from "@/lib/evaluation/rubric";
 
 import styles from "./evaluation-feedback.module.css";
@@ -13,12 +15,14 @@ type EvaluationFeedbackProps = {
     organization: string;
     responseCount: number;
   };
+  cameraInsights?: CameraConfidenceInsights | null;
   onRetry: () => void;
 };
 
 export function EvaluationFeedback({
   evaluation,
   session,
+  cameraInsights,
   onRetry,
 }: EvaluationFeedbackProps) {
   const recommendedLesson = getLessonRecommendation(evaluation.recommendedLessonId);
@@ -30,6 +34,7 @@ export function EvaluationFeedback({
   const overallScore =
     evaluation.rubricScores.reduce((total, item) => total + item.score, 0) /
     evaluation.rubricScores.length;
+  const cameraCopy = cameraInsights ? cameraConfidenceCopy(cameraInsights) : null;
 
   return (
     <section
@@ -184,6 +189,42 @@ export function EvaluationFeedback({
           <blockquote>{evaluation.improvedExample}</blockquote>
         </div>
       </section>
+
+      {cameraCopy ? (
+        <section
+          className={styles.sectionCard}
+          aria-labelledby="camera-confidence-insights-heading"
+        >
+          <div className={styles.sectionHeading}>
+            <PixelIcon name="camera" size="medium" />
+            <div>
+              <p>Optional on-device practice cues</p>
+              <h3 id="camera-confidence-insights-heading">Camera Confidence Insights</h3>
+            </div>
+          </div>
+          <div className={styles.disclaimer} role="note">
+            <PixelIcon name="speech" size="small" />
+            <span>
+              These results are approximate and should only be used for practice. They
+              describe face presence and head direction, not emotion, confidence,
+              appearance, eye contact, or hiring suitability. Video was not recorded or
+              stored, and these cues did not affect your score.
+            </span>
+          </div>
+          <h4 className={styles.subsectionHeading}>Supportive observations</h4>
+          <ul className={styles.guidanceList}>
+            {cameraCopy.observations.map((observation) => (
+              <li key={observation}>{observation}</li>
+            ))}
+          </ul>
+          <h4 className={styles.subsectionHeading}>Practice tips</h4>
+          <ul className={styles.guidanceList}>
+            {cameraCopy.tips.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className={styles.sectionCard} aria-labelledby="actionable-tips-heading">
         <div className={styles.sectionHeading}>

@@ -15,6 +15,7 @@ import { PixelPanel } from "@/components/PixelPanel";
 import { ResumeProfileEditor } from "@/components/ResumeProfileEditor";
 import { PracticeLobbyScene } from "@/components/PracticeLobbyScene";
 import { useCameraPresence } from "@/hooks/useCameraPresence";
+import type { CameraConfidenceInsights } from "@/lib/camera/types";
 import {
   appendTranscriptSegment,
   extractRecognitionUpdate,
@@ -234,6 +235,9 @@ export function InterviewSimulator() {
   const [announcement, setAnnouncement] = useState("");
   const [cameraIntent, setCameraIntent] = useState(false);
   const [cameraPreviewOpen, setCameraPreviewOpen] = useState(false);
+  const [cameraInsights, setCameraInsights] = useState<CameraConfidenceInsights | null>(
+    null,
+  );
   const [selectedInputMode, setSelectedInputMode] = useState<InputMode | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const wantListeningRef = useRef(false);
@@ -248,9 +252,12 @@ export function InterviewSimulator() {
     presence: cameraPresence,
     orientation: cameraOrientation,
     errorMessage: cameraErrorMessage,
+    getConfidenceInsights,
+    resetConfidenceInsights,
   } = useCameraPresence({
     enabled: cameraIntent,
     active: isActiveSession || cameraPreviewOpen,
+    collectInsights: isActiveSession,
   });
 
   useEffect(() => {
@@ -745,6 +752,7 @@ export function InterviewSimulator() {
           retryGoal: focusedRetryGoal,
         });
         saveCompletedAttempt(window.localStorage, attempt);
+        setCameraInsights(getConfidenceInsights());
         setCompletedAttempt(attempt);
         setResponses(nextResponses);
         setSaveError("");
@@ -864,6 +872,8 @@ export function InterviewSimulator() {
     setElapsedSeconds(0);
     setSpeakingSeconds(0);
     setCameraPreviewOpen(false);
+    setCameraInsights(null);
+    resetConfidenceInsights();
     setSelectedInputMode(null);
     setStep("mode");
     setAnnouncement(
@@ -891,6 +901,8 @@ export function InterviewSimulator() {
     setSpeakingSeconds(0);
     setCameraIntent(false);
     setCameraPreviewOpen(false);
+    setCameraInsights(null);
+    resetConfidenceInsights();
     setSelectedInputMode(null);
   };
 
@@ -1733,6 +1745,7 @@ export function InterviewSimulator() {
                   organization: completedAttempt.context.setup.organization,
                   responseCount: completedAttempt.responses.length,
                 }}
+                cameraInsights={cameraInsights}
                 onRetry={retrySameScenario}
               />
             ) : null}

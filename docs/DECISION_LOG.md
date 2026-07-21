@@ -1318,3 +1318,37 @@ Consequences: The desktop campus HUD is 72px tall and all five right-side
 controls share 84px width, 42px height, and 8px spacing. Breakpoints reduce those
 dimensions together, the offline notice begins below the new header, and the
 title screen continues to use its established standalone controls.
+
+---
+
+## Decision 037 - Keep Camera Practice Cues Ephemeral and Separate from Scoring
+
+Date: 2026-07-21
+
+Status: Accepted
+
+Context: Learners requested supportive observations about face presence and
+approximate head direction while the product must not record video, infer
+emotion, judge appearance, influence hiring decisions, or change the existing
+backend and scoring behavior.
+
+Decision: Aggregate a small set of geometric observations inside the existing
+browser-only MediaPipe loop during active interviews. Keep the aggregate only
+in component memory, require a minimum observation window, and render
+deterministic supportive copy in the final report without sending or persisting
+camera data. Treat direction as approximate head orientation rather than eye
+gaze or a confidence score.
+
+Alternatives considered: Sending landmarks to GPT-5.6, storing camera summaries
+with attempts, adding an emotion model, assigning a visual-confidence score, or
+changing the live camera controls and analysis panel.
+
+Reason: Ephemeral local aggregation supplies useful practice guidance while
+preserving privacy, avoiding sensitive or unsupported inferences, and keeping
+the educational rubric and hiring boundary trustworthy.
+
+Consequences: Camera users can receive approximate observations and practice
+tips after sufficient analyzed time. Camera-off and insufficient-data sessions
+remain unchanged. The report's STAR score, recommendation, retry goal, APIs,
+storage schema, progress history, and every existing camera control remain
+unchanged.

@@ -27,12 +27,13 @@ export function createPresenceDebounceState(): PresenceDebounceState {
   };
 }
 
-export function isCenterInFrame(centerX: number, centerY: number, inset = FRAME_INSET): boolean {
+export function isCenterInFrame(
+  centerX: number,
+  centerY: number,
+  inset = FRAME_INSET,
+): boolean {
   return (
-    centerX >= inset &&
-    centerX <= 1 - inset &&
-    centerY >= inset &&
-    centerY <= 1 - inset
+    centerX >= inset && centerX <= 1 - inset && centerY >= inset && centerY <= 1 - inset
   );
 }
 
@@ -65,13 +66,16 @@ export function observationFromLandmarks(
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
   const width = maxX - minX;
+  const height = maxY - minY;
 
   // Nose tip (landmark 1) relative to the horizontal face span approximates yaw.
   const nose = landmarks[1];
   const yawRatio =
     nose && width > 0.02 ? Math.min(1, Math.max(0, (nose.x - minX) / width)) : null;
+  const pitchRatio =
+    nose && height > 0.02 ? Math.min(1, Math.max(0, (nose.y - minY) / height)) : null;
 
-  return { detected: true, centerX, centerY, yawRatio };
+  return { detected: true, centerX, centerY, yawRatio, pitchRatio };
 }
 
 export function reducePresenceObservation(
