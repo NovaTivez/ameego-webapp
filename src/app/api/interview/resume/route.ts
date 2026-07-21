@@ -52,6 +52,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ profile: await extractResumeProfile(input) });
   } catch (error) {
     const kind = error instanceof InterviewAIError ? error.kind : "provider";
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[resume]", kind, error instanceof Error ? error.message : error);
+    }
     return NextResponse.json(
       { error: RESUME_PERSONALIZATION_UNAVAILABLE_MESSAGE },
       { status: ERROR_STATUS[kind] },

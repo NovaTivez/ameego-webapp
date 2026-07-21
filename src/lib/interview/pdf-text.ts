@@ -1,3 +1,6 @@
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
 import { InterviewAIError } from "@/lib/interview/openai";
 
 const MAX_PDF_PAGES = 100;
@@ -20,28 +23,55 @@ type PdfDocument = {
 
 export type LoadPdfDocument = (data: Uint8Array) => Promise<PdfDocument>;
 
+function resolvePdfWorkerSrc(): string {
+  return pathToFileURL(
+    path.join(
+      process.cwd(),
+      "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+    ),
+  ).href;
+}
+
 const loadPdfDocument: LoadPdfDocument = async (data) => {
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const task = pdfjs.getDocument({ data });
-  const document = await task.promise;
-  return {
-    numPages: document.numPages,
-    getPage: async (pageNumber) => {
-      const page = await document.getPage(pageNumber);
-      return {
-        getTextContent: async () => {
-          const content = await page.getTextContent();
-          const items: PdfTextItem[] = content.items.map((item) =>
-            "str" in item
-              ? { str: item.str, hasEOL: item.hasEOL }
-              : { str: undefined, hasEOL: false },
-          );
-          return { items };
-        },
-      };
-    },
-    destroy: () => task.destroy(),
-  };
+  try {
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    pdfjs.GlobalWorkerOptions.workerSrc = resolvePdfWorkerSrc();
+    const task = pdfjs.getDocument({
+      data,
+      // Prefer main-thread parsing in Node/Next so the worker import path
+      // does not need to survive the Turbopack rewrite of node_modules URLs.
+      useWorkerFetch: false,
+      isEvalSupported: false,
+      useSystemFonts: true,
+    });
+    const document = await task.promise;
+    return {
+      numPages: document.numPages,
+      getPage: async (pageNumber) => {
+        const page = await document.getPage(pageNumber);
+        return {
+          getTextContent: async () => {
+            const content = await page.getTextContent();
+            const items: PdfTextItem[] = content.items.map((item) =>
+              "str" in item
+                ? { str: item.str, hasEOL: item.hasEOL }
+                : { str: undefined, hasEOL: false },
+            );
+            return { items };
+          },
+        };
+      },
+      destroy: () => task.destroy(),
+    };
+  } catch (error) {
+    if (error instanceof InterviewAIError) throw error;
+    throw new InterviewAIError(
+      "provider",
+      error instanceof Error
+        ? error.message
+        : "PDF.js failed to load the resume document.",
+    );
+  }
 };
 
 function decodePdfDataUrl(fileData: string): Uint8Array {
@@ -102,7 +132,8 @@ export async function extractPdfText(
       }
       if (characterCount >= MAX_PDF_TEXT_CHARACTERS) break;
     }
-  } catch {
+  } catch (error) {
+    if (error instanceof InterviewAIError) throw error;
     throw new InterviewAIError("invalid_output", "Text could not be read from the PDF.");
   } finally {
     await document.destroy().catch(() => undefined);

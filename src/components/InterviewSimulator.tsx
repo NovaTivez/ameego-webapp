@@ -57,7 +57,7 @@ import {
   PERSONALIZATION_UNAVAILABLE_MESSAGE,
   RESUME_PERSONALIZATION_UNAVAILABLE_MESSAGE,
 } from "@/lib/interview/product-messages";
-import { RESUME_ACCEPT, RESUME_MAX_BYTES } from "@/lib/interview/resume";
+import { RESUME_ACCEPT, RESUME_MAX_BYTES } from "@/lib/interview/resume-constants";
 import {
   parseQuestionSet,
   parseResumeProfile,

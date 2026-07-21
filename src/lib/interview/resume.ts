@@ -6,9 +6,9 @@ import {
   requestStructuredResponse,
 } from "@/lib/interview/openai";
 import { extractPdfText } from "@/lib/interview/pdf-text";
+import { RESUME_MAX_BYTES } from "@/lib/interview/resume-constants";
 
-export const RESUME_MAX_BYTES = 5 * 1024 * 1024;
-export const RESUME_ACCEPT = ".pdf,.doc,.docx,.rtf,.txt,.md,.markdown";
+export { RESUME_ACCEPT, RESUME_MAX_BYTES } from "@/lib/interview/resume-constants";
 
 const ALLOWED_EXTENSIONS = new Set([
   "pdf",
