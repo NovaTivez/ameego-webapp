@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { extractResumeProfile, validateResumeInput } from "@/lib/interview/resume";
+import {
+  extractResumeProfile,
+  groundResumeProfile,
+  validateResumeInput,
+} from "@/lib/interview/resume";
 
 describe("resume extraction boundary", () => {
   it("accepts a supported small file and rejects unsupported formats", () => {
@@ -14,7 +18,7 @@ describe("resume extraction boundary", () => {
     expect(validateResumeInput({ ...supported, filename: "resume.exe" })).toBeNull();
   });
 
-  it("extracts only validated structured profile data with response storage off", async () => {
+  it("sends extracted PDF text instead of binary data and validates the profile", async () => {
     const profile = {
       education: ["BS Computer Science"],
       experience: [],
@@ -25,17 +29,14 @@ describe("resume extraction boundary", () => {
     };
     const fetcher = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body)) as {
-        store: boolean;
-        input: Array<{ content: Array<Record<string, unknown>> }>;
+        messages: Array<{ role: string; content: string }>;
       };
-      expect(body.store).toBe(false);
-      expect(body.input[0].content[0]).toMatchObject({
-        type: "input_file",
-        filename: "resume.pdf",
-      });
-      return new Response(JSON.stringify({ output_text: JSON.stringify(profile) }), {
-        status: 200,
-      });
+      expect(body.messages.at(-1)?.content).toContain("BS Computer Science");
+      expect(JSON.stringify(body)).not.toContain("data:application/pdf");
+      return new Response(
+        JSON.stringify({ choices: [{ message: { content: JSON.stringify(profile) } }] }),
+        { status: 200 },
+      );
     });
 
     await expect(
@@ -45,8 +46,36 @@ describe("resume extraction boundary", () => {
           mimeType: "application/pdf",
           fileData: "data:application/pdf;base64,cmVzdW1l",
         },
-        { apiKey: "test-key", fetcher: fetcher as typeof fetch },
+        {
+          apiKey: "test-key",
+          fetcher: fetcher as typeof fetch,
+          pdfTextExtractor: async () =>
+            "BS Computer Science\nAccessibility audit project\nTypeScript",
+        },
       ),
     ).resolves.toEqual(profile);
+  });
+
+  it("removes extracted details that are not grounded in the PDF text", () => {
+    expect(
+      groundResumeProfile(
+        {
+          education: ["BS Computer Science"],
+          experience: ["Invented employer"],
+          projects: [],
+          skills: ["TypeScript"],
+          leadership: [],
+          achievements: ["AWS Certified"],
+        },
+        "BS Computer Science\nSkills: TypeScript",
+      ),
+    ).toEqual({
+      education: ["BS Computer Science"],
+      experience: [],
+      projects: [],
+      skills: ["TypeScript"],
+      leadership: [],
+      achievements: [],
+    });
   });
 });

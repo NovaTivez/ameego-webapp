@@ -702,6 +702,10 @@
 
 .manualResume textarea {
   min-height: 76px;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .reviewColumns {
@@ -795,7 +799,11 @@
 .resumeSummaryField textarea {
   grid-column: 1 / -1;
   min-height: 58px;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
   font-size: 0.69rem;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .noResume {

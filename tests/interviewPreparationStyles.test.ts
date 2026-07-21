@@ -89,6 +89,9 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toContain(".uploadedFile");
     expect(styles).toContain(".fileActions");
     expect(styles).toContain(".manualResume");
+    expect(styles).toMatch(
+      /\.manualResume textarea\s*{[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-wrap:\s*anywhere;[\s\S]*?white-space:\s*pre-wrap;[\s\S]*?word-break:\s*break-word/,
+    );
   });
 
   it("uses separate interview-detail and resume-summary columns", () => {
@@ -97,6 +100,9 @@ describe("Interview preparation page style contract", () => {
     expect(styles).toContain(".resumeSummaryPanel");
     expect(styles).toContain(".resumeSummaryGrid");
     expect(styles).toContain(".resumeSummaryField");
+    expect(styles).toMatch(
+      /\.resumeSummaryField textarea\s*{[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-wrap:\s*anywhere;[\s\S]*?white-space:\s*pre-wrap;[\s\S]*?word-break:\s*break-word/,
+    );
     expect(styles).toMatch(/\.noResume\s*{[\s\S]*?min-height:\s*112px/);
   });
 

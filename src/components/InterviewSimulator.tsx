@@ -411,12 +411,12 @@ export function InterviewSimulator() {
     setAnnouncement("Interview setup saved. Resume upload is optional.");
   };
 
-  const extractResume = async () => {
-    if (!resumeFile) {
+  const extractResume = async (selectedFile: File | null = resumeFile) => {
+    if (!selectedFile) {
       setResumeError("Choose a resume file, use manual text, or skip this step.");
       return;
     }
-    if (resumeFile.size > RESUME_MAX_BYTES) {
+    if (selectedFile.size > RESUME_MAX_BYTES) {
       setResumeError("Resume must be no larger than 5 MB.");
       return;
     }
@@ -428,9 +428,9 @@ export function InterviewSimulator() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          filename: resumeFile.name,
-          mimeType: resumeFile.type || "application/octet-stream",
-          fileData: await fileAsDataUrl(resumeFile),
+          filename: selectedFile.name,
+          mimeType: selectedFile.type || "application/octet-stream",
+          fileData: await fileAsDataUrl(selectedFile),
         }),
       });
       const result = await readServicePayload(response);
@@ -1066,8 +1066,10 @@ export function InterviewSimulator() {
                   type="file"
                   accept={RESUME_ACCEPT}
                   onChange={(event) => {
-                    setResumeFile(event.target.files?.[0] ?? null);
+                    const selectedFile = event.target.files?.[0] ?? null;
+                    setResumeFile(selectedFile);
                     setResumeError("");
+                    if (selectedFile) void extractResume(selectedFile);
                   }}
                 />
               </label>
@@ -1104,8 +1106,8 @@ export function InterviewSimulator() {
             <div className={preparationStyles.extractColumn}>
               <div className={preparationStyles.sectionTitle}>Uploaded Resume</div>
               <p>
-                Select a file, preview it if needed, then continue to extract only
-                confirmed interview-relevant details.
+                Select a file to automatically extract only confirmed interview-relevant
+                details, then review every field before continuing.
               </p>
               <div className={preparationStyles.sidebarPrompt} role="status">
                 Continue from the session summary when your resume choice is ready.
@@ -1126,6 +1128,8 @@ export function InterviewSimulator() {
               value={manualResumeText}
               onChange={(event) => setManualResumeText(event.target.value)}
               placeholder="Paste relevant education, experience, projects, skills, leadership, or achievements."
+              spellCheck
+              wrap="soft"
             />
           </div>
         </PixelPanel>

@@ -165,6 +165,45 @@ describe("InterviewSimulator", () => {
     }
   });
 
+  it("automatically extracts all six PDF resume sections for editable review", async () => {
+    const user = userEvent.setup();
+    const profile = {
+      education: ["BS Computer Science, 2025"],
+      experience: ["Frontend Intern at Northstar Labs"],
+      projects: ["Built an accessible student portal."],
+      skills: ["TypeScript, React, CSS"],
+      leadership: ["Led a five-person capstone team."],
+      achievements: ["Dean's List, 2024"],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ profile }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+      ),
+    );
+
+    render(<InterviewSimulator />);
+    await completeRequiredSetup(user);
+    await user.upload(
+      screen.getByLabelText(/resume file/i),
+      new File(["%PDF-resume"], "resume.pdf", { type: "application/pdf" }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Review Your Profile" }),
+    ).toBeVisible();
+    expect(screen.getByLabelText("Education")).toHaveValue(profile.education[0]);
+    expect(screen.getByLabelText("Experience")).toHaveValue(profile.experience[0]);
+    expect(screen.getByLabelText("Projects")).toHaveValue(profile.projects[0]);
+    expect(screen.getByLabelText("Skills")).toHaveValue(profile.skills[0]);
+    expect(screen.getByLabelText("Leadership")).toHaveValue(profile.leadership[0]);
+    expect(screen.getByLabelText("Achievements")).toHaveValue(profile.achievements[0]);
+  });
+
   it("separates interview details and resume summary before starting", async () => {
     const user = userEvent.setup();
     render(<InterviewSimulator />);
@@ -489,7 +528,6 @@ describe("InterviewSimulator", () => {
 
     const file = new File(["resume text"], "resume.txt", { type: "text/plain" });
     await user.upload(screen.getByLabelText(/resume file/i), file);
-    await user.click(screen.getByRole("button", { name: /extract resume/i }));
     const resumeAlert = await screen.findByRole("alert");
     expect(resumeAlert).toHaveTextContent(
       /resume personalization is temporarily unavailable/i,

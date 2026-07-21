@@ -1352,3 +1352,38 @@ tips after sufficient analyzed time. Camera-off and insufficient-data sessions
 remain unchanged. The report's STAR score, recommendation, retry goal, APIs,
 storage schema, progress history, and every existing camera control remain
 unchanged.
+
+---
+
+## Decision 038 - Extract PDF Text Before Structured Resume Organization
+
+Date: 2026-07-21
+
+Status: Accepted
+
+Context: The upload boundary accepted PDF files, but the Groq chat adapter could
+not read binary PDF content and explicitly substituted an unreadable-file
+message. The review textareas also normalized every keystroke, which removed
+trailing spaces and blank lines while the learner was still typing.
+
+Decision: Parse selectable PDF text on the server with PDF.js, send only that
+text through the existing structured six-section organizer, and retain only
+output entries grounded in the extracted text. Keep raw textarea drafts local
+to the editor while emitting trimmed, non-empty one-item-per-line arrays to the
+existing interview context.
+
+Alternatives considered: Sending raw PDF bytes to a provider that does not
+support them, using browser-only parsing, accepting ungrounded summaries,
+replacing the six-field editor, or storing empty lines in the validated resume
+contract.
+
+Reason: Server-side text extraction makes PDF uploads genuinely usable without
+exposing binary processing to the client. Grounding protects factual fidelity,
+while local draft state provides normal text editing without weakening the
+validated profile consumed by question generation.
+
+Consequences: Text-based PDFs populate the six existing fields automatically
+and remain fully editable. Image-only/scanned PDFs without selectable text use
+the existing recoverable error and manual-entry path. A PDF parser dependency
+is now part of the server bundle; no visual system, persistence schema, or
+downstream interview contract changed.

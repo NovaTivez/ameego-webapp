@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { PixelIcon, type PixelIconName } from "@/components/PixelIcon";
 import {
   RESUME_FIELDS,
@@ -33,6 +35,25 @@ type Props = {
 };
 
 export function ResumeProfileEditor({ profile, onChange }: Props) {
+  const [drafts, setDrafts] = useState<Record<ResumeField, string>>(
+    () =>
+      Object.fromEntries(
+        RESUME_FIELDS.map((field) => [field, profile[field].join("\n")]),
+      ) as Record<ResumeField, string>,
+  );
+
+  const updateField = (field: ResumeField, value: string) => {
+    setDrafts((current) => ({ ...current, [field]: value }));
+    onChange({
+      ...profile,
+      [field]: value
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .slice(0, 20),
+    });
+  };
+
   return (
     <div className={styles.resumeSummaryGrid}>
       {RESUME_FIELDS.map((field) => (
@@ -42,17 +63,11 @@ export function ResumeProfileEditor({ profile, onChange }: Props) {
           <textarea
             id={`resume-${field}`}
             rows={2}
-            value={profile[field].join("\n")}
-            onChange={(event) =>
-              onChange({
-                ...profile,
-                [field]: event.target.value
-                  .split("\n")
-                  .map((item) => item.trim())
-                  .filter(Boolean),
-              })
-            }
+            value={drafts[field]}
+            onChange={(event) => updateField(field, event.target.value)}
             placeholder={`One ${LABELS[field].toLowerCase()} item per line`}
+            spellCheck
+            wrap="soft"
           />
         </div>
       ))}

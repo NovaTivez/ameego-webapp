@@ -1733,3 +1733,32 @@ resume request mock contract. Repository lint retains its existing interview
 speech-effect finding, and the formatting check retains existing unrelated
 files. The browser skill was followed, but no browser backend was exposed for
 screenshots or console inspection.
+
+## Contribution 042 - Functional PDF Resume Summary
+
+Date: 2026-07-21
+
+Feature: Automatic, grounded PDF resume extraction and natural six-section
+review editing.
+
+Codex inspected: The upload workflow, file validation, Groq payload adapter,
+structured resume schema, review editor, preparation styles, route tests,
+simulator tests, and existing extraction mock failure.
+
+Codex implemented: Server-side PDF.js parsing with page/character bounds and
+cleanup; automatic extraction after upload; verbatim structured organization;
+post-response grounding against extracted PDF text; raw per-field textarea
+drafts; one-item-per-line normalized profile updates; and overflow-safe text
+wrapping. A real generated PDF fixture verifies the installed parser runtime.
+
+Scope protection: The same six labels, icons, cards, colors, typography,
+borders, spacing, responsive grid, API route, profile contract, manual fallback,
+and downstream interview flow remain in use. No resume claims unsupported by
+the extracted PDF are shown, and image-only PDFs fail safely into the existing
+manual-entry route.
+
+Validation result: All 37 focused tests, focused ESLint, strict TypeScript, and
+the production build pass. The full suite reports 266 of 267 tests passing; the
+only failure is the unrelated existing Courses star-background occurrence
+assertion. Browser visual and console inspection remained unavailable because
+the browser service exposed no backend.

@@ -1691,6 +1691,44 @@ Status: Implemented and validated on 2026-07-17.
 
 ---
 
+# Milestone Update - Functional PDF Resume Summary
+
+Status: Implemented and validated on 2026-07-21.
+
+## Completed
+
+- Added server-side PDF.js text extraction for uploaded PDF resumes instead of
+  treating binary PDF data as unreadable.
+- Automatically starts extraction after file selection and opens the existing
+  Review Your Profile step when the six-section profile is ready.
+- Organizes only resume-supported text into Education, Experience, Projects,
+  Skills, Leadership, and Achievements through the existing validated schema.
+- Requires PDF-derived AI items to be grounded in the extracted document text;
+  unsupported additions are discarded before reaching the review UI.
+- Keeps all six existing pixel-art textareas editable so learners can add,
+  revise, or remove one item per line before question generation.
+- Preserves raw textarea drafts while typing so spaces, trailing spaces, line
+  breaks, punctuation, and multi-word sentences work naturally.
+- Added overflow-safe wrapping without changing colors, type, borders, icons,
+  spacing, grid composition, or responsive breakpoints.
+- Retained size/type validation, manual text fallback, no-resume continuation,
+  question generation, transcript confirmation, evaluation, camera, progress,
+  and attempt storage behavior.
+
+## Validation
+
+- All 37 focused PDF, route, editor, simulator, and responsive-style tests pass.
+- The focused source and test ESLint checks pass.
+- Strict TypeScript checking and the production build pass.
+- The full suite reports 266 passing tests and one unrelated existing failure
+  in the duplicate star-background style assertion.
+- The installed PDF.js runtime is exercised against a generated text PDF, not
+  only through a mocked parser.
+- Browser screenshot and console inspection could not run because the browser
+  service exposed no available backend.
+
+---
+
 # Milestone Update - On-Device Camera Confidence Insights
 
 Status: Implemented and validated on 2026-07-21.
